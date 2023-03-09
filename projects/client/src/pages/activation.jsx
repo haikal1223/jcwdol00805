@@ -22,15 +22,17 @@ import "../App.css";
 import HeaderPattern from "../assets/img/homepage/HeaderPattern.svg";
 
 export default function Activation() {
-  const [message, setMessage] = useState("Password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character.");
+  const [message, setMessage] = useState(
+    "Password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character."
+  );
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
 
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
-  const [idUser, setIdUser] = useState(0);
   const [verified, setVerified] = useState(0);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [uidUser, setUidUser] = useState("");
 
   let password = useRef();
   let location = useLocation();
@@ -43,8 +45,8 @@ export default function Activation() {
       );
       setFirstName(response.data[0].first_name);
       setEmail(response.data[0].email);
-      setIdUser(response.data[0].id);
       setVerified(response.data[0].is_verified);
+      setUidUser(response.data[0].uid);
     } catch (error) {}
   };
 
@@ -54,7 +56,7 @@ export default function Activation() {
 
   let handlePassword = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
       let inputPassword = password.current.value;
       console.log(inputPassword);
       // validasi
@@ -69,15 +71,16 @@ export default function Activation() {
             "Password must contain lowercase, uppercase, number, and special character.",
         };
 
-      await axios.patch(`http://localhost:8000/user/verification/${idUser}`, {
+      await axios.patch(`http://localhost:8000/user/verification/${uidUser}`, {
         password: inputPassword,
       });
       alert("Register Success!");
       setMessage("");
       navigate("/login");
-      setIsLoading(false)
+      setIsLoading(false);
     } catch (error) {
       setMessage(error.message);
+      setIsLoading(false);
     }
   };
 
@@ -151,7 +154,7 @@ export default function Activation() {
               className="font-ibmFont"
               onClick={handlePassword}
             >
-              {isLoading? <Spinner/>:'Register'}
+              {isLoading ? <Spinner /> : "Register"}
             </Button>
           </VStack>
         </Box>
@@ -173,7 +176,7 @@ export default function Activation() {
                 <Text mt="50" className="font-ibmFont" fontSize={"4xl"}>
                   Error 404
                 </Text>
-                <Text fontSize={"xl"}>Your email has been verified!</Text>
+                <Text fontSize={"xl"}>Your account has been verified!</Text>
                 <HStack mt="30">
                   <Button
                     rounded="lg"
@@ -193,7 +196,7 @@ export default function Activation() {
                 <Text mt="50" className="font-ibmFont" fontSize={"4xl"}>
                   Error 404
                 </Text>
-                <Text fontSize={"xl"}>Email is not found</Text>
+                <Text fontSize={"xl"}>Account is not found</Text>
                 <HStack mt="30">
                   <Button
                     rounded="lg"
