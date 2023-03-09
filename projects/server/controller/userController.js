@@ -52,6 +52,8 @@ module.exports = {
                 first_name,
                 last_name,
                 email,
+                is_verified: 0,
+                role: "user",
             });
 
             const template = await fs.readFile(

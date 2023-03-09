@@ -1,4 +1,5 @@
 'use strict';
+const { UUIDV4 } = require("sequelize");
 const {
   Model
 } = require('sequelize');
@@ -14,15 +15,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   user.init({
+    uid: {
+      allowNull: false,
+      primaryKey: true,
+      type: DataTypes.UUID,
+      defaultValue: UUIDV4
+    },
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
     email: DataTypes.STRING,
-    gender: DataTypes.STRING,
-    password: DataTypes.STRING,
+    gender: DataTypes.INTEGER,
     role: DataTypes.STRING,
-    birth_date: DataTypes.DATE,
+    birth_date: DataTypes.INTEGER,
     birth_place: DataTypes.STRING,
-    is_verified: DataTypes.INTEGER
+    is_verified: DataTypes.INTEGER,
+    password: DataTypes.STRING,
+
   }, {
     sequelize,
     modelName: 'user',
