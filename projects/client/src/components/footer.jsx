@@ -1,12 +1,10 @@
 import { 
     Image
     , Link 
-    , HStack
     , VStack
 } from "@chakra-ui/react"
 import logo from '../supports/image/logo.svg'
-import { TbReceipt, TbShoppingBag } from 'react-icons/tb';
-import { IconContext } from "react-icons";
+
 
 export default function Footer() {
     return (

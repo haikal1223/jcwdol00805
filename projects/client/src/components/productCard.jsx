@@ -13,9 +13,9 @@ export default function ProductCard(props) {
             <Image alt="" src={props.productData.image_url} objectFit='cover' className='w-[154px] h-[147px]'/>
             <div className='flex flex-col justify-between gap-1 px-2'>
                 <div className="font-ibmMed text-[14px] truncate ...">{props.productData.name}</div>
-                <div className="flex items-baseline">
-                    <div className="font-ibmReg text-[10px] text-purple">Rp</div>
-                    <div className="font-ibmMed text-[20px]">{props.productData.price}</div>
+                <div className="flex items-baseline gap-1">
+                    <div className="font-ibmMed text-[14px] text-purple">Rp</div>
+                    <div className="font-ibmMed text-[20px]">{props.productData.price.toLocaleString()}</div>
                 </div>
                 <Button h={'24px'} bg='#5D5FEF' color='white'>
                     <div className="text-[12px]">Add to cart</div> 
