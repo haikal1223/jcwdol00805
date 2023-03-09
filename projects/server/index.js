@@ -6,15 +6,28 @@ const { join } = require("path");
 const PORT = process.env.PORT || 8000;
 const app = express();
 app.use(
-  cors({
+  cors(/* {
     origin: [
       process.env.WHITELISTED_DOMAIN &&
         process.env.WHITELISTED_DOMAIN.split(","),
     ],
-  })
+  } */)
 );
 
 app.use(express.json());
+
+// Sequelize Synchronize
+/* const Sequelize = require('sequelize')
+const Models = require('./models')
+Models.sequelize.sync({
+    force: false,
+    alter: true,
+    logging: console.log
+}).then(function () {
+    console.log('Database is Synchronized')
+}).catch(function(err) {
+    console.log(err, 'Something went wrong with Database Update!')
+}); */
 
 //#region API ROUTES
 
@@ -55,15 +68,20 @@ app.use((err, req, res, next) => {
 //#endregion
 
 //#region CLIENT
-const clientPath = "../../client/build";
-app.use(express.static(join(__dirname, clientPath)));
+//"../../client/build"
+/* const clientPath = "../../client/public";
+app.use(express.static(join(__dirname, clientPath))); */
 
 // Serve the HTML page
-app.get("*", (req, res) => {
+/* app.get("*", (req, res) => {
   res.sendFile(join(__dirname, clientPath, "index.html"));
-});
+}); */
 
 //#endregion
+
+// import router
+const { productRouter } = require('./router')
+app.use('/product', productRouter)
 
 app.listen(PORT, (err) => {
   if (err) {
@@ -72,3 +90,4 @@ app.listen(PORT, (err) => {
     console.log(`APP RUNNING at ${PORT} ✅`);
   }
 });
+
