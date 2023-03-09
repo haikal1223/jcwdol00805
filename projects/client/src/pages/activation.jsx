@@ -1,0 +1,228 @@
+import { useState, useRef, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  Box,
+  VStack,
+  Heading,
+  Text,
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
+  Image,
+  Icon,
+  InputGroup,
+  InputRightElement,
+  HStack,
+  Spinner,
+} from "@chakra-ui/react";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import "../App.css";
+import HeaderPattern from "../assets/img/homepage/HeaderPattern.svg";
+
+export default function Activation() {
+  const [message, setMessage] = useState("Password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character.");
+  const [show, setShow] = useState(false);
+  const handleClick = () => setShow(!show);
+
+  const [firstName, setFirstName] = useState("");
+  const [email, setEmail] = useState("");
+  const [idUser, setIdUser] = useState(0);
+  const [verified, setVerified] = useState(0);
+  const [isLoading, setIsLoading] = useState(false)
+
+  let password = useRef();
+  let location = useLocation();
+  const navigate = useNavigate();
+
+  let getData = async () => {
+    try {
+      let response = await axios.get(
+        `http://localhost:8000/user/verification${location.search}`
+      );
+      setFirstName(response.data[0].first_name);
+      setEmail(response.data[0].email);
+      setIdUser(response.data[0].id);
+      setVerified(response.data[0].is_verified);
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    getData();
+  });
+
+  let handlePassword = async () => {
+    try {
+      setIsLoading(true)
+      let inputPassword = password.current.value;
+      console.log(inputPassword);
+      // validasi
+      if (inputPassword.length < 8)
+        throw { message: "Password should be of minimum 8 character length." };
+
+      const regex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+      if (!regex.test(inputPassword))
+        throw {
+          message:
+            "Password must contain lowercase, uppercase, number, and special character.",
+        };
+
+      await axios.patch(`http://localhost:8000/user/verification/${idUser}`, {
+        password: inputPassword,
+      });
+      alert("Register Success!");
+      setMessage("");
+      navigate("/login");
+      setIsLoading(false)
+    } catch (error) {
+      setMessage(error.message);
+    }
+  };
+
+  let navigateLogin = () => {
+    navigate("/login");
+  };
+
+  let navigateRegister = () => {
+    navigate("/register");
+  };
+
+  return (
+    <>
+      {firstName && verified == 0 ? (
+        <Box
+          w={[640]}
+          h={["full"]}
+          p={[0, 0]}
+          mx="auto"
+          display={"flex"}
+          flexDirection={"column"}
+          alignItems={"center"}
+          justifyContent={"between"}
+        >
+          <Image src={HeaderPattern} w="full"></Image>
+          <VStack spacing={4} align="flex-start" w="full">
+            <VStack spacing={1} align={["flex-start", "left"]} w="full">
+              <Heading>
+                <Text mt="50" className="font-ibmFont">
+                  One More Step, {firstName}!
+                </Text>
+              </Heading>
+            </VStack>
+            <FormControl>
+              <FormLabel>
+                <Text className="font-ibmFont">E-mail</Text>
+              </FormLabel>
+              <Input
+                rounded="lg"
+                variant="filled"
+                placeholder={`${email}`}
+                isDisabled="true"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>
+                <Text className="font-ibmFont">Password</Text>
+              </FormLabel>
+              <InputGroup>
+                <Input
+                  rounded="lg"
+                  variant="filled"
+                  type={show ? "text" : "password"}
+                  placeholder="Password"
+                  ref={password}
+                />
+                <InputRightElement width="4.5rem">
+                  <Button h="1.75rem" size="sm" onClick={handleClick}>
+                    {show ? <Icon as={ViewIcon} /> : <Icon as={ViewOffIcon} />}
+                  </Button>
+                </InputRightElement>
+              </InputGroup>
+            </FormControl>
+            <Text color="red">{message}</Text>
+            <Button
+              rounded="lg"
+              w={["30vh"]}
+              alignSelf="center"
+              backgroundColor="#5D5FEF"
+              color="white"
+              className="font-ibmFont"
+              onClick={handlePassword}
+            >
+              {isLoading? <Spinner/>:'Register'}
+            </Button>
+          </VStack>
+        </Box>
+      ) : (
+        <Box
+          w={[640]}
+          h={["full"]}
+          p={[0, 0]}
+          mx="auto"
+          display={"flex"}
+          flexDirection={"column"}
+          alignItems={"center"}
+          justifyContent={"between"}
+        >
+          <Image src={HeaderPattern} w="full"></Image>
+          <Heading w="full">
+            {verified == 1 ? (
+              <>
+                <Text mt="50" className="font-ibmFont" fontSize={"4xl"}>
+                  Error 404
+                </Text>
+                <Text fontSize={"xl"}>Your email has been verified!</Text>
+                <HStack mt="30">
+                  <Button
+                    rounded="lg"
+                    w="full"
+                    alignSelf="center"
+                    backgroundColor="#5D5FEF"
+                    color="white"
+                    className="font-ibmFont"
+                    onClick={navigateLogin}
+                  >
+                    Login
+                  </Button>
+                </HStack>
+              </>
+            ) : (
+              <>
+                <Text mt="50" className="font-ibmFont" fontSize={"4xl"}>
+                  Error 404
+                </Text>
+                <Text fontSize={"xl"}>Email is not found</Text>
+                <HStack mt="30">
+                  <Button
+                    rounded="lg"
+                    w="full"
+                    alignSelf="center"
+                    backgroundColor="#5D5FEF"
+                    color="white"
+                    className="font-ibmFont"
+                    onClick={navigateRegister}
+                  >
+                    Register
+                  </Button>
+                  <Button
+                    rounded="lg"
+                    w="full"
+                    alignSelf="center"
+                    backgroundColor="#5D5FEF"
+                    color="white"
+                    className="font-ibmFont"
+                    onClick={navigateLogin}
+                  >
+                    Login
+                  </Button>
+                </HStack>
+              </>
+            )}
+          </Heading>
+        </Box>
+      )}
+    </>
+  );
+}
