@@ -12,7 +12,7 @@ export default function Navbar () {
     
     return (
         <div className="flex justify-center sticky top-0 z-20">
-            <div className="w-[375px] h-[86px] bg-white flex justify-between p-[24px] sticky top-0 shadow-[0_1px_10px_rgba(0,0,0,0.1)] z-20">
+            <div className="w-[100%] h-[86px] bg-white flex justify-between p-[24px] sticky top-0 shadow-[0_1px_10px_rgba(0,0,0,0.1)] z-20">
                 <div>
                     <HStack>
                         <Link href='/'>

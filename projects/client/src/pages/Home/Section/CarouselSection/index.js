@@ -7,7 +7,7 @@ import banner3 from './assets/banner3.png'
 
 const CarouselSection = () => {
   return (
-    <div className='w-[375px] h-[119px]'>
+    <div className='w-[100%] h-[160px]'>
             <Carousel showThumbs={false} showStatus={false} className='z-5'>
                 <div>
                     <img src={banner1} />

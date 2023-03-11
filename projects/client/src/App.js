@@ -6,16 +6,20 @@ import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
+import Pages from './components/pages';
 
 function App() {
   
   return (
-    <div>
-      <Navbar />
-      <Routes>
-        <Route path='/' element={<Home />} />
-      </Routes>
-      <Footer />
+    <div className="flex justify-center">
+      
+      <div className="w-[480px] z-0">
+        <Navbar />
+        <Routes>
+          <Route path='/' element={<Home />} />
+        </Routes>
+        <Footer />
+      </div>
     </div>
   );
 }

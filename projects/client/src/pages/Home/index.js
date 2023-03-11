@@ -2,10 +2,11 @@
 import { Stack, Input, IconButton, SimpleGrid, useRadioGroup } from '@chakra-ui/react';
 import {TbSearch, TbDots, TbArrowNarrowLeft, TbArrowNarrowRight} from 'react-icons/tb'
 import ProductCard from '../../components/productCard';
-import CategoryRadio from '../../components/category';
+import CategoryRadio from './components/category';
 import { useEffect, useState } from 'react';
 import axios from 'axios'
 import CarouselSection from './Section/CarouselSection';
+import Pages from '../../components/pages';
 
 export default function Home() {
 
@@ -17,7 +18,7 @@ export default function Home() {
         searchCategory: '' 
     })
     const [filteredProducts, setFilteredProducts] = useState([])
-    const itemLimit = 10
+    const itemLimit = 15
 
     // fetch & render
     const fetchProduct = async() => {
@@ -49,7 +50,9 @@ export default function Home() {
 
     // pagination
     const nextPageHandler = () => {
-        setPage(page + 1)
+        if(page < maxPage) {
+            setPage(page + 1)
+        }
     }
 
     const prevPageHandler = () => {
@@ -117,10 +120,12 @@ export default function Home() {
 
 
     return (
-        <div className='flex justify-center z-5'>
-            <div className="w-[375px] h-[2066px] flex flex-col items-center">
+        
+            <div className='flex justify-center'>
                 
-            <CarouselSection />
+                <div className="w-[100%] h-[2066px] flex flex-col items-center">
+                    
+                    <CarouselSection />
                     <div className='w-[348px] h-[198px] flex flex-col justify-between items-center gap-3 bg-white rounded-md p-5 shadow-md z-10 mt-[50px]'>
                         <div className='font-ibmBold text-[20px] text-dgrey'>
                             What are you looking?
@@ -133,21 +138,19 @@ export default function Home() {
                             
                         {renderCategory()}
                     </div>
-                    <div className='mt-10 flex flex-col justify-start gap-5'>
-                        <div className='font-ibmMed text-[18px]'>Daily Discover</div>
-                        <div className=''>
-                            <SimpleGrid columns={2} spacing={10}>
-                                {renderProduct()}
-                            </SimpleGrid>
+                    <div className='w-[100%] px-[10px] mt-10 flex flex-col items-center gap-5'>
+                        <div className='w-[100%] font-ibmBold text-[20px] text-left'>Daily Discover</div>
+                        <div className='w-[100%] flex justify-start flex-wrap gap-5'>
+                            {renderProduct()}
                         </div>
-                        <div className='flex justify-center items-center gap-5'>
+                        <div className='w-[100%] mt-5 flex justify-center items-center gap-5'>
                             <IconButton disabled={page === 1} onClick={prevPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbArrowNarrowLeft color='white' boxsize={'16px'}/>}/>
                                 <div className='font-ibmReg text-dgrey'>Page {page} / {maxPage}</div>
                             <IconButton onClick={nextPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbArrowNarrowRight color='white' boxsize={'16px'}/>}/>
                         </div>
                     </div>
+                </div>
             </div>
-        </div>
-        
+         
     )
 }
