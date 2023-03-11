@@ -83,9 +83,22 @@ module.exports = {
         try {
             let { email, password } = req.query;
 
+            if (!email || !password)
+                return res.status(404).send({
+                    iserror: true,
+                    message: 'Email or password is empty',
+                    data: null
+                })
             let findEmail = await db.user.findOne({
                 where: { email: email }
             })
+
+            if (!findEmail)
+                return res.status(404).send({
+                    iserror: true,
+                    message: 'Email is not found',
+                    data: null
+                })
 
             let hasMatchResult = await hashMatch(password, findEmail.dataValues.password)
 
@@ -93,24 +106,19 @@ module.exports = {
                 return
             res.status(404).send({
                 isError: true,
-                message: 'Data not valid',
+                message: 'Password is incorrect',
                 data: true
             })
 
             let token = createToken({
                 uid: findEmail.dataValues.uid
             })
+
             res.status(200).send({
                 isError: false,
                 message: 'Login Success',
                 data: { token, email: findEmail.dataValues.email }
             })
-            if (!email || !password)
-                return res.status(404).send({
-                    iserror: true,
-                    message: 'Login Failed',
-                    data: null
-                })
 
 
         } catch (error) {
