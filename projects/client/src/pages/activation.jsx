@@ -43,10 +43,10 @@ export default function Activation() {
       let response = await axios.get(
         `http://localhost:8000/user/verification${location.search}`
       );
-      setFirstName(response.data[0].first_name);
-      setEmail(response.data[0].email);
-      setVerified(response.data[0].is_verified);
-      setUidUser(response.data[0].uid);
+      setFirstName(response.data.data[0].first_name);
+      setEmail(response.data.data[0].email);
+      setVerified(response.data.data[0].is_verified);
+      setUidUser(response.data.data[0].uid);
     } catch (error) {}
   };
 
@@ -58,8 +58,6 @@ export default function Activation() {
     try {
       setIsLoading(true);
       let inputPassword = password.current.value;
-      console.log(inputPassword);
-      // validasi
       if (inputPassword.length < 8)
         throw { message: "Password should be of minimum 8 character length." };
 
