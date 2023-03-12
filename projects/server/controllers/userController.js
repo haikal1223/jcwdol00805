@@ -7,10 +7,10 @@ module.exports = {
   getData: async (req, res) => {
     let { uid } = req.query;
     const findUsers = await db.user.findAll({
-        where: {
-          uid,
-        },
-      });
+      where: {
+        uid,
+      },
+    });
     if (findUsers)
       return res.status(200).send({
         isError: false,
@@ -46,21 +46,34 @@ module.exports = {
   },
 
   inputPassword: async (req, res) => {
-    let { password } = req.body;
-    const saltRounds = parseInt(process.env.SALT_ROUNDS);
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    try {
+      let { password } = req.body;
+      const saltRounds = parseInt(process.env.SALT_ROUNDS);
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const updatePassword = await db.user.update(
-      {
-        password: hashedPassword,
-        is_verified: 1
-      },
-      {
-        where: {
-          uid:req.params.uid
+      const updatePassword = await db.user.update(
+        {
+          password: hashedPassword,
+          is_verified: 1,
+        },
+        {
+          where: {
+            uid: req.params.uid,
+          },
         }
-      }
-    )
+      );
 
+      res.status(201).send({
+        isError: false,
+        message: "Your account is verified!",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Something Error",
+        data: null,
+      });
+    }
   },
 };

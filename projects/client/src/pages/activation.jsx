@@ -94,7 +94,7 @@ export default function Activation() {
     <>
       {firstName && verified == 0 ? (
         <Box
-          w={[640]}
+          w={[480]}
           h={["full"]}
           p={[0, 0]}
           mx="auto"
@@ -158,7 +158,7 @@ export default function Activation() {
         </Box>
       ) : (
         <Box
-          w={[640]}
+          w={[480]}
           h={["full"]}
           p={[0, 0]}
           mx="auto"
