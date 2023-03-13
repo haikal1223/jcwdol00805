@@ -27,7 +27,7 @@ export default function Home() {
             setProducts(response.data.data[0])
             setMaxPage(Math.ceil(response.data.data[0].length / itemLimit))
             setFilteredProducts(response.data.data[0])
-            //console.log(response.data.data[0])
+            
         } catch (error) {
 
         }
@@ -69,7 +69,7 @@ export default function Home() {
             ...filter
             , [name]: value
         })
-        console.log(e)
+        
     }
 
     const searchButtonHandler = () => {
