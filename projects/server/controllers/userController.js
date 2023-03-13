@@ -1,7 +1,7 @@
 const { sequelize } = require("sequelize");
 const { UUIDV4 } = require("sequelize");
+const { hashPassword } = require("../lib/hash");
 const db = require("../models/index");
-const bcrypt = require("bcrypt");
 
 module.exports = {
   getData: async (req, res) => {
@@ -48,8 +48,7 @@ module.exports = {
   inputPassword: async (req, res) => {
     try {
       let { password } = req.body;
-      const saltRounds = parseInt(process.env.SALT_ROUNDS);
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      const hashedPassword = await hashPassword(password)
 
       const updatePassword = await db.user.update(
         {

@@ -16,6 +16,7 @@ import {
   InputRightElement,
   HStack,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import "../App.css";
@@ -37,6 +38,7 @@ export default function Activation() {
   let password = useRef();
   let location = useLocation();
   const navigate = useNavigate();
+  const toast = useToast();
 
   let getData = async () => {
     try {
@@ -53,6 +55,28 @@ export default function Activation() {
   useEffect(() => {
     getData();
   });
+
+  let validatePassword = (val) => {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+    if (!regex.test(val)) {
+      if (val.length < 8) {
+        setMessage(
+          "Password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character."
+        );
+      } else {
+        setMessage(
+          "Password must contain lowercase, uppercase, number, and special character."
+        );
+      }
+    } else {
+      if (val.length < 8) {
+        setMessage("Password should be of minimum 8 character length.");
+      } else {
+        setMessage("");
+      }
+    }
+  };
 
   let handlePassword = async () => {
     try {
@@ -72,12 +96,17 @@ export default function Activation() {
       await axios.patch(`http://localhost:8000/user/verification/${uidUser}`, {
         password: inputPassword,
       });
-      alert("Register Success!");
+      toast({
+        title: "Register Success",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
+      });
       setMessage("");
       navigate("/login");
       setIsLoading(false);
     } catch (error) {
-      setMessage(error.message);
       setIsLoading(false);
     }
   };
@@ -134,6 +163,7 @@ export default function Activation() {
                   type={show ? "text" : "password"}
                   placeholder="Password"
                   ref={password}
+                  onChange={(e) => validatePassword(e.target.value)}
                 />
                 <InputRightElement width="4.5rem">
                   <Button h="1.75rem" size="sm" onClick={handleClick}>
