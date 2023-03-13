@@ -1,7 +1,7 @@
 import { Box, Card, FormControl, FormLabel, Heading, Input, Text, VStack, Button, CardBody, Image } from "@chakra-ui/react";
 import HeaderPattern from '../assets/img/homepage/HeaderPattern.svg';
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -14,6 +14,8 @@ export default function RegisterUser() {
     const inputFirstName = useRef();
     const inputLastName = useRef();
     const inputEmail = useRef();
+
+    const location = useLocation();
 
     const Navigate = useNavigate()
 
@@ -42,7 +44,7 @@ export default function RegisterUser() {
     };
 
     let validateFirstName = (val) => {
-        if (val == "") {
+        if (val === "") {
             seterrFirstName("Input your first name");
         } else if (val.length <= 2) {
             seterrFirstName("Name to short, less than 2 characters");
@@ -55,7 +57,7 @@ export default function RegisterUser() {
     }
 
     let validateLastName = (val) => {
-        if (val = "") {
+        if (val === "") {
             seterrLastName("Input your first name");
         } else if (val.length <= 2) {
             seterrLastName("Name to short, less than 2 characters");
@@ -84,6 +86,7 @@ export default function RegisterUser() {
         <>
             <Box justifyContent={"center"} display={'flex'} flexDirection={'column'} alignItems={'center'} gap={6} >
                 <Image src={HeaderPattern}></Image>
+                {console.log(location.search)}
                 <VStack as='header' spacing='6' mt='91'>
                     <Heading as='h1' fontWeight='600' fontSize='36px' letterSpacing='0,5px'>
                         What's Your Name?
@@ -98,7 +101,6 @@ export default function RegisterUser() {
                             <Input type='text' bg='white' borderColor='#d8dee4' size='sm' borderRadius='6px' placeholder="First Name" required ref={inputFirstName} onChange={(e) => validateFirstName(e.target.value)} />
                             <div className=" text-red-700 text-sm font-semibold font-ibmFont">
                                 {errFirstName ? errFirstName : null}
-                                {console.log(errFirstName)}
                             </div>
                         </FormControl>
                         <FormControl>
@@ -106,6 +108,9 @@ export default function RegisterUser() {
                                 Last Name
                             </FormLabel>
                             <Input type='text' bg='white' borderColor='#d8dee4' size='sm' borderRadius='6px' placeholder="Last Name" required ref={inputLastName} onChange={(e) => validateLastName(e.target.value)} />
+                            <div className=" text-red-700 text-sm font-semibold font-ibmFont">
+                                {errLastName ? errLastName : null}
+                            </div>
                         </FormControl>
                         <FormControl>
                             <FormLabel size='sm'>
@@ -122,6 +127,8 @@ export default function RegisterUser() {
                     </CardBody>
                 </Card>
             </Box>
+
+
 
         </>
     )

@@ -1,14 +1,22 @@
+import logo from './logo.svg';
 import './App.css';
-import Register from './pages/Register';
-
-
-
+import { Route, Routes } from 'react-router-dom'
+import Activation from './pages/activation'
+import RegisterUser from './pages/Register';
+import ForgotPassword from './pages/forgotPassword';
+import UpdatePassword from './pages/newPassword';
 
 function App() {
   return (
-    <>
-      <Register />
-    </>
+    <div>
+      <Routes>
+        <Route path='/activation' element={<Activation />} />
+        <Route path='/register' element={<RegisterUser />} />
+        {/* <Route path='/forgotpassword' element={<ForgotPassword />} />
+        <Route path='/updatePassword/:uid' element={<UpdatePassword />} /> */}
+
+      </Routes>
+    </div>
   );
 }
 
