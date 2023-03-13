@@ -1,3 +1,4 @@
+require("dotenv").config()
 
 const { sequelize } = require('../models')
 const { Op } = require('sequelize');
@@ -10,6 +11,11 @@ const user = db.user
 const { hashPassword, hashMatch } = require('./../lib/hash')
 
 const { createToken } = require('./../lib/jwt')
+
+
+
+// line 140
+const { geocode } = require('opencage-api-client');
 
 module.exports = {
 
@@ -117,7 +123,7 @@ module.exports = {
             res.status(200).send({
                 isError: false,
                 message: 'Login Success',
-                data: { token, email: findEmail.dataValues.email }
+                data: { token, email: findEmail.dataValues.email, image: findEmail.dataValues.profile_photo, name: findEmail.dataValues.first_name }
             })
 
 
@@ -129,5 +135,25 @@ module.exports = {
                 data: true
             })
         }
-    }
+
+    },
+    addAddress: async (req, res) => {
+
+        try {
+            const myToken = localStorage.getItem('myToken')
+            const decoded = jwt.verify(myToken, '123abc')
+            const { main_address, street_address, subdistrict, city, province, recipient_name, recipient_phone, postal_code } = req.body;
+
+            const response = await geocode({ q: `${street_address}, ${subdistrict}, ${city}, ${province}`, countrycode: 'id', limit: 1, key: process.env.API_KEY });
+
+            const { lat, lng } = response.results[0].geometry;
+            const address = await db.user_address.create({ main_address, street_address, subdistrict, city, province, recipient_name, recipient_phone, postal_code, lat, lng, user_uid: decoded });
+            res.json(address);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Server error' });
+        }
+    },
+
+
 }

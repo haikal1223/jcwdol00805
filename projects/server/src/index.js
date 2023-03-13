@@ -1,4 +1,4 @@
-require("dotenv/config");
+require("dotenv").config()
 const express = require("express");
 const cors = require("cors");
 const { join } = require("path");
@@ -39,7 +39,8 @@ const Models = require("../models");
 
 // ===========================
 // NOTE : Add your routes here
-const { usersRouter } = require('./../routes')
+
+const { usersRouter } = require('./../routes');
 
 app.use('/user', usersRouter)
 
