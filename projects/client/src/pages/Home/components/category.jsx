@@ -14,7 +14,7 @@ export default function CategoryRadio(props) {
     const { state, getInputProps, getCheckboxProps, htmlProps, getLabelProps } = useRadio(radioProps)
     
     const iconPlaceholder = giIcon[props.icon]
-    /* console.log(props.func) */
+    
 
     return (
         <chakra.label {...htmlProps} cursor='pointer'>
