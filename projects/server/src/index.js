@@ -1,4 +1,4 @@
-require("dotenv/config");
+require("dotenv").config()
 const express = require("express");
 const cors = require("cors");
 const { join } = require("path");
@@ -6,22 +6,45 @@ const { join } = require("path");
 const PORT = process.env.PORT || 8000;
 const app = express();
 app.use(
-  cors({
-    origin: [
-      process.env.WHITELISTED_DOMAIN &&
-        process.env.WHITELISTED_DOMAIN.split(","),
-    ],
-  })
+  cors(
+    //   {
+    //   origin: [
+    //     process.env.WHITELISTED_DOMAIN &&
+    //     process.env.WHITELISTED_DOMAIN.split(","),
+    //   ],
+    // }
+  )
 );
 
 app.use(express.json());
 
 //#region API ROUTES
 
+// Sequelize DB Sync
+
+const Sequelize = require("sequelize");
+const Models = require("../models");
+// Models.sequelize
+//   .sync({
+//     force: false,
+//     alter: true,
+//     logging: console.log,
+//   })
+//   .then(function () {
+//     console.log("Database is Synchronized!");
+//   })
+//   .catch(function (err) {
+//     console.log(err, "Something went wrong with database sync!");
+//   });
+
 // ===========================
 // NOTE : Add your routes here
 
-app.get("/api", (req, res) => {
+const { usersRouter } = require('./../routes');
+
+app.use('/user', usersRouter)
+
+app.post("/api", (req, res) => {
   res.send(`Hello, this is my API`);
 });
 
@@ -55,13 +78,13 @@ app.use((err, req, res, next) => {
 //#endregion
 
 //#region CLIENT
-const clientPath = "../../client/build";
-app.use(express.static(join(__dirname, clientPath)));
+// const clientPath = "../../client/build";
+// app.use(express.static(join(__dirname, clientPath)));
 
-// Serve the HTML page
-app.get("*", (req, res) => {
-  res.sendFile(join(__dirname, clientPath, "index.html"));
-});
+// // Serve the HTML page
+// app.get("*", (req, res) => {
+//   res.sendFile(join(__dirname, clientPath, "index.html"));
+// });
 
 //#endregion
 
