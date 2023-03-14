@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="ic_user_profile" width="32" height="32.5" viewBox="0 0 32 32.5">
+    <defs>
+        <style>
+            .cls-1{fill:#a8dacf}.cls-2{fill:none}.cls-3,.cls-4{fill:#fff;opacity:.7}.cls-4{stroke:rgba(0,0,0,0);stroke-miterlimit:10}
+        </style>
+    </defs>
+    <g id="Group_3658" data-name="Group 3658" transform="translate(-239 -2329)">
+        <rect id="Rectangle_2201" width="32" height="32" class="cls-1" data-name="Rectangle 2201" rx="6" transform="translate(239 2329)"/>
+        <path id="Shape" d="M0 0h16v16H0z" class="cls-2" transform="translate(247 2337)"/>
+        <g id="Group_3658-2" data-name="Group 3658" transform="translate(.632 3)">
+            <path id="Path" d="M6.257 12.513A6.257 6.257 0 1 0 0 6.257a6.255 6.255 0 0 0 6.257 6.257z" class="cls-3" transform="translate(248.267 2334)"/>
+            <path id="Subtraction_1" d="M24 9.986H0a13.245 13.245 0 0 1 4.311-7.143A12.117 12.117 0 0 1 7.856.754a11.762 11.762 0 0 1 8.288 0 12.117 12.117 0 0 1 3.545 2.089A13.245 13.245 0 0 1 24 9.985z" class="cls-4" data-name="Subtraction 1" transform="translate(242.368 2348.014)"/>
+        </g>
+    </g>
+    <path id="Shape-2" d="M0 0h16v16H0z" class="cls-2" data-name="Shape" transform="translate(8 8)"/>
+</svg>
