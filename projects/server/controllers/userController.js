@@ -2,6 +2,9 @@ const { sequelize } = require("sequelize");
 const { UUIDV4 } = require("sequelize");
 const { hashPassword } = require("../lib/hash");
 const db = require("../models/index");
+const { uploader } = require("../lib/multer");
+const fs = require("fs");
+const { error } = require("console");
 
 module.exports = {
   getData: async (req, res) => {
@@ -48,12 +51,13 @@ module.exports = {
   inputPassword: async (req, res) => {
     try {
       let { password } = req.body;
-      const hashedPassword = await hashPassword(password)
+      const hashedPassword = await hashPassword(password);
 
       const updatePassword = await db.user.update(
         {
           password: hashedPassword,
           is_verified: 1,
+          profile_photo: "Publicimagesdefault.svg",
         },
         {
           where: {
@@ -75,4 +79,77 @@ module.exports = {
       });
     }
   },
+
+  getProfilePhoto: async (req, res) => {
+    try {
+      let { profilePhoto } = req.body;
+    } catch (error) {}
+  },
+
+  uploadPhoto: async (req, res) => {
+    try {
+      let { uid } = req.params;
+
+      await db.user.update(
+        {
+          profile_photo: req.files.images[0].path,
+        },
+        {
+          where: {
+            uid,
+          },
+        }
+      );
+      res.status(201).send({
+        isError: false,
+        message: "Your profile picture is updated!",
+        data: null,
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: "Something Error",
+        data: null,
+      });
+    }
+  },
+
+  // uploadPhotos: (req, res) => {
+  //   let { uid } = req.params;
+  //   let path = "/image";
+  //   const upload = uploader(path, "IMG").fields([{ name: "images" }]);
+  //   console.log(req)
+
+  //   upload(req, res, (error) => {
+  //     try {
+  //       if (error) {
+  //         res.status(500).send(error);
+  //         console.log(error);
+  //       }
+  //       const { file } = req.files;
+  //       const filepath = file ? path + "/" + file.name : "hehe";
+  //       const updateProfilePicture = db.user.update(
+  //         {
+  //           profile_photo: filepath,
+  //         },
+  //         {
+  //           where: {
+  //             uid,
+  //           },
+  //         }
+  //       );
+  //       res.status(201).send({
+  //         isError: false,
+  //         message: "Your profile picture is updated!",
+  //         data: null,
+  //       });
+  //     } catch (error) {
+  //       res.status(500).send({
+  //         isError: true,
+  //         message: "Something Error",
+  //         data: null,
+  //       });
+  //     }
+  //   });
+  // },
 };

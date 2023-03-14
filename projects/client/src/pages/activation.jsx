@@ -58,8 +58,9 @@ export default function Activation() {
 
   let validatePassword = (val) => {
     const regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{4,}$/;
     if (!regex.test(val)) {
+      console.log(!regex.test(val ))
       if (val.length < 8) {
         setMessage(
           "Password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character."
@@ -70,6 +71,7 @@ export default function Activation() {
         );
       }
     } else {
+      console.log(!regex.test(val ))
       if (val.length < 8) {
         setMessage("Password should be of minimum 8 character length.");
       } else {
