@@ -7,10 +7,10 @@ const { userController } = require('../controller')
 //Import JWTVerify
 
 Router.post('/register', userController.registerUser);
-Router.get('/verification', userController.getData);
-Router.patch('/verification/:uid', userController.inputPassword);
-Router.post('/forgot-password', userController.forgotPassword)
-Router.patch('/reset-password/:uid', userController.resetPassword)
+// Router.get('/verification', userController.getData);
+// Router.patch('/verification/:uid', userController.inputPassword);
+// Router.post('/forgot-password', userController.forgotPassword)
+// Router.patch('/reset-password/:uid', userController.resetPassword)
 
 
 module.exports = Router

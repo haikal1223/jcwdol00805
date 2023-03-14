@@ -31,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     is_verified: DataTypes.INTEGER,
     is_Updated: DataTypes.INTEGER,
     password: DataTypes.STRING,
+    profile_photo: DataTypes.STRING,
 
   }, {
     sequelize,

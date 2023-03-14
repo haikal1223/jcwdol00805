@@ -12,8 +12,8 @@ function App() {
       <Routes>
         <Route path='/activation' element={<Activation />} />
         <Route path='/register' element={<RegisterUser />} />
-        {/* <Route path='/forgotpassword' element={<ForgotPassword />} />
-        <Route path='/updatePassword/:uid' element={<UpdatePassword />} /> */}
+        <Route path='/forgotpassword' element={<ForgotPassword />} />
+        <Route path='/updatePassword/:uid' element={<UpdatePassword />} />
 
       </Routes>
     </div>
