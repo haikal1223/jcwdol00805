@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
+
 export default function RegisterUser() {
     const [errFirstName, seterrFirstName] = useState();
     const [errLastName, seterrLastName] = useState();
@@ -84,6 +85,7 @@ export default function RegisterUser() {
 
     return (
         <>
+            {console.log(process.env.DB_PASSWORD)}
             <Box justifyContent={"center"} display={'flex'} flexDirection={'column'} alignItems={'center'} gap={6} >
                 <Image src={HeaderPattern}></Image>
                 {console.log(location.search)}
