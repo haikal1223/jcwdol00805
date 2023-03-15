@@ -21,7 +21,10 @@ module.exports = (sequelize, DataTypes) => {
     province: DataTypes.STRING,
     recipient_name: DataTypes.STRING,
     recipient_phone: DataTypes.INTEGER,
-    postal_code: DataTypes.INTEGER
+    postal_code: DataTypes.INTEGER,
+    lng: DataTypes.STRING,
+    lat: DataTypes.STRING
+
   }, {
     sequelize,
     modelName: 'user_address',

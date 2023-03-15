@@ -1,24 +1,20 @@
-require("dotenv").config()
+require("dotenv").config();
 
-const { sequelize } = require('../models')
-const { Op } = require('sequelize');
-const bcrypt = require('bcrypt')
+const { sequelize } = require("../models");
+const { Op } = require("sequelize");
+const bcrypt = require("bcrypt");
 
+const db = require("../models/index");
+const user = db.user;
 
-const db = require('../models/index')
-const user = db.user
+const { hashPassword, hashMatch } = require("./../lib/hash");
 
-const { hashPassword, hashMatch } = require('./../lib/hash')
-
-const { createToken } = require('./../lib/jwt')
-
-
+const { createToken } = require("./../lib/jwt");
 
 // line 140
-const { geocode } = require('opencage-api-client');
+const { geocode } = require("opencage-api-client");
 
 module.exports = {
-
     registerUser: async (req, res) => {
         try {
             let { first_name, last_name, email } = req.body;
@@ -33,7 +29,7 @@ module.exports = {
             let findEmail = await db.user.findOne({
                 where: {
                     email: email,
-                }
+                },
             });
 
             if (findEmail)
@@ -49,10 +45,7 @@ module.exports = {
                 email,
             });
 
-            const template = await fs.readFile(
-                "./template/template.html",
-                "utf-8"
-            );
+            const template = await fs.readFile("./template/template.html", "utf-8");
 
             const templateComplier = await handlebars.compile(template);
             const newTemp = templateComplier({
@@ -69,91 +62,120 @@ module.exports = {
 
             res.status(201).send({
                 isError: false,
-                message: 'Registration Success, Please check your E-mail',
+                message: "Registration Success, Please check your E-mail",
                 data: null,
             });
-
         } catch (error) {
             res.status(404).send({
                 isError: true,
                 message: "Registration Failed",
-                data: error
+                data: error,
             });
             console.log(error);
         }
-
     },
-
 
     login: async (req, res) => {
         try {
             let { email, password } = req.query;
 
-            if (!email || !password)
-                return res.status(404).send({
+            // if (!email || !password)                                 ///////////
+            //     return res.status(404).send({                        ini bikin eror ngk tau knapa             
+            //         iserror: true,                                   ///////////
+            //         message: 'Email or password is empty',           ///////////
+            //         data: null                                       ///////////
+            //     })
+            let findEmail = await user.findOne({
+                where: { email: email },
+            });
+
+            if (!findEmail) {
+                res.status(404).send({
                     iserror: true,
-                    message: 'Email or password is empty',
-                    data: null
-                })
-            let findEmail = await db.user.findOne({
-                where: { email: email }
-            })
+                    message: "Email is not found",
+                    data: null,
+                });
+            } else {
+                let hasMatchResult = await hashMatch(
+                    password,
+                    findEmail.dataValues.password
+                );
 
-            if (!findEmail)
-                return res.status(404).send({
-                    iserror: true,
-                    message: 'Email is not found',
-                    data: null
-                })
+                if (hasMatchResult === false)
+                    return res.status(404).send({
+                        isError: true,
+                        message: "Password is incorrect",
+                        data: true,
+                    });
 
-            let hasMatchResult = await hashMatch(password, findEmail.dataValues.password)
+                let token = createToken({
+                    uid: findEmail.dataValues.uid,
+                });
 
-            if (hasMatchResult === false)
-                return
-            res.status(404).send({
-                isError: true,
-                message: 'Password is incorrect',
-                data: true
-            })
-
-            let token = createToken({
-                uid: findEmail.dataValues.uid
-            })
-
-            res.status(200).send({
-                isError: false,
-                message: 'Login Success',
-                data: { token, email: findEmail.dataValues.email, image: findEmail.dataValues.profile_photo, name: findEmail.dataValues.first_name }
-            })
-
-
+                res.status(200).send({
+                    isError: false,
+                    message: "Login Success",
+                    data: {
+                        token,
+                        email: findEmail.dataValues.email,
+                        image: findEmail.dataValues.profile_photo,
+                        name: findEmail.dataValues.first_name,
+                    },
+                });
+            }
         } catch (error) {
-            // console.log(error)
             res.status(500).send({
                 isError: true,
                 message: error.message,
-                data: true
-            })
+                data: true,
+            });
         }
-
     },
     addAddress: async (req, res) => {
-
         try {
-            const myToken = localStorage.getItem('myToken')
-            const decoded = jwt.verify(myToken, '123abc')
-            const { main_address, street_address, subdistrict, city, province, recipient_name, recipient_phone, postal_code } = req.body;
+            const myToken = localStorage.getItem("myToken");
+            const decoded = jwt.verify(myToken, "123abc");
+            const {
+                main_address,
+                street_address,
+                subdistrict,
+                city,
+                province,
+                recipient_name,
+                recipient_phone,
+                postal_code,
+            } = req.body;
 
-            const response = await geocode({ q: `${street_address}, ${subdistrict}, ${city}, ${province}`, countrycode: 'id', limit: 1, key: process.env.API_KEY });
+            const response = await geocode({
+                q: `${street_address}, ${subdistrict}, ${city}, ${province}`,
+                countrycode: "id",
+                limit: 1,
+                key: process.env.API_KEY,
+            });
 
             const { lat, lng } = response.results[0].geometry;
-            const address = await db.user_address.create({ main_address, street_address, subdistrict, city, province, recipient_name, recipient_phone, postal_code, lat, lng, user_uid: decoded });
+            const address = await db.user_address.create({
+                main_address,
+                street_address,
+                subdistrict,
+                city,
+                province,
+                recipient_name,
+                recipient_phone,
+                postal_code,
+                lat,
+                lng,
+                user_uid: decoded,
+            });
             res.json(address);
         } catch (err) {
             console.error(err);
-            res.status(500).json({ error: 'Server error' });
+            res.status(500).json({ error: "Server error" });
         }
     },
+    ////////////////////////////////////////
+    ///////////////////////////////////////////
+    ////update dan delete menunggu halaman edit profile
+    //////////////////////////////
 
-
-}
+};

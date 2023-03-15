@@ -1,4 +1,7 @@
 'use strict';
+
+const { sequelize } = require('../models');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -40,6 +43,14 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
+      },
+      lng: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      lat: {
+        allowNull: false,
+        type: Sequelize.STRING
       }
     });
   },

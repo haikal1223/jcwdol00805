@@ -1,4 +1,5 @@
 'use strict';
+const { UUIDV4 } = require("sequelize");
 const {
   Model
 } = require('sequelize');
@@ -10,10 +11,19 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      this.hasMany(models.user_address, {
+        foreignKey: 'user_uid'
+      })
+
     }
   }
   user.init({
+    uid: {
+      allowNull: false,
+      primaryKey: true,
+      type: DataTypes.UUID,
+      defaultValue: UUIDV4
+    },
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
     email: DataTypes.STRING,
