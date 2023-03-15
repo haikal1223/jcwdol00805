@@ -1,8 +1,5 @@
-const { sequelize } = require("sequelize");
-const { UUIDV4 } = require("sequelize");
 const { hashPassword } = require("../lib/hash");
 const db = require("../models/index");
-const fs = require("fs");
 const { error } = require("console");
 
 module.exports = {
@@ -19,32 +16,6 @@ module.exports = {
         message: "Data is found",
         data: findUsers,
       });
-  },
-
-  addData: async (req, res) => {
-    try {
-      let { first_name, last_name, email } = req.body;
-
-      let createUser = await db.user.create({
-        first_name,
-        last_name,
-        email,
-        role: "user",
-        is_verified: 0,
-      });
-
-      res.status(201).send({
-        isError: false,
-        message: "Registration is success",
-        data: null,
-      });
-    } catch (error) {
-      res.status(404).send({
-        isError: true,
-        message: "Something Error",
-        data: null,
-      });
-    }
   },
 
   inputPassword: async (req, res) => {

@@ -7,20 +7,20 @@ const mysql2 = require("mysql2");
 const PORT = process.env.PORT || 8000;
 const app = express();
 app.use(
-  cors()
-  // {
-  //   origin: [
-  //     process.env.WHITELISTED_DOMAIN &&
-  //       process.env.WHITELISTED_DOMAIN.split(","),
-  //   ],
-  // }
+	cors()
+	// {
+	//   origin: [
+	//     process.env.WHITELISTED_DOMAIN &&
+	//       process.env.WHITELISTED_DOMAIN.split(","),
+	//   ],
+	// }
 );
 
 app.use(express.json());
 
 //#region API ROUTES
 const Sequelize = require("sequelize");
-const Models = require("../models");
+const Models = require("./models");
 // Models.sequelize
 //   .sync({
 //     force: false,
@@ -37,8 +37,8 @@ const Models = require("../models");
 // ===========================
 // NOTE : Add your routes here
 
-const { userRouters } = require("../routers");
-app.use("/user", userRouters);
+const { userRouter } = require("./router");
+app.use("/user", userRouter);
 
 // app.get("/api", (req, res) => {
 //   res.send(`Hello, this is my API`);
