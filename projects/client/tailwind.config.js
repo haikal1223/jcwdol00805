@@ -1,15 +1,29 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}", 'node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}'],
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}"
+  ],
   theme: {
     extend: {
-      fontFamily: {
-        'ibmFont': ['IBMPlexSans-Bold'],
-        'ibmFontRegular': ['IBMPlexSans-Regular']
+      fontFamily : {
+        'ibmReg' : ['IBMPlexSans-Regular'],
+        'ibmMed' : ['IBMPlexSans-Medium'],
+        'ibmBold' : ['IBMPlexSans-Bold']
+      },
+      colors: {
+        'purple': '#5D5FEF',
+        'white': '#FCFCFD',
+        'dgrey': '#323643',
+        'grey': '#9AA0B4',
+        'lgrey': '#D9D9D9',
+        'violet': '#A5A6F6',
+        'red': '#FF3838',
+        'yellow': '#FFC529',
+        'green': '#4EE476'
       }
     },
   },
   plugins: [
-    require('flowbite/plugin')
+    require('@tailwindcss/line-clamp'),
   ],
 }

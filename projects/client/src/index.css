@@ -14,6 +14,25 @@ code {
 
 @tailwind base;
 @tailwind components;
-@tailwind utilities;  
+@tailwind utilities;
 
+@font-face {
+  font-family: 'IBMPlexSans-Bold';
+  src: url('./supports/font/IBMPlexSans-Bold.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
 
+@font-face {
+  font-family: 'IBMPlexSans-Medium';
+  src: url('./supports/font/IBMPlexSans-Medium.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'IBMPlexSans-Regular';
+  src: url('./supports/font/IBMPlexSans-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
