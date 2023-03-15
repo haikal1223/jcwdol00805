@@ -1,10 +1,10 @@
 const { sequelize } = require("sequelize");
 const { UUIDV4 } = require("sequelize");
-const { hashPassword } = require("../lib/hash");
 const db = require("../models/index");
 const { uploader } = require("../lib/multer");
 const fs = require("fs");
 const { error } = require("console");
+const { hashPassword, hashMatch } = require("./../lib/hash");
 
 module.exports = {
   getData: async (req, res) => {
@@ -129,4 +129,90 @@ module.exports = {
     }
   },
 
+  updateProfile: async (req, res) => {
+    try {
+      let { first_name, last_name, gender, birth_place, birth_date } = req.body;
+      const updateProfile = await db.user.update(
+        {
+          first_name,
+          last_name,
+          gender,
+          birth_place,
+          birth_date,
+        },
+        {
+          where: {
+            uid: req.params.uid,
+          },
+        }
+      );
+
+      res.status(201).send({
+        isError: false,
+        message: "Your account is verified!",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Something Error",
+        data: null,
+      });
+    }
+  },
+
+  updatePassword: async (req, res) => {
+    try {
+      let { uid } = req.param;
+      let { oldPassword, newPassword } = req.query;
+      if (!oldPassword || !newPassword || !confirmPassword)
+        return res.status(404).send({
+          isError: true,
+          message: "Password is empty",
+          data: null,
+        });
+
+      let findUser = await db.user.findOne({
+        where: {
+          uid,
+        },
+      });
+
+      let hashMatchResult = await hashMatch(
+        oldPassword,
+        findUser.dataValues.password
+      );
+
+      if (!hashMatchResult)
+        return res.status(404).send({
+          isError: true,
+          message: "Password is incorrect",
+          data: null,
+        });
+
+      const hashedPassword = await hashPassword(newPassword);
+
+      const updatePassword = await db.user.update(
+        {
+          password: hashedPassword,
+        },
+        {
+          where: {
+            uid,
+          },
+        }
+      );
+      res.status(201).send({
+        isError: false,
+        message: "Your account is verified!",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Something Error",
+        data: null,
+      });
+    }
+  },
 };

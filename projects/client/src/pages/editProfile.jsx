@@ -29,45 +29,127 @@ export default function Activation() {
   const [message, setMessage] = useState(
     "Password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character."
   );
+  const [matchMessage, setMatchMessage] = useState("");
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
   let inputImage = useRef();
+  const [profilePicture, setProfilePicture] = useState([]);
+  const handleClickChangePassword = () =>
+    setIsChangePassword(!isChangePassword);
+  const [editMode, setEditMode] = useState(false);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [gender, setGender] = useState(0);
+  const [genderValue, setGenderValue] = useState(0);
+  const [gender, setGender] = useState("-");
   const [password, setPassword] = useState("");
   const [uidUser, setUidUser] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [birthDate, setBirthDate] = useState("");
-  const [birthPlace, setBirthPlace] = useState(false);
+  const [birthDate, setBirthDate] = useState(
+    new Date(0).toISOString().slice(0, 10)
+  );
+  const [birthPlace, setBirthPlace] = useState("-");
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState("");
   const [isChangePassword, setIsChangePassword] = useState(false);
-  const [profilePicture, setProfilePicture] = useState([]);
-  const handleClickChangePassword = () =>
-    setIsChangePassword(!isChangePassword);
+
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const navigate = useNavigate();
-  let uid = "445ae5f1-a0d8-4c5e-8a7e-9a4e5163af0a";
+  let uid = "af618f31-950f-4c1f-aa23-635742edf2de";
   const toast = useToast();
+
+  let validatePassword = (val) => {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{4,}$/;
+    if (!regex.test(val)) {
+      if (val.length < 8) {
+        setMessage(
+          "Password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character."
+        );
+      } else {
+        setMessage(
+          "Password must contain lowercase, uppercase, number, and special character."
+        );
+      }
+    } else {
+      if (val.length < 8) {
+        setMessage("Password should be of minimum 8 character length.");
+      } else {
+        setMessage("");
+      }
+    }
+  };
+
+  let validateMatchNewPassword = (val1, val2) => {
+    if (!val1 || !val2) {
+      setMatchMessage("");
+    } else {
+      if (val1 !== val2) {
+        setMatchMessage("These passwords do not match.");
+      } else {
+        setMatchMessage("");
+      }
+    }
+  };
+
+  const handleEditProfile = () => {
+    if (editMode) {
+      setEditMode(!editMode);
+      axios.patch(`http://localhost:8000/user/updateprofile/${uid}`, {
+        first_name: firstName,
+        last_name: lastName,
+        gender: genderValue,
+        birth_date: birthDate,
+        birth_place: birthPlace,
+      });
+    } else {
+      setEditMode(!editMode);
+    }
+  };
 
   let getImage = () => {
     axios
       .get(`http://localhost:8000/user/getphoto?uid=${uid}`)
       .then((res) => {
-        let profilePictureSplit = res.data.data[0].profile_photo.split(/\\/g)[2];
-        setProfilePicture(`http://localhost:8000/images/${profilePictureSplit}`);
-        console.log(profilePicture)
+        let profilePictureSplit =
+          res.data.data[0].profile_photo.split(/\\/g)[2];
+        setProfilePicture(
+          `http://localhost:8000/images/${profilePictureSplit}`
+        );
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
+  let getData = async () => {
+    try {
+      let response = await axios.get(
+        `http://localhost:8000/user/verification?uid=${uid}`
+      );
+      console.log(response);
+      setFirstName(response.data.data[0].first_name);
+      setLastName(response.data.data[0].last_name);
+      setEmail(response.data.data[0].email);
+      if (response.data.data[0].gender) {
+        setGenderValue(response.data.data[0].gender);
+      }
+      if (response.data.data[0].birth_date) {
+        setBirthDate(response.data.data[0].birth_date);
+      }
+      if (response.data.data[0].birth_place) {
+        setBirthPlace(response.data.data[0].birth_place);
+      }
+    } catch (error) {}
+  };
+
   useEffect(() => {
     getImage();
+    getData();
   }, []);
 
   let handleImage = (e) => {
@@ -98,6 +180,33 @@ export default function Activation() {
         });
         setMessage("");
       }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  let changePassword = async (uid) => {
+    try {
+      let oldPassword = oldPassword.current.value;
+      let newPassword = newPassword.current.value;
+      let confirmPassword = confirmPassword.current.value;
+
+      let response = await axios.patch(
+        `http://localhost:8000/user/checkpassword/${uid}`,
+        {
+          oldPassword,
+          newPassword,
+        }
+      );
+
+      toast({
+        title: "Change Password Success",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
+      });
+      setMessage("");
     } catch (error) {
       console.log(error);
     }
@@ -191,7 +300,19 @@ export default function Activation() {
                 <FormLabel>
                   <Text className="font-ibmFont">First Name</Text>
                 </FormLabel>
-                <Input rounded="lg" variant="filled" placeholder="First Name" />
+                {editMode ? (
+                  <Input
+                    rounded="lg"
+                    variant="filled"
+                    placeholder="First Name"
+                    value={firstName}
+                    onChange={(event) => setFirstName(event.target.value)}
+                  />
+                ) : (
+                  <>
+                    <Text my={3}>{firstName}</Text>
+                  </>
+                )}
               </FormControl>
             </VStack>
             <VStack w="full">
@@ -199,7 +320,19 @@ export default function Activation() {
                 <FormLabel>
                   <Text className="font-ibmFont">Last Name</Text>
                 </FormLabel>
-                <Input rounded="lg" variant="filled" placeholder="Last Name" />
+                {editMode ? (
+                  <Input
+                    rounded="lg"
+                    variant="filled"
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(event) => setLastName(event.target.value)}
+                  />
+                ) : (
+                  <>
+                    <Text my={3}>{lastName}</Text>
+                  </>
+                )}
               </FormControl>
             </VStack>
           </HStack>
@@ -209,12 +342,19 @@ export default function Activation() {
                 <FormLabel>
                   <Text className="font-ibmFont">Email</Text>
                 </FormLabel>
-                <Input
-                  rounded="lg"
-                  variant="filled"
-                  placeholder="Email"
-                  isDisabled="true"
-                />
+                {editMode ? (
+                  <Input
+                    rounded="lg"
+                    variant="filled"
+                    placeholder="Email"
+                    isDisabled="true"
+                    value={email}
+                  />
+                ) : (
+                  <>
+                    <Text my={3}>{email}</Text>
+                  </>
+                )}
               </FormControl>
             </VStack>
             <VStack w="full">
@@ -222,14 +362,48 @@ export default function Activation() {
                 <FormLabel>
                   <Text className="font-ibmFont">Gender</Text>
                 </FormLabel>
-                <Select
-                  rounded="lg"
-                  variant="filled"
-                  placeholder="Select gender"
-                >
-                  <option value={0}>Male</option>
-                  <option value={1}>Female</option>
-                </Select>
+                {editMode ? (
+                  <Select
+                    rounded="lg"
+                    variant="filled"
+                    onChange={(event) => {
+                      setGenderValue(event.target.value);
+                      console.log(genderValue);
+                    }}
+                    placeholder="Choose gender"
+                  >
+                    {genderValue == 1 ? (
+                      <>
+                        <option value={1} selected>
+                          Male
+                        </option>
+                        <option value={2}>Female</option>
+                      </>
+                    ) : genderValue == 2 ? (
+                      <>
+                        <option value={1}>Male</option>
+                        <option value={2} selected>
+                          Female
+                        </option>
+                      </>
+                    ) : (
+                      <>
+                        <option value={1}>Male</option>
+                        <option value={2}>Female</option>
+                      </>
+                    )}
+                  </Select>
+                ) : (
+                  <>
+                    <Text my={3}>
+                      {genderValue == 1
+                        ? "Male"
+                        : genderValue == 2
+                        ? "Female"
+                        : "-"}
+                    </Text>
+                  </>
+                )}
               </FormControl>
             </VStack>
           </HStack>
@@ -239,11 +413,19 @@ export default function Activation() {
                 <FormLabel>
                   <Text className="font-ibmFont">Birth Place</Text>
                 </FormLabel>
-                <Input
-                  rounded="lg"
-                  variant="filled"
-                  placeholder="Birth Place"
-                />
+                {editMode ? (
+                  <Input
+                    rounded="lg"
+                    variant="filled"
+                    placeholder="Birth Place"
+                    value={birthPlace}
+                    onChange={(event) => setBirthPlace(event.target.value)}
+                  />
+                ) : (
+                  <>
+                    <Text my={3}>{birthPlace}</Text>
+                  </>
+                )}
               </FormControl>
             </VStack>
             <VStack w="full">
@@ -251,15 +433,34 @@ export default function Activation() {
                 <FormLabel>
                   <Text className="font-ibmFont">Birth Date</Text>
                 </FormLabel>
-                <Input
-                  rounded="lg"
-                  variant="filled"
-                  placeholder="Birth Date"
-                  type="date"
-                />
+                {editMode ? (
+                  <Input
+                    rounded="lg"
+                    variant="filled"
+                    placeholder="Birth Date"
+                    type="date"
+                    value={birthDate}
+                    onChange={(event) => setBirthDate(event.target.value)}
+                  />
+                ) : (
+                  <>
+                    <Text my={3}>{birthDate}</Text>
+                  </>
+                )}
               </FormControl>
             </VStack>
           </HStack>
+          <Button
+            rounded="lg"
+            w={["full"]}
+            alignSelf="center"
+            backgroundColor="#5D5FEF"
+            color="white"
+            className="font-ibmFont"
+            onClick={handleEditProfile}
+          >
+            {isLoading ? <Spinner /> : editMode ? "Save" : "Edit Profile"}
+          </Button>
           <VStack align={["flex-start", "left"]} w="full">
             <Text
               fontSize={18}
@@ -282,6 +483,9 @@ export default function Activation() {
                     variant="filled"
                     placeholder="Old Password"
                     type="password"
+                    onChange={(e) => {
+                      setOldPassword(e.target.value);
+                    }}
                   />
                 </FormControl>
               </HStack>
@@ -295,9 +499,15 @@ export default function Activation() {
                     variant="filled"
                     placeholder="Old Password"
                     type="password"
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      validatePassword(e.target.value);
+                      validateMatchNewPassword(e.target.value, confirmPassword);
+                    }}
                   />
                 </FormControl>
               </HStack>
+              <Text color="red">{message}</Text>
               <HStack w="full">
                 <FormControl>
                   <FormLabel>
@@ -306,11 +516,18 @@ export default function Activation() {
                   <Input
                     rounded="lg"
                     variant="filled"
-                    placeholder="Old Password"
+                    placeholder="Confirm Password"
                     type="password"
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      validateMatchNewPassword(e.target.value, newPassword);
+                    }}
                   />
                 </FormControl>
               </HStack>
+              <VStack align={["flex-start", "left"]}>
+                <Text color="red">{matchMessage}</Text>
+              </VStack>
             </>
           ) : (
             <></>
@@ -331,16 +548,6 @@ export default function Activation() {
             ) : (
               "Change Password"
             )}
-          </Button>
-          <Button
-            rounded="lg"
-            w={["full"]}
-            alignSelf="center"
-            backgroundColor="#5D5FEF"
-            color="white"
-            className="font-ibmFont"
-          >
-            {isLoading ? <Spinner /> : "Save"}
           </Button>
           <VStack align={["flex-start", "left"]} w="full">
             <Text
