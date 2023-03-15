@@ -32,7 +32,39 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
+  }
+}
+
+
+@font-face {
+  font-family: 'IBMPlexSans-Bold';
+  src: url('./supports/font/IBMPlexSans-Bold.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'IBMPlexSans-Regular';
+  src: url('./supports/font/IBMPlexSans-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.Box {
+  width: 100%;
+}
+
+@media screen and (min-width: 30em) {
+  .Box {
+    width: 50%;
+  }
+}
+
+@media screen and (min-width: 48em) {
+  .Box {
+    width: 25%;
   }
 }
