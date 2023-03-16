@@ -88,7 +88,6 @@ export default function RegisterUser() {
             {console.log(process.env.DB_PASSWORD)}
             <Box justifyContent={"center"} display={'flex'} flexDirection={'column'} alignItems={'center'} gap={6} >
                 <Image src={HeaderPattern}></Image>
-                {console.log(location.search)}
                 <VStack as='header' spacing='6' mt='91'>
                     <Heading as='h1' fontWeight='600' fontSize='36px' letterSpacing='0,5px'>
                         What's Your Name?
