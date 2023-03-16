@@ -5,7 +5,6 @@ import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import RegisterUser from './pages/Register';
 
-
 function App() {
 
   return (
