@@ -85,7 +85,6 @@ export default function RegisterUser() {
 
     return (
         <>
-            {console.log(process.env.DB_PASSWORD)}
             <Box justifyContent={"center"} display={'flex'} flexDirection={'column'} alignItems={'center'} gap={6} >
                 <Image src={HeaderPattern}></Image>
                 <VStack as='header' spacing='6' mt='91'>
