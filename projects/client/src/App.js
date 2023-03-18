@@ -44,7 +44,7 @@ function App() {
       <div className="w-[480px] z-0">
         <Navbar />
         <Routes>
-          <Route path='/' element={<Home />} />
+          <Route path='/' element={<Home login={isLoggedIn}/>} />
           <Route path='/activation' element={<Activation />} />
           <Route path='/register' element={<RegisterUser />} />
           <Route path='/product/:id' element={<Product />} />

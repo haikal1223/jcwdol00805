@@ -7,8 +7,9 @@ import { useEffect, useState } from 'react';
 import axios from 'axios'
 import CarouselSection from './Section/CarouselSection';
 import Pages from '../../components/pages';
+import { toast, Toaster } from "react-hot-toast";
 
-export default function Home() {
+export default function Home(props) {
 
     const [products, setProducts] = useState([])
     const [page, setPage] = useState(1)
@@ -166,6 +167,7 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
+                <Toaster/>
             </div>
          
     )
