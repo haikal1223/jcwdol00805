@@ -43,7 +43,7 @@ export default function Home() {
         
         return productPerPage.map((val, idx) => {
             return (
-                <ProductCard productData={val} productIdx={idx} />
+                <ProductCard productData={val} productIdx={idx} func={addCart}/>
             )
         })
     }
@@ -117,7 +117,23 @@ export default function Home() {
         defaultValue: 'All'
     })
     
-
+    // add to cart
+    const addCart = () => {
+        try {
+            if (!props.login) {
+              toast.error('Please log in first', {
+                duration: 3000,
+              })
+            } 
+            else {
+                toast.success('Added to cart', {
+                    duration: 3000,
+                  }) 
+            }
+          } catch (error) {
+      
+          }
+    }
 
     return (
         
