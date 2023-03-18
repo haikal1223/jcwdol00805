@@ -43,7 +43,7 @@ function App() {
     <div className="flex justify-center">
       
       <div className="w-[480px] z-0">
-        <Navbar />
+        <Navbar login={isLoggedIn} />
         <Routes>
           <Route path='/' element={<Home login={isLoggedIn}/>} />
           <Route path='/activation' element={<Activation />} />
