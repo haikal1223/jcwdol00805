@@ -5,17 +5,16 @@ import {
     , useRadio
     , Text
     , chakra
-} from "@chakra-ui/react"
-import * as giIcon from "react-icons/gi";
-
-
-export default function CategoryRadio(props) {
+  } from "@chakra-ui/react"
+  import * as giIcon from "react-icons/gi";
+  
+  
+  export default function CategoryRadio(props) {
     const { image, ...radioProps } = props
     const { state, getInputProps, getCheckboxProps, htmlProps, getLabelProps } = useRadio(radioProps)
-    
+  
     const iconPlaceholder = giIcon[props.icon]
-    
-
+  
     return (
         <chakra.label {...htmlProps} cursor='pointer'>
             <input name='searchCategory' {...getInputProps({ })}  hidden />
@@ -24,7 +23,7 @@ export default function CategoryRadio(props) {
                 name='searchCategory'
                 {...getCheckboxProps()}
                 bg={state.isChecked ? '#5D5FEF' : 'transparent'}
-                className='w-[52px] h-[65px] flex justify-center rounded-md py-2'
+                className='hover:shadow-md w-[52px] h-[65px] flex justify-center rounded-md py-2'
             >
                 <VStack {...getLabelProps()}>
                     <Icon as={iconPlaceholder} boxSize={'30px'} color={state.isChecked ? "white" : '#5D5FEF'} {...getLabelProps()}></Icon>
@@ -32,6 +31,6 @@ export default function CategoryRadio(props) {
                 </VStack>
             </Box>
         </chakra.label>
-        
+  
     )
-}
+  }

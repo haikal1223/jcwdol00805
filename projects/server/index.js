@@ -24,7 +24,9 @@ app.use(express.json());
 // NOTE : Add your routes here
 
 const { userRouter } = require("./router");
+const { productRouter } = require('./router')
 app.use("/user", userRouter);
+app.use('/product', productRouter)
 
 // app.get("/api", (req, res) => {
 //   res.send(`Hello, this is my API`);
