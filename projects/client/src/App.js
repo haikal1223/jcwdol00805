@@ -3,6 +3,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
+import { toast, Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Order from "./pages/Order";
@@ -72,6 +73,7 @@ function App() {
           <Route path='/updatePassword/:uid' element={<UpdatePassword />} /> */}
         </Routes>
         <Footer />
+        <Toaster />
       </div>
       </div>
     )
