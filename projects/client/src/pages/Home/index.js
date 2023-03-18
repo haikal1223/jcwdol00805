@@ -160,9 +160,9 @@ export default function Home() {
                             {renderProduct()}
                         </div>
                         <div className='w-[100%] mt-5 flex justify-center items-center gap-5'>
-                            <IconButton disabled={page === 1} onClick={prevPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbArrowNarrowLeft color='white' boxsize={'16px'}/>}/>
+                            <IconButton isDisabled={page === 1} onClick={prevPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbArrowNarrowLeft color='white' boxsize={'16px'}/>}/>
                                 <div className='font-ibmReg text-dgrey'>Page {page} / {maxPage}</div>
-                            <IconButton onClick={nextPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbArrowNarrowRight color='white' boxsize={'16px'}/>}/>
+                            <IconButton isDisabled={page === maxPage} onClick={nextPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbArrowNarrowRight color='white' boxsize={'16px'}/>}/>
                         </div>
                     </div>
                 </div>
