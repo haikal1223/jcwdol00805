@@ -1,14 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}"
+    "./src/**/*.{js,jsx,ts,tsx}", '../../node_modules/@tailwind.css/line-clamp/**/*.{js,jsx,ts,tsx}'
   ],
   theme: {
     extend: {
-      fontFamily : {
-        'ibmReg' : ['IBMPlexSans-Regular'],
-        'ibmMed' : ['IBMPlexSans-Medium'],
-        'ibmBold' : ['IBMPlexSans-Bold']
+      fontFamily: {
+        'ibmReg': ['IBMPlexSans-Regular'],
+        'ibmMed': ['IBMPlexSans-Medium'],
+        'ibmBold': ['IBMPlexSans-Bold']
       },
       colors: {
         'purple': '#5D5FEF',
