@@ -4,7 +4,7 @@ const util = require('util')
 const query = util.promisify(db.query).bind(db)
 
 module.exports = {
-    viewProduct: async(req, res) => {
+    viewProduct: async (req, res) => {
         try {
             // get value
 

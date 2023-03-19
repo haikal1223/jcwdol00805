@@ -49,7 +49,7 @@ function App() {
 
   return (
     <div className="flex justify-center">
-      
+
       <div className="w-[480px] z-0">
         <Navbar login={isLoggedIn}/>
         <Routes>
@@ -79,8 +79,8 @@ function App() {
         <Footer />
         <Toaster />
       </div>
-      </div>
-    )
-  }
+    </div>
+  )
+}
 
 export default App;

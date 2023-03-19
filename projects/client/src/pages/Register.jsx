@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
+
 export default function RegisterUser() {
     const [errFirstName, seterrFirstName] = useState();
     const [errLastName, seterrLastName] = useState();
@@ -86,7 +87,6 @@ export default function RegisterUser() {
         <>
             <Box justifyContent={"center"} display={'flex'} flexDirection={'column'} alignItems={'center'} gap={6} >
                 <Image src={HeaderPattern}></Image>
-                {console.log(location.search)}
                 <VStack as='header' spacing='6' mt='91'>
                     <Heading as='h1' fontWeight='600' fontSize='36px' letterSpacing='0,5px'>
                         What's Your Name?
