@@ -17,7 +17,6 @@ import RegisterUser from './pages/Register';
 // import UpdatePassword from './pages/newPassword';
 
 function App() {
-  /* const navigate = useNavigate() */
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const keepLoggedIn = () => {
