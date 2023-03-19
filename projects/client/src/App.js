@@ -13,10 +13,10 @@ import RegisterUser from './pages/Register';
 // import UpdatePassword from './pages/newPassword';
 
 function App() {
-  
+
   return (
     <div className="flex justify-center">
-      
+
       <div className="w-[480px] z-0">
         <Navbar />
         <Routes>
@@ -28,8 +28,8 @@ function App() {
         </Routes>
         <Footer />
       </div>
-      </div>
-    )
-  }
+    </div>
+  )
+}
 
 export default App;

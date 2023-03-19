@@ -1,10 +1,10 @@
-const { sequelize } = require("../models");
+const { sequelize } = require("../sequelize/models");
 const db = require('../connection/conn')
 const util = require('util')
 const query = util.promisify(db.query).bind(db)
 
 module.exports = {
-    viewProduct: async(req, res) => {
+    viewProduct: async (req, res) => {
         try {
             // get value
 

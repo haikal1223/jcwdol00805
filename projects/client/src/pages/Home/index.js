@@ -6,7 +6,7 @@ import CategoryRadio from './components/category';
 import { useEffect, useState } from 'react';
 import axios from 'axios'
 import CarouselSection from './Section/CarouselSection';
-import Pages from '../../components/pages';
+
 
 export default function Home() {
 
