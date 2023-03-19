@@ -7,39 +7,25 @@ const mysql2 = require("mysql2");
 const PORT = process.env.PORT || 8000;
 const app = express();
 app.use(
-  cors()
-  // {
-  //   origin: [
-  //     process.env.WHITELISTED_DOMAIN &&
-  //       process.env.WHITELISTED_DOMAIN.split(","),
-  //   ],
-  // }
+	cors()
+	// {
+	//   origin: [
+	//     process.env.WHITELISTED_DOMAIN &&
+	//       process.env.WHITELISTED_DOMAIN.split(","),
+	//   ],
+	// }
 );
 
 app.use(express.json());
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 //#region API ROUTES
-const Sequelize = require("sequelize");
-const Models = require("../models");
-// Models.sequelize
-//   .sync({
-//     force: false,
-//     alter: true,
-//     logging: console.log,
-//   })
-//   .then(function () {
-//     console.log("Database is Synchronized!");
-//   })
-//   .catch(function (err) {
-//     console.log(err, "Something went wrong with database sync!");
-//   });
 
 // ===========================
 // NOTE : Add your routes here
 
-const { userRouters } = require("../routers");
-app.use("/user", userRouters);
+const { userRouter } = require("./router");
+app.use("/user", userRouter);
 
 // app.get("/api", (req, res) => {
 //   res.send(`Hello, this is my API`);

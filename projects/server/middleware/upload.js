@@ -8,8 +8,6 @@ const uploadImages = (req, res, next) => {
     const multerResult = multerUpload.fields([{name: 'images', maxCount: 3}])
     multerResult(req, res, function (err){
         try { 
-            console.log(req.files)
-
             if(err) throw err
 
             req.files.images.forEach(value => {

@@ -1,10 +1,10 @@
 const { sequelize } = require("sequelize");
 const { UUIDV4 } = require("sequelize");
-const db = require("../models/index");
+const db = require("../sequelize/models/index");
 const { uploader } = require("../lib/multer");
 const fs = require("fs");
 const { error } = require("console");
-const { hashPassword, hashMatch } = require("./../lib/hash");
+const { hashPassword, matchPassword } = require("./../lib/hash");
 
 module.exports = {
   getData: async (req, res) => {
@@ -99,10 +99,8 @@ module.exports = {
 
   uploadPhoto: async (req, res) => {
     try {
-      let { uid } = req.params;
-      let data = req.body.data;
+      let { uid } = req.query;
       const { file } = req.files;
-      console.log(data);
 
       await db.user.update(
         {
@@ -120,10 +118,9 @@ module.exports = {
         data: null,
       });
     } catch (error) {
-      console.log(error);
       res.status(500).send({
         isError: true,
-        message: "Something Error",
+        message: error.message,
         data: null,
       });
     }
@@ -163,9 +160,29 @@ module.exports = {
 
   updatePassword: async (req, res) => {
     try {
-      let { uid } = req.param;
-      let { oldPassword, newPassword } = req.query;
-      if (!oldPassword || !newPassword || !confirmPassword)
+      let { uid } = req.query;
+      let {
+        inputOldPassword,
+        inputNewPassword,
+        inputConfirmPassword,
+        message,
+        matchMessage,
+      } = req.body;
+
+      if (message)
+        return res.status(404).send({
+          isError: true,
+          message: message,
+          data: null,
+        });
+      if (matchMessage)
+        return res.status(404).send({
+          isError: true,
+          message: "New password and confirm password do not match",
+          data: null,
+        });
+
+      if (!inputOldPassword || !inputNewPassword)
         return res.status(404).send({
           isError: true,
           message: "Password is empty",
@@ -178,19 +195,19 @@ module.exports = {
         },
       });
 
-      let hashMatchResult = await hashMatch(
-        oldPassword,
+      let hashMatchResult = await matchPassword(
+        inputOldPassword,
         findUser.dataValues.password
       );
 
       if (!hashMatchResult)
         return res.status(404).send({
           isError: true,
-          message: "Password is incorrect",
+          message: "Old password is incorrect",
           data: null,
         });
 
-      const hashedPassword = await hashPassword(newPassword);
+      const hashedPassword = await hashPassword(inputNewPassword);
 
       const updatePassword = await db.user.update(
         {
@@ -202,9 +219,10 @@ module.exports = {
           },
         }
       );
+
       res.status(201).send({
         isError: false,
-        message: "Your account is verified!",
+        message: "Change password is success",
         data: null,
       });
     } catch (error) {

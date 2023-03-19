@@ -26,9 +26,7 @@ import {
 import "../App.css";
 
 export default function Activation() {
-  const [message, setMessage] = useState(
-    "Password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character."
-  );
+  const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
@@ -42,15 +40,11 @@ export default function Activation() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [genderValue, setGenderValue] = useState(0);
-  const [gender, setGender] = useState("-");
-  const [password, setPassword] = useState("");
-  const [uidUser, setUidUser] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [birthDate, setBirthDate] = useState(
     new Date(0).toISOString().slice(0, 10)
   );
   const [birthPlace, setBirthPlace] = useState("-");
-  const [fileName, setFileName] = useState("");
   const [file, setFile] = useState("");
   const [isChangePassword, setIsChangePassword] = useState(false);
 
@@ -68,16 +62,16 @@ export default function Activation() {
     if (!regex.test(val)) {
       if (val.length < 8) {
         setMessage(
-          "Password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character."
+          "New password should be of minimum 8 character length and must contain lowercase, uppercase, number, and special character."
         );
       } else {
         setMessage(
-          "Password must contain lowercase, uppercase, number, and special character."
+          "New password must contain lowercase, uppercase, number, and special character."
         );
       }
     } else {
       if (val.length < 8) {
-        setMessage("Password should be of minimum 8 character length.");
+        setMessage("New password should be of minimum 8 character length.");
       } else {
         setMessage("");
       }
@@ -120,6 +114,7 @@ export default function Activation() {
         setProfilePicture(
           `http://localhost:8000/images/${profilePictureSplit}`
         );
+        console.log(profilePicture);
       })
       .catch((err) => {
         console.log(err);
@@ -131,7 +126,6 @@ export default function Activation() {
       let response = await axios.get(
         `http://localhost:8000/user/verification?uid=${uid}`
       );
-      console.log(response);
       setFirstName(response.data.data[0].first_name);
       setLastName(response.data.data[0].last_name);
       setEmail(response.data.data[0].email);
@@ -153,24 +147,27 @@ export default function Activation() {
   }, []);
 
   let handleImage = (e) => {
-    console.log(e);
     if (e.target.files[0]) {
-      setFileName(e.target.files[0].name);
       setFile(e.target.files[0]);
       let preview = document.getElementById("imgpreview");
       preview.src = URL.createObjectURL(e.target.files[0]);
     }
   };
 
-  let handleUploadImage = async (uid) => {
+  let handleUploadImage = async () => {
     try {
       if (file) {
         let formData = new FormData();
-        formData.append("file", file);
-        await axios.patch(`http://localhost:8000/user/uploadphoto/${uid}`, {
+        formData.append("images", file);
+        await axios.patch(
+          `http://localhost:8000/user/uploadphoto?uid=${uid}`,
           formData,
-        });
-
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
         toast({
           title: "Register Success",
           status: "success",
@@ -181,21 +178,30 @@ export default function Activation() {
         setMessage("");
       }
     } catch (error) {
-      console.log(error);
+      toast({
+        title: "Error in upload photo",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
+      });
     }
   };
 
   let changePassword = async (uid) => {
     try {
-      let oldPassword = oldPassword.current.value;
-      let newPassword = newPassword.current.value;
-      let confirmPassword = confirmPassword.current.value;
+      let inputOldPassword = oldPassword;
+      let inputNewPassword = newPassword;
+      let inputConfirmPassword = confirmPassword;
 
       let response = await axios.patch(
-        `http://localhost:8000/user/checkpassword/${uid}`,
+        `http://localhost:8000/user/updatepassword?uid=${uid}`,
         {
-          oldPassword,
-          newPassword,
+          inputOldPassword,
+          inputNewPassword,
+          inputConfirmPassword,
+          message,
+          matchMessage,
         }
       );
 
@@ -206,9 +212,16 @@ export default function Activation() {
         isClosable: true,
         position: "top",
       });
+      setIsChangePassword(isChangePassword);
       setMessage("");
     } catch (error) {
-      console.log(error);
+      toast({
+        title: error.response.data.message,
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
+      });
     }
   };
 
@@ -249,7 +262,7 @@ export default function Activation() {
                   boxSize="100px"
                   objectFit="cover"
                   src={`${profilePicture}`}
-                  alt={`${profilePicture}`}
+                  alt={"Profile Picture"}
                   rounded="full"
                   id="imgpreview"
                 />
@@ -275,9 +288,7 @@ export default function Activation() {
                   backgroundColor="#5D5FEF"
                   color="white"
                   className="font-ibmFont"
-                  onClick={(e) =>
-                    handleUploadImage("445ae5f1-a0d8-4c5e-8a7e-9a4e5163af0a")
-                  }
+                  onClick={(e) => handleUploadImage()}
                 >
                   Change Photo
                 </Button>
@@ -532,23 +543,34 @@ export default function Activation() {
           ) : (
             <></>
           )}
-          <Button
-            rounded="lg"
-            w={["full"]}
-            alignSelf="center"
-            backgroundColor="#5D5FEF"
-            color="white"
-            className="font-ibmFont"
-            onClick={handleClickChangePassword}
-          >
-            {isLoading ? (
-              <Spinner />
-            ) : isChangePassword ? (
-              "Save Password"
-            ) : (
-              "Change Password"
-            )}
-          </Button>
+
+          {isLoading ? (
+            <Spinner />
+          ) : isChangePassword ? (
+            <Button
+              rounded="lg"
+              w={["full"]}
+              alignSelf="center"
+              backgroundColor="#5D5FEF"
+              color="white"
+              className="font-ibmFont"
+              onClick={() => changePassword(uid)}
+            >
+              Save Password
+            </Button>
+          ) : (
+            <Button
+              rounded="lg"
+              w={["full"]}
+              alignSelf="center"
+              backgroundColor="#5D5FEF"
+              color="white"
+              className="font-ibmFont"
+              onClick={handleClickChangePassword}
+            >
+              Change Password
+            </Button>
+          )}
           <VStack align={["flex-start", "left"]} w="full">
             <Text
               mb={["50pt"]}
