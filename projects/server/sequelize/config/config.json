@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "root",
-    "password": "12345678",
-    "database": "db_warehouse",
-    "host": "127.0.0.1",
+    "username": "${DB_USERNAME}",
+    "password": "${DB_PASSWORD}",
+    "database": "${DB_DATABASE}",
+    "host": "${DB_HOST}",
     "dialect": "mysql"
   },
   "test": {
