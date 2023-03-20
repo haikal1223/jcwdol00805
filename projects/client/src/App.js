@@ -2,8 +2,12 @@ import axios from "axios";
 import logo from "./logo.svg";
 import "./App.css";
 import { useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
+import { toast, Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
+import Cart from "./pages/Cart";
+import Order from "./pages/Order";
+import Product from "./pages/Product";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import Pages from './components/pages';
@@ -54,8 +58,6 @@ function App() {
           <Route path='/activation' element={<Activation />} />
           <Route path='/register' element={<RegisterUser />} />
           <Route path='/product/:id' element={<Product />} />
-
-
           <Route
             path="/cart"
             element={
@@ -76,6 +78,7 @@ function App() {
           <Route path='/updatePassword/:uid' element={<UpdatePassword />} /> */}
         </Routes>
         <Footer />
+        <Toaster />
       </div>
     </div>
   )

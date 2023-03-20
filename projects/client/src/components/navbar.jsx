@@ -26,6 +26,7 @@ export default function Navbar(props) {
             })
         }
     }
+
     // replace '/' with null if do not want to redirect to home but stays
     const handleCartClick = async () => {
         await notLoggedIn();
@@ -81,6 +82,6 @@ export default function Navbar(props) {
                 </div>
             </div>
             <Toaster />
-        </div>
+        </div >
     )
 } 
