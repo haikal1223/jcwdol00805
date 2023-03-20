@@ -6,9 +6,10 @@ import CategoryRadio from './components/category';
 import { useEffect, useState } from 'react';
 import axios from 'axios'
 import CarouselSection from './Section/CarouselSection';
+import Pages from '../../components/pages';
+import { toast, Toaster } from "react-hot-toast";
 
-
-export default function Home() {
+export default function Home(props) {
 
     const [products, setProducts] = useState([])
     const [page, setPage] = useState(1)
@@ -43,7 +44,7 @@ export default function Home() {
         
         return productPerPage.map((val, idx) => {
             return (
-                <ProductCard productData={val} productIdx={idx} />
+                <ProductCard productData={val} productIdx={idx} func={addCart}/>
             )
         })
     }
@@ -117,7 +118,23 @@ export default function Home() {
         defaultValue: 'All'
     })
     
-
+    // add to cart
+    const addCart = () => {
+        try {
+            if (!props.login) {
+              toast.error('Please log in first', {
+                duration: 3000,
+              })
+            } 
+            else {
+                toast.success('Added to cart', {
+                    duration: 3000,
+                  }) 
+            }
+          } catch (error) {
+      
+          }
+    }
 
     return (
         
@@ -144,12 +161,13 @@ export default function Home() {
                             {renderProduct()}
                         </div>
                         <div className='w-[100%] mt-5 flex justify-center items-center gap-5'>
-                            <IconButton disabled={page === 1} onClick={prevPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbArrowNarrowLeft color='white' boxsize={'16px'}/>}/>
+                            <IconButton isDisabled={page === 1} onClick={prevPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbArrowNarrowLeft color='white' boxsize={'16px'}/>}/>
                                 <div className='font-ibmReg text-dgrey'>Page {page} / {maxPage}</div>
-                            <IconButton onClick={nextPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbArrowNarrowRight color='white' boxsize={'16px'}/>}/>
+                            <IconButton isDisabled={page === maxPage} onClick={nextPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbArrowNarrowRight color='white' boxsize={'16px'}/>}/>
                         </div>
                     </div>
                 </div>
+                <Toaster/>
             </div>
          
     )
