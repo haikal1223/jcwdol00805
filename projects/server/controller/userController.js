@@ -11,7 +11,7 @@ const db = require("../sequelize/models/index");
 const { hashPassword, matchPassword } = require("../lib/hash");
 
 // Import jwt
-const { createToken } = require("../lib/jwt");
+const { createToken, validateToken } = require("../lib/jwt");
 
 // Import multer
 const { uploader } = require("../lib/multer");
@@ -117,7 +117,7 @@ module.exports = {
         {
           password: hashedPassword,
           is_verified: 1,
-          profile_photo: "Publicimagesdefault.svg",
+          profile_photo: "Public\\images\\default.svg",
         },
         {
           where: {
@@ -252,6 +252,29 @@ module.exports = {
       res.status(500).send({
         isError: true,
         message: error.message,
+        data: null,
+      });
+    }
+  },
+
+  verifyToken: async (req, res) => {
+    try {
+      let { token } = req.query;
+
+      if (!token) {
+        return res.status(401).send({
+          isError: true,
+          message: "Token not found",
+          data: null,
+        });
+      }
+
+      const validateTokenResult = validateToken(token);
+      validateTokenResult;
+    } catch (error) {
+      res.status(401).send({
+        isError: true,
+        message: "Invalid Token",
         data: null,
       });
     }

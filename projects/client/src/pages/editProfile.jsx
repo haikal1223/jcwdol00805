@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
@@ -35,6 +34,7 @@ export default function Activation() {
   const handleClickChangePassword = () =>
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
+  const [uid,setUid] = useState(0)
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -52,10 +52,16 @@ export default function Activation() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const navigate = useNavigate();
-  let uid = "af618f31-950f-4c1f-aa23-635742edf2de";
   const toast = useToast();
-
+  let getUid = async () => {
+    try {
+      let token = localStorage.getItem("myToken");
+      let response = await axios.get(
+        `http://localhost:8000/user/verifytoken?token=${token}`
+      );
+        setUid(1)
+    } catch (error) {}
+  };
   let validatePassword = (val) => {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{4,}$/;
@@ -144,6 +150,7 @@ export default function Activation() {
   useEffect(() => {
     getImage();
     getData();
+    getUid();
   }, []);
 
   let handleImage = (e) => {

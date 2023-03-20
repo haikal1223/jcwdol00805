@@ -1,5 +1,4 @@
 const { multerUpload } = require("../lib/multer");
-const deleteFiles = require("../helper/deleteFiles");
 
 const uploadImage = (req, res, next) => {
 	const multerResult = multerUpload.fields([{ name: "image", maxCount: 1 }]);
