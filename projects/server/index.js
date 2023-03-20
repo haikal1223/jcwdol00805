@@ -72,9 +72,9 @@ app.use("/user", userRouter);
 //#endregion
 
 app.listen(PORT, (err) => {
-  if (err) {
-    console.log(`ERROR: ${err}`);
-  } else {
-    console.log(`APP RUNNING at ${PORT} ✅`);
-  }
+	if (err) {
+		console.log(`ERROR: ${err}`);
+	} else {
+		console.log(`APP RUNNING at ${PORT} ✅`);
+	}
 });

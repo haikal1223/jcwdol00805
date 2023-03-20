@@ -1,6 +1,6 @@
-import { 
+import {
     Image
-    , Link 
+    , Link
     , VStack
 } from "@chakra-ui/react"
 import logo from '../supports/image/logo.svg'
@@ -16,10 +16,10 @@ export default function Footer() {
                             <VStack>
                                 <Link href='/'>
                                     <div>
-                                        <Image src={logo}/>
+                                        <Image src={logo} />
                                     </div>
                                 </Link>
-                                <Link _hover={{textDecoration:'none'}}>
+                                <Link _hover={{ textDecoration: 'none' }}>
                                     <div className="font-ibmBold text-[16px] text-purple">
                                         ikeanye
                                     </div>
@@ -28,19 +28,19 @@ export default function Footer() {
                         </div>
                         <div className="flex flex-col justify-between">
                             <div className="font-ibmMed font-[10px]">Follow us</div>
-                            <Link _hover={{textDecoration:'none'}}>
+                            <Link _hover={{ textDecoration: 'none' }}>
                                 <div className="font-ibmReg font-[10px] text-lgrey hover:text-purple">GitHub</div>
                             </Link>
-                            <Link _hover={{textDecoration:'none'}}>
+                            <Link _hover={{ textDecoration: 'none' }}>
                                 <div className="font-ibmReg font-[10px] text-lgrey hover:text-purple">Twitter</div>
                             </Link>
                         </div>
                         <div className="flex flex-col justify-between">
                             <div className="font-ibmMed font-[10px]">Resources</div>
-                            <Link _hover={{textDecoration:'none'}}>
+                            <Link _hover={{ textDecoration: 'none' }}>
                                 <div className="font-ibmReg font-[10px] text-lgrey hover:text-purple">About Us</div>
                             </Link>
-                            <Link _hover={{textDecoration:'none'}}>
+                            <Link _hover={{ textDecoration: 'none' }}>
                                 <div className="font-ibmReg font-[10px] text-lgrey hover:text-purple">Terms & Condition</div>
                             </Link>
                         </div>

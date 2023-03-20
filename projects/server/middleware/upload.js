@@ -1,34 +1,28 @@
-// Import Multer
-const {multerUpload} = require('./../lib/multer')
+const { multerUpload } = require("../lib/multer");
+const deleteFiles = require("../helper/deleteFiles");
 
-// Import DeleteFiles
-const deleteFiles = require('./../helpers/deleteFiles')
-
-const uploadImages = (req, res, next) => {
-    const multerResult = multerUpload.fields([{name: 'images', maxCount: 3}])
-    multerResult(req, res, function (err){
-        try { 
-            if(err) throw err
-
-            req.files.images.forEach(value => {
-                if(value.size > 10000000) throw {
-                    message: `${value.originalname} size too large`
-                }
-            })
-
-            next()
-            
-        } catch (error) {
-            if(req.files.images){
-                deleteFiles(req.files.images)
-            }
-            res.status(400).send({
-                isError: true, 
-                message: error.message, 
-                data: null
-            })
-        }
-    })
-}
-
-module.exports = uploadImages
+const uploadImage = (req, res, next) => {
+	const multerResult = multerUpload.fields([{ name: "image", maxCount: 1 }]);
+	multerResult(req, res, function (error) {
+		try {
+			if (error) throw error;
+			req.files.images.forEach((value) => {
+				if (value.size > 10000000)
+					throw {
+						message: `${value.originalname} size too large`,
+						fileToDelete: req.files,
+					};
+			});
+			next();
+		} catch (error) {
+			if (error.fileToDelete) {
+				deleteFiles(error.fileToDelete);
+			}
+			return res.status(413).send({
+				isError: true,
+				message: error.message,
+				data: null,
+			});
+		}
+	});
+};
