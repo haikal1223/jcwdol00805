@@ -16,6 +16,7 @@ import RegisterUser from './pages/Register';
 import ForgotPassword from './pages/forgotPassword';
 import UpdatePassword from './pages/newPassword';
 
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
