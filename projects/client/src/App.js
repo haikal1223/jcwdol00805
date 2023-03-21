@@ -13,6 +13,7 @@ import Footer from "./components/footer";
 import Pages from './components/pages';
 import Activation from './pages/activation'
 import RegisterUser from './pages/Register';
+
 // import ForgotPassword from './pages/forgotPassword';
 // import UpdatePassword from './pages/newPassword';
 
@@ -22,7 +23,7 @@ function App() {
   const keepLoggedIn = () => {
     try {
       const token = localStorage.getItem('myToken')
-      if(token) {
+      if (token) {
         setIsLoggedIn(true)
       } else {
         setIsLoggedIn(false)
@@ -34,14 +35,14 @@ function App() {
 
   useEffect(() => {
     keepLoggedIn()
-  },[])
+  }, [])
 
   const RequireAuth = ({ children }) => {
     const userIsLogged = localStorage.getItem('myToken')
-    
+
     if (!userIsLogged) {
       return (
-        <Navigate to='/'/>
+        <Navigate to='/' />
       )
     }
     return children
@@ -51,27 +52,27 @@ function App() {
     <div className="flex justify-center">
 
       <div className="w-[480px] z-0">
-        <Navbar login={isLoggedIn}/>
+        <Navbar login={isLoggedIn} />
         <Routes>
-          <Route path='/' element={<Home login={isLoggedIn}/>} />
+          <Route path='/' element={<Home login={isLoggedIn} />} />
           <Route path='/activation' element={<Activation />} />
           <Route path='/register' element={<RegisterUser />} />
           <Route path='/product/:id' element={<Product />} />
           <Route
-              path="/cart"
-              element={
-                <RequireAuth>
-                  <Cart login={isLoggedIn}/>
-                </RequireAuth>
-              }
+            path="/cart"
+            element={
+              <RequireAuth>
+                <Cart login={isLoggedIn} />
+              </RequireAuth>
+            }
           />
           <Route
-              path="/order"
-              element={
-                <RequireAuth>
-                  <Order login={isLoggedIn}/>
-                </RequireAuth>
-              }
+            path="/order"
+            element={
+              <RequireAuth>
+                <Order login={isLoggedIn} />
+              </RequireAuth>
+            }
           />
           {/* <Route path='/forgotpassword' element={<ForgotPassword />} />
           <Route path='/updatePassword/:uid' element={<UpdatePassword />} /> */}
