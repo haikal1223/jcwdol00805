@@ -26,11 +26,6 @@ const { kStringMaxLength } = require("buffer");
 const bcrypt = require("bcrypt");
 
 module.exports = {
-
-
-};
-
-module.exports = {
     registerUser: async (req, res) => {
         try {
             let { first_name, last_name, email } = req.body;

@@ -13,7 +13,6 @@ import Footer from "./components/footer";
 import Pages from './components/pages';
 import Activation from './pages/activation'
 import RegisterUser from './pages/Register';
-
 // import ForgotPassword from './pages/forgotPassword';
 // import UpdatePassword from './pages/newPassword';
 
@@ -61,7 +60,7 @@ function App() {
           <Route
             path="/cart"
             element={
-              <RequireAuth>
+              <RequireAuth> 
                 <Cart login={isLoggedIn} />
               </RequireAuth>
             }
