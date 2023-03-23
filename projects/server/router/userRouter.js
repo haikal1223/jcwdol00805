@@ -24,5 +24,6 @@ Router.patch("/updatepassword", userController.updatePassword);
 Router.patch("/verifytoken", userController.verifyToken);
 // Router.post('/forgot-password', userController.forgotPassword)
 // Router.patch('/reset-password/:uid', userController.resetPassword)
+Router.get('/login', userController.login)
 
 module.exports = Router
