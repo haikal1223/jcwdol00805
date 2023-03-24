@@ -56,7 +56,7 @@ function UpdatePassword() {
         value
       )
     ) {
-      setmessage("Password must contain number and capital");
+      setmessage("Password must contain lowercase, uppercase, number, and special character.");
     } else {
       setmessage("");
     }
@@ -67,11 +67,11 @@ function UpdatePassword() {
     } else if (value.length < 8) {
       setmsg("Password less than 8 character, please input more");
     } else if (
-      !/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(
+      !/^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[!@#$%^&()+])[A-Za-z\d!@#$%^&()+]{4,}$/.test(
         value
       )
     ) {
-      setmsg("Password must contain number and capital");
+      setmsg("Password must contain lowercase, uppercase, number, and special character.");
     } else {
       setmsg("");
     }
