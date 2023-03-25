@@ -6,7 +6,7 @@ import { Tag, Link, Box, VStack, Heading, ModalCloseButton, Text, FormControl, F
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
 
-export default function Login() {
+export default function AdminLogin() {
 
 
     const [profile, setProfile] = useState([])
@@ -21,14 +21,14 @@ export default function Login() {
             let inputEmail = email.current.value
             let inputPassword = password.current.value
 
-            // change to Admin Controller
-            let response = await axios.get(`http://localhost:8000/user/login?email=${inputEmail}&password=${inputPassword}`)
-            toast(response?.data?.message)
+            let response = await axios.get(`http://localhost:8000/admin/login?email=${inputEmail}&password=${inputPassword}`)
+            
+            toast.success(response?.data?.message, {duration: 3000})
             setProfile(response?.data?.data)
-            localStorage.setItem('myToken', response.data.data.token)
+            localStorage.setItem('adminToken', response.data.data.token)
             window.location.reload()
         } catch (error) {
-            toast(error.message)
+            toast.error(error?.response?.data.message)
         }
     }
 
@@ -60,12 +60,9 @@ export default function Login() {
                             </InputRightElement>
                         </InputGroup>
                     </FormControl>
-                    <HStack w='full' justify='space-between'>
-                        <Checkbox><Text className='font-ibmReg' fontSize='12px'>Remember me.</Text></Checkbox>
-                        <Button variant='link' colorScheme='blue'><Text className='font-ibmReg' fontSize='12px'>Forgot Password?</Text></Button>
-                    </HStack>
+                    
                     <Button rounded='lg' w={['30vh']} alignSelf='center' backgroundColor='#5D5FEF' color='white' className='font-ibmReg' onClick={login} >Login</Button>
-                    <Text fontSize='xs' alignSelf='center'>Don't have an account? <Link variant='link' colorScheme='blue' href="/register" >Sign Up</Link></Text>
+                    
                 </VStack>
             </Box >
 
