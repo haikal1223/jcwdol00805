@@ -13,6 +13,7 @@ import Activation from './pages/activation'
 import RegisterUser from './pages/Register';
 import ForgotPassword from './pages/forgotPassword';
 import UpdatePassword from './pages/newPassword';
+import EditProfile from "./pages/editProfile";
 
 //Admin Components
 import AdminHome from "./pages/Admin/Home";
