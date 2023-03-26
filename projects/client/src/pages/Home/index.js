@@ -44,19 +44,20 @@ export default function Home(props) {
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
       setUid(response.data.data.uid);
-      let user_uid = response.data.data.uid;
-      let getUserCart = await axios.get(
-        `http://localhost:8000/cart/getUserCart?user_uid=${user_uid}`
-      );
-      setUserCart(getUserCart.data.data);
-      for (let i = 0; i < getUserCart.data.data.length; i++) {
-        sumCart += getUserCart.data.data[i].quantity;
+      if (uid) {
+        let getUserCart = await axios.get(
+          `http://localhost:8000/cart/getUserCart?user_uid=${uid}`
+        );
+        setUserCart(getUserCart.data.data);
+        for (let i = 0; i < getUserCart.data.data.length; i++) {
+          sumCart += getUserCart.data.data[i].quantity;
+        }
       }
     } catch (error) {}
   };
   useEffect(() => {
     getUserCart();
-  }, []);
+  }, [uid]);
 
   const fetchProduct = async () => {
     try {
@@ -181,7 +182,6 @@ export default function Home(props) {
           duration: 3000,
         });
       } else {
-        getUserCart();
         let foundInCart = false;
         let sumStock = 0;
         let getProductStock = await axios.get(
@@ -190,7 +190,6 @@ export default function Home(props) {
         for (let i = 0; i < getProductStock.data.data.length; i++) {
           sumStock += getProductStock.data.data[i].stock;
         }
-
         if (sumStock === 0) {
           toast.error("There are no stock of the product", {
             duration: 3000,
@@ -199,7 +198,7 @@ export default function Home(props) {
           userCart.map(async (valCart, idx) => {
             if (valCart.product_id === valProduct.id) {
               foundInCart = true;
-              if (valCart.quantity > sumStock) {
+              if (valCart.quantity+1 > sumStock) {
                 toast.error("Your cart has maximum stock of the product", {
                   duration: 3000,
                 });

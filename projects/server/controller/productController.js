@@ -32,7 +32,7 @@ module.exports = {
 
       // run query
       let products = await sequelize.query(
-        `SELECT * FROM product ORDER BY id ASC`
+        `SELECT * FROM product ORDER BY RAND()`
       );
 
       // response
