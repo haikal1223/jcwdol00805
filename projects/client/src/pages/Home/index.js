@@ -30,12 +30,36 @@ export default function Home(props) {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const itemLimit = 15;
 
-  const [uid, setUid] = useState("e867cba8-dcd7-4fd2-8dcf-34316567b8c7");
+  const [uid, setUid] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [userCart, setUserCart] = useState([]);
 
   // fetch & render
+  let getUserCart = async () => {
+    try {
+      let sumCart = 0;
+      let token = localStorage.getItem("myToken");
+      let response = await axios.get(
+        `http://localhost:8000/user/verifytoken?token=${token}`
+      );
+      setUid(response.data.data.uid);
+      let user_uid = response.data.data.uid;
+      let getUserCart = await axios.get(
+        `http://localhost:8000/cart/getUserCart?user_uid=${user_uid}`
+      );
+      console.log(getUserCart);
+      setUserCart(getUserCart.data.data);
+      for (let i = 0; i < getUserCart.data.data.length; i++) {
+        sumCart += getUserCart.data.data[i].quantity;
+      }
+      console.log(sumCart);
+    } catch (error) {}
+  };
+  useEffect(() => {
+    getUserCart();
+  }, []);
+
   const fetchProduct = async () => {
     try {
       let response = await axios.get(`http://localhost:8000/product/view`);
@@ -44,18 +68,24 @@ export default function Home(props) {
       setFilteredProducts(response.data.data[0]);
     } catch (error) {}
   };
-  let getUserCart = async () => {
+  useEffect(() => {
+    fetchProduct();
+  }, []);
+
+  let getUid = async () => {
     try {
-      let getUserCart = await axios.get(
-        `http://localhost:8000/cart/getUserCart?user_uid=${uid}`
+      let token = localStorage.getItem("myToken");
+      let response = await axios.get(
+        `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setTimeout(() => setUserCart(getUserCart.data.data), 1000);
-    } catch (error) {}
+      setUid(response.data.data.uid);
+    } catch (error) {
+      console.log(error.response.data);
+    }
   };
 
   useEffect(() => {
-    fetchProduct();
-    getUserCart();
+    getUid();
   }, []);
 
   const renderProduct = () => {
@@ -153,32 +183,59 @@ export default function Home(props) {
           duration: 3000,
         });
       } else {
+        getUserCart();
         let foundInCart = false;
-        userCart.map(async (valCart, idx) => {
-          if (valCart.product_id === valProduct.id) {
-            foundInCart = true;
-            let updateCart = await axios.patch(
-              `http://localhost:8000/cart/updateCart?user_uid=${uid}&product_id=${valCart.product_id}`,
+        let sumStock = 0;
+        let getProductStock = await axios.get(
+          `http://localhost:8000/product/productStock?product_id=${valProduct.id}`
+        );
+        for (let i = 0; i < getProductStock.data.data.length; i++) {
+          sumStock += getProductStock.data.data[i].stock;
+        }
+
+        if (sumStock === 0) {
+          toast.error("There are no stock of the product", {
+            duration: 3000,
+          });
+        } else {
+          userCart.map(async (valCart, idx) => {
+            if (valCart.product_id === valProduct.id) {
+              foundInCart = true;
+              if (valCart.quantity > sumStock) {
+                toast.error("Your cart has maximum stock of the product", {
+                  duration: 3000,
+                });
+              } else {
+                let updateCart = await axios.patch(
+                  `http://localhost:8000/cart/updateCart?user_uid=${uid}&product_id=${valCart.product_id}`,
+                  {
+                    quantity: valCart.quantity + 1,
+                    price: valCart.price,
+                  }
+                );
+                toast.success("Added to cart", {
+                  duration: 3000,
+                });
+              }
+              getUserCart();
+            }
+          });
+          if (!foundInCart) {
+            let addCart = await axios.post(
+              `http://localhost:8000/cart/addCart`,
               {
-                quantity: valCart.quantity + 1,
-                price: valCart.price,
+                quantity: 1,
+                price: valProduct.price,
+                user_uid: uid,
+                product_id: valProduct.id,
               }
             );
+            toast.success("Added to cart", {
+              duration: 3000,
+            });
             getUserCart();
           }
-        });
-        if (!foundInCart) {
-          let addCart = await axios.post(`http://localhost:8000/cart/addCart`, {
-            quantity: 1,
-            price: valProduct.price,
-            user_uid: uid,
-            product_id: valProduct.id,
-          });
-          getUserCart();
         }
-        toast.success("Added to cart", {
-          duration: 3000,
-        });
       }
     } catch (error) {}
   };
