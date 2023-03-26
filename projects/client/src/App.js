@@ -1,5 +1,3 @@
-import axios from "axios";
-import logo from "./logo.svg";
 import "./App.css";
 import { useEffect, useState } from "react";
 import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
@@ -16,10 +14,12 @@ import RegisterUser from './pages/Register';
 import ForgotPassword from './pages/forgotPassword';
 import UpdatePassword from './pages/newPassword';
 
+
 //Admin Components
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
+
 
 
 
@@ -30,16 +30,16 @@ function App() {
 
   const keepLoggedIn = () => {
     try {
-      const token = localStorage.getItem('myToken')
+      const token = localStorage.getItem("myToken");
       if (token) {
-        setIsLoggedIn(true)
+        setIsLoggedIn(true);
       } else {
-        setIsLoggedIn(false)
+        setIsLoggedIn(false);
       }
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
-  }
+  };
 
   const keepAdminLoggedIn = () => {
     try {
@@ -55,14 +55,17 @@ function App() {
   }
 
   useEffect(() => {
+
     keepLoggedIn()
     keepAdminLoggedIn()
   }, [])
 
+
   const RequireAuth = ({ children }) => {
-    const userIsLogged = localStorage.getItem('myToken')
+    const userIsLogged = localStorage.getItem("myToken");
 
     if (!userIsLogged) {
+
       return (
         <>
           <Navigate to='/' />
@@ -72,9 +75,10 @@ function App() {
           })}
         </>
       )
+
     }
-    return children
-  }
+    return children;
+  };
 
   const AuthAdmin = ({children}) => {
     const adminIsLogged = localStorage.getItem('adminToken')
@@ -112,6 +116,7 @@ function App() {
 
   return (
     <div className="flex justify-center">
+
 
       <div className={window.location.pathname.includes('/admin')?"w-[1440px] z-0":"w-[480px] z-0"}>
         {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={onLogout}/>:<Navbar login={isLoggedIn} />}
@@ -152,12 +157,13 @@ function App() {
               }
             />
             
+
         </Routes>
         {window.location.pathname.includes('/admin')?<></>:<Footer />}
         <Toaster />
       </div>
     </div>
-  )
+  );
 }
 
 export default App;
