@@ -13,14 +13,15 @@ import Footer from "./components/footer";
 import Pages from './components/pages';
 import Activation from './pages/activation'
 import RegisterUser from './pages/Register';
+import ForgotPassword from './pages/forgotPassword';
+import UpdatePassword from './pages/newPassword';
 
 //Admin Components
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
 
-// import ForgotPassword from './pages/forgotPassword';
-// import UpdatePassword from './pages/newPassword';
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -119,6 +120,7 @@ function App() {
             <Route path='/' element={<Home login={isLoggedIn} />} />
             <Route path='/activation' element={<Activation />} />
             <Route path='/register' element={<RegisterUser />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
             <Route path='/product/:id' element={<Product />} />
             <Route
               path="/cart"
@@ -136,8 +138,8 @@ function App() {
                 </RequireAuth>
               }
             />
-            {/* <Route path='/forgotpassword' element={<ForgotPassword />} />
-            <Route path='/updatePassword/:uid' element={<UpdatePassword />} /> */}
+            <Route path='/forgotpassword' element={<ForgotPassword />} />
+            <Route path='/updatePassword/:uid' element={<UpdatePassword />} />
 
             {/* Admin Routing */}
             <Route path='/admin' element={<AdminHome />}/>
