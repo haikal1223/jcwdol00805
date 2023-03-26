@@ -1,5 +1,4 @@
 const { sequelize } = require("../sequelize/models");
-const jwt = require("jsonwebtoken");
 
 const { Op } = require("sequelize");
 
@@ -28,7 +27,6 @@ const handlebars = require("handlebars");
 const { kStringMaxLength } = require("buffer");
 
 const bcrypt = require("bcrypt");
-const { validateToken } = require("../lib/jwt");
 
 module.exports = {
   registerUser: async (req, res) => {
@@ -255,7 +253,7 @@ module.exports = {
       });
     }
   },
-  
+
   login: async (req, res) => {
     try {
       let { email, password } = req.query;
@@ -325,7 +323,11 @@ module.exports = {
       }
 
       const validateTokenResult = validateToken(token);
-      validateTokenResult;
+      return res.status(200).send({
+        isError: true,
+        message: "Token is found",
+        data: validateTokenResult,
+      });
     } catch (error) {
       res.status(401).send({
         isError: true,

@@ -24,9 +24,7 @@ Router.patch(
 Router.get("/getphoto", userController.getProfilePhoto);
 Router.patch("/updateprofile/:uid", userController.updateProfile);
 Router.patch("/updatepassword", userController.updatePassword);
-Router.patch("/verifytoken", userController.verifyToken);
+Router.get("/verifytoken", userController.verifyToken);
 Router.get('/login', userController.login)
-Router.get('/verifytoken', userController.verifytoken)
-
 
 module.exports = Router

@@ -48,12 +48,10 @@ export default function Home(props) {
       let getUserCart = await axios.get(
         `http://localhost:8000/cart/getUserCart?user_uid=${user_uid}`
       );
-      console.log(getUserCart);
       setUserCart(getUserCart.data.data);
       for (let i = 0; i < getUserCart.data.data.length; i++) {
         sumCart += getUserCart.data.data[i].quantity;
       }
-      console.log(sumCart);
     } catch (error) {}
   };
   useEffect(() => {
@@ -78,7 +76,7 @@ export default function Home(props) {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setUid(response.data.data.uid);
+      setUid(response?.data?.data?.uid);
     } catch (error) {
       console.log(error.response.data);
     }
