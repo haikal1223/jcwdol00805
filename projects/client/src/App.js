@@ -1,5 +1,3 @@
-import axios from "axios";
-import logo from "./logo.svg";
 import "./App.css";
 import { useEffect, useState } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
@@ -10,11 +8,13 @@ import Order from "./pages/Order";
 import Product from "./pages/Product";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
-import Pages from "./components/pages";
-import Activation from "./pages/activation";
-import RegisterUser from "./pages/Register";
-// import ForgotPassword from './pages/forgotPassword';
-// import UpdatePassword from './pages/newPassword';
+import Pages from './components/pages';
+import Activation from './pages/activation'
+import RegisterUser from './pages/Register';
+import ForgotPassword from './pages/forgotPassword';
+import UpdatePassword from './pages/newPassword';
+
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -53,6 +53,7 @@ function App() {
           <Route path="/" element={<Home login={isLoggedIn} />} />
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/product/:id" element={<Product login={isLoggedIn} />} />
           <Route
             path="/cart"
@@ -70,8 +71,8 @@ function App() {
               </RequireAuth>
             }
           />
-          {/* <Route path='/forgotpassword' element={<ForgotPassword />} />
-          <Route path='/updatePassword/:uid' element={<UpdatePassword />} /> */}
+          <Route path='/forgotpassword' element={<ForgotPassword />} />
+          <Route path='/updatePassword/:uid' element={<UpdatePassword />} />
         </Routes>
         <Footer />
         <Toaster />

@@ -12,7 +12,10 @@ const db = require("../sequelize/models/index");
 const { hashPassword, matchPassword } = require("../lib/hash");
 
 // Import jwt
-const { createToken } = require("../lib/jwt");
+const { createToken, validateToken } = require("../lib/jwt");
+
+// Import multer
+const { uploader } = require("../lib/multer");
 
 // Import Filesystem
 const fs = require("fs").promises;
@@ -239,7 +242,6 @@ module.exports = {
           },
         }
       );
-
       res.status(201).send({
         isError: false,
         message: "Update Password Success",
@@ -253,6 +255,7 @@ module.exports = {
       });
     }
   },
+  
   login: async (req, res) => {
     try {
       let { email, password } = req.query;
@@ -308,28 +311,179 @@ module.exports = {
       });
     }
   },
-  verifytoken: (req, res) => {
-    let { token } = req.query;
 
-    if (!token) {
-      return res.status(401).send({
-        isError: true,
-        message: "Token not found",
-        data: null,
-      });
-    }
-
+  verifyToken: async (req, res) => {
     try {
+      let { token } = req.query;
+
+      if (!token) {
+        return res.status(401).send({
+          isError: true,
+          message: "Token not found",
+          data: null,
+        });
+      }
+
       const validateTokenResult = validateToken(token);
-      res.status(200).send({
-        isError: true,
-        message: "Token is valid",
-        data: validateTokenResult,
-      });
+      validateTokenResult;
     } catch (error) {
       res.status(401).send({
         isError: true,
         message: "Invalid Token",
+        data: null,
+      });
+    }
+  },
+
+  getProfilePhoto: async (req, res) => {
+    try {
+      let { uid } = req.query;
+      const findUsers = await db.user.findAll({
+        where: {
+          uid,
+        },
+      });
+      if (findUsers)
+        return res.status(200).send({
+          isError: false,
+          message: "Data is found",
+          data: findUsers,
+        });
+    } catch (error) {}
+  },
+
+  uploadPhoto: async (req, res) => {
+    try {
+      let { uid } = req.query;
+      const { file } = req.files;
+
+      await db.user.update(
+        {
+          profile_photo: req.files.images[0].path,
+        },
+        {
+          where: {
+            uid,
+          },
+        }
+      );
+      res.status(201).send({
+        isError: false,
+        message: "Your profile picture is updated!",
+        data: null,
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
+
+  updateProfile: async (req, res) => {
+    try {
+      let { first_name, last_name, gender, birth_place, birth_date } = req.body;
+      const updateProfile = await db.user.update(
+        {
+          first_name,
+          last_name,
+          gender,
+          birth_place,
+          birth_date,
+        },
+        {
+          where: {
+            uid: req.params.uid,
+          },
+        }
+      );
+
+      res.status(201).send({
+        isError: false,
+        message: "Your account is verified!",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Something Error",
+        data: null,
+      });
+    }
+  },
+
+  updatePassword: async (req, res) => {
+    try {
+      let { uid } = req.query;
+      let {
+        inputOldPassword,
+        inputNewPassword,
+        inputConfirmPassword,
+        message,
+        matchMessage,
+      } = req.body;
+
+      if (message)
+        return res.status(404).send({
+          isError: true,
+          message: message,
+          data: null,
+        });
+      if (matchMessage)
+        return res.status(404).send({
+          isError: true,
+          message: "New password and confirm password do not match",
+          data: null,
+        });
+
+      if (!inputOldPassword || !inputNewPassword)
+        return res.status(404).send({
+          isError: true,
+          message: "Password is empty",
+          data: null,
+        });
+
+      let findUser = await db.user.findOne({
+        where: {
+          uid,
+        },
+      });
+
+      let hashMatchResult = await matchPassword(
+        inputOldPassword,
+        findUser.dataValues.password
+      );
+
+      if (!hashMatchResult)
+        return res.status(404).send({
+          isError: true,
+          message: "Old password is incorrect",
+          data: null,
+        });
+
+      const hashedPassword = await hashPassword(inputNewPassword);
+
+      const updatePassword = await db.user.update(
+        {
+          password: hashedPassword,
+        },
+        {
+          where: {
+            uid,
+          },
+        }
+      );
+
+      res.status(201).send({
+        isError: false,
+        message: "Change password is success",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Something Error",
         data: null,
       });
     }
