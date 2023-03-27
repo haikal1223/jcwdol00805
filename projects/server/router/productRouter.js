@@ -10,5 +10,6 @@ const uploadImages = require('../middleware/upload') */
 
 // Router method
 Router.get('/view', productController.viewProduct)
+Router.get('/detail/:id', productController.viewDetailProduct)
 
 module.exports = Router
