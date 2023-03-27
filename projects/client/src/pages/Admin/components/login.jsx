@@ -46,13 +46,13 @@ export default function AdminLogin() {
                         <ModalCloseButton />
                     </HStack>
                     <FormControl>
-                        <FormLabel><Text className='font-ibmReg'>E-mail</Text></FormLabel>
-                        <Input ref={email} rounded='lg' variant='filled' placeholder='Your Email' />
+                        <FormLabel><Text className='font-ibmMed'>E-mail</Text></FormLabel>
+                        <Input ref={email} rounded='lg' variant='filled' placeholder='Your Email' bg='#f5f5f5' border-1 borderColor={'#D9D9D9'} />
                     </FormControl>
                     <FormControl>
-                        <FormLabel><Text className='font-ibmReg'>Password</Text></FormLabel>
+                        <FormLabel><Text className='font-ibmMed'>Password</Text></FormLabel>
                         <InputGroup>
-                            <Input ref={password} rounded='lg' variant='filled' type={show ? 'text' : 'password'} placeholder='Password' />
+                            <Input ref={password} rounded='lg' variant='filled' type={show ? 'text' : 'password'} placeholder='Password' bg='#f5f5f5' border-1 borderColor={'#D9D9D9'} />
                             <InputRightElement width='4.5rem'>
                                 <Button h='1.75rem' size='sm' onClick={handleClick}>
                                     {show ? <Icon as={ViewIcon} /> : <Icon as={ViewOffIcon} />}
@@ -61,12 +61,19 @@ export default function AdminLogin() {
                         </InputGroup>
                     </FormControl>
                     
-                    <Button rounded='lg' w={['30vh']} alignSelf='center' backgroundColor='#5D5FEF' color='white' className='font-ibmReg' onClick={login} >Login</Button>
+                    <Button rounded='lg' w={['4.5rem']} alignSelf='center' backgroundColor='#5D5FEF' color='white' className='font-ibmReg' onClick={login} >Login</Button>
                     
                 </VStack>
             </Box >
 
-            <Toaster />
+            <Toaster
+                toastOptions={{
+                style: {
+                height: "50px",
+                width: "175px",
+                },
+                }}
+            />
 
         </Tag>
     )
