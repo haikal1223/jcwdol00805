@@ -18,6 +18,7 @@ export default function ProductCard(props) {
                             <div className="font-ibmMed text-[12px] text-purple">Rp</div>
                             <div className="font-ibmMed text-[18px]">{props.productData.price.toLocaleString()}</div>
                         </div>
+
                         <Button 
                             isDisabled={props.productData.total_stock === 0} 
                             _disabled={{bg:'#D9D9D9', color:'#9AA0B4', border:'0px', _hover:{bg:'#D9D9D9',color:'#9AA0B4', border:'0px'}}} 

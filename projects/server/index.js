@@ -7,16 +7,17 @@ const mysql2 = require("mysql2");
 const PORT = process.env.PORT || 8000;
 const app = express();
 app.use(
-	cors()
-	// {
-	//   origin: [
-	//     process.env.WHITELISTED_DOMAIN &&
-	//       process.env.WHITELISTED_DOMAIN.split(","),
-	//   ],
-	// }
+  cors()
+  // {
+  //   origin: [
+  //     process.env.WHITELISTED_DOMAIN &&
+  //       process.env.WHITELISTED_DOMAIN.split(","),
+  //   ],
+  // }
 );
 
 app.use(express.json());
+app.use(express.static('public'));
 
 //#region API ROUTES
 
@@ -25,8 +26,10 @@ app.use(express.json());
 
 const { userRouter } = require("./router");
 const { productRouter } = require('./router')
+const { cartRouter } = require('./router')
 app.use("/user", userRouter);
 app.use('/product', productRouter)
+app.use('/cart', cartRouter)
 
 // app.get("/api", (req, res) => {
 //   res.send(`Hello, this is my API`);
@@ -73,9 +76,9 @@ app.use('/product', productRouter)
 //#endregion
 
 app.listen(PORT, (err) => {
-	if (err) {
-		console.log(`ERROR: ${err}`);
-	} else {
-		console.log(`APP RUNNING at ${PORT} ✅`);
-	}
+  if (err) {
+    console.log(`ERROR: ${err}`);
+  } else {
+    console.log(`APP RUNNING at ${PORT} ✅`);
+  }
 });
