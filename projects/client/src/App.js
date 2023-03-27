@@ -8,13 +8,12 @@ import Order from "./pages/Order";
 import Product from "./pages/Product";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
-import Pages from './components/pages';
-import Activation from './pages/activation'
-import RegisterUser from './pages/Register';
-import ForgotPassword from './pages/forgotPassword';
-import UpdatePassword from './pages/newPassword';
-
-
+import Pages from "./components/pages";
+import Activation from "./pages/activation";
+import RegisterUser from "./pages/Register";
+import ForgotPassword from "./pages/forgotPassword";
+import UpdatePassword from "./pages/newPassword";
+import EditProfile from "./pages/editProfile";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,7 +53,7 @@ function App() {
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
           <Route path="/edit-profile" element={<EditProfile />} />
-          <Route path="/product/:id" element={<Product />} />
+          <Route path="/product/:id" element={<Product login={isLoggedIn} />} />
           <Route
             path="/cart"
             element={
@@ -71,8 +70,8 @@ function App() {
               </RequireAuth>
             }
           />
-          <Route path='/forgotpassword' element={<ForgotPassword />} />
-          <Route path='/updatePassword/:uid' element={<UpdatePassword />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
         </Routes>
         <Footer />
         <Toaster />

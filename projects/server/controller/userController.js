@@ -28,8 +28,6 @@ const { kStringMaxLength } = require("buffer");
 
 const bcrypt = require("bcrypt");
 
-module.exports = {};
-
 module.exports = {
   registerUser: async (req, res) => {
     try {
@@ -255,7 +253,7 @@ module.exports = {
       });
     }
   },
-  
+
   login: async (req, res) => {
     try {
       let { email, password } = req.query;
@@ -325,7 +323,11 @@ module.exports = {
       }
 
       const validateTokenResult = validateToken(token);
-      validateTokenResult;
+      return res.status(200).send({
+        isError: true,
+        message: "Token is found",
+        data: validateTokenResult,
+      });
     } catch (error) {
       res.status(401).send({
         isError: true,
