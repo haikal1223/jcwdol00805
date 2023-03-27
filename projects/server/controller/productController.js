@@ -10,12 +10,22 @@ module.exports = {
 
 
             // run query
-            let products = await sequelize.query(`SELECT a.*
+            let products = await sequelize.query(`(SELECT a.*
             , CAST(COALESCE(sum(b.stock),0) AS UNSIGNED) total_stock 
             FROM product a 
             LEFT JOIN product_stock b
             ON a.id = b.product_id
-            GROUP BY 1,2,3,4,5,6,7 ORDER BY RAND()`)
+            WHERE b.stock IS NOT NULL
+            GROUP BY 1,2,3,4,5,6,7 ORDER BY RAND())
+            UNION
+            (SELECT a.*
+            , CAST(COALESCE(sum(b.stock),0) AS UNSIGNED) total_stock 
+            FROM product a 
+            LEFT JOIN product_stock b
+            ON a.id = b.product_id
+            WHERE b.stock IS NULL
+            GROUP BY 1,2,3,4,5,6,7 ORDER BY RAND())
+            `)
 
             // response
             res.status(201).send({
