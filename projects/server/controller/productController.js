@@ -123,12 +123,6 @@ module.exports = {
           data: findProductStock,
         });
 
-      // response
-      // res.status(201).send({
-      //   isError: false,
-      //   message: "Product list returned",
-      //   data: findProductStock,
-      // });
     } catch (error) {
       res.status(404).send({
         isError: true,

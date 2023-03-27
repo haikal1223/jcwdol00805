@@ -62,9 +62,9 @@ export default function CartCard(props) {
               <Box w="50px" textAlign="center">
                 {props.cartData.quantity}
               </Box>
-                <Button onClick={props.addFunction}>
-                  <AddIcon />
-                </Button>
+              <Button onClick={props.addFunction}>
+                <AddIcon />
+              </Button>
             </HStack>
           </VStack>
         </HStack>
