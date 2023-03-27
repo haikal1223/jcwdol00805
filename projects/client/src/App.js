@@ -15,13 +15,10 @@ import ForgotPassword from './pages/forgotPassword';
 import UpdatePassword from './pages/newPassword';
 import EditProfile from "./pages/editProfile";
 
-
 //Admin Components
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
-
-
 
 
 function App() {
@@ -158,7 +155,6 @@ function App() {
               }
             />
             
-
         </Routes>
         {window.location.pathname.includes('/admin')?<></>:<Footer />}
         <Toaster />

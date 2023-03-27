@@ -18,7 +18,7 @@ export default function ProductCard(props) {
                             <div className="font-ibmMed text-[12px] text-purple">Rp</div>
                             <div className="font-ibmMed text-[18px]">{props.productData.price.toLocaleString()}</div>
                         </div>
-                        <Button h={'24px'} bg='#5D5FEF' color='white' onClick={props.func} zIndex={5} >
+                        <Button h={'24px'} bg='#5D5FEF' color='white' onClick={props.func} zIndex={5}>
                             <div className="text-[12px]">Add to cart</div> 
                         </Button>
                     </div>
