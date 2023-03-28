@@ -5,6 +5,7 @@ const Router = express.Router()
 const { adminController } = require('../controller')
 
 Router.get('/login', adminController.login)
+Router.get('/fetch-role', adminController.fetchRole)
 
 
 module.exports = Router

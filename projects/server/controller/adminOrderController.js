@@ -26,9 +26,21 @@ const bcrypt = require("bcrypt");
 module.exports = {
     viewOrder: async(req, res) => {
         try {
+            // limit by warehouse id
+            let { wh_id } = req.params
+
+            let whereClause = ''
+            if (wh_id > 0) {
+                whereClause = ` WHERE warehouse_id = ${wh_id}`
+            }
 
             // run query
-            let orders = await sequelize.query(`SELECT * FROM order ORDER BY id ASC`)
+            let orders = await sequelize.query(
+                `SELECT a.*, b.status 
+                FROM db_warehouse.order a 
+                LEFT JOIN order_status b ON a.order_status_id=b.id
+                ${whereClause} ORDER BY id DESC`
+            )
 
             // response
             res.status(201).send({
