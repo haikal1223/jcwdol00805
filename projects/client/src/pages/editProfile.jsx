@@ -21,10 +21,30 @@ import {
   EditableTextarea,
   Select,
   useToast,
+  useDisclosure,
+  ModalOverlay,
+  ModalContent,
+  ModalCloseButton,
+  Modal
 } from "@chakra-ui/react";
 import "../App.css";
+import { useNavigate } from "react-router-dom";
+import Address from "../components/address";
 
-export default function Activation() {
+export default function EditProfile() {
+  const Navigate = useNavigate();
+  const [rakir, setRakir] = useState({
+    main_address: false,
+  });
+
+  const [allAddress, setAllAddress] = useState([]);
+
+  const modalAddress = useDisclosure();
+  const modalSwitch = useDisclosure();
+  const [mainAddress, setMainAddress] = useState({});
+
+
+
   const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
   const [show, setShow] = useState(false);
@@ -34,7 +54,7 @@ export default function Activation() {
   const handleClickChangePassword = () =>
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
-  const [uid,setUid] = useState(0)
+  const [uid, setUid] = useState('3dcf1aa9-fed9-4734-bcdd-bfd90bdaea37')
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -53,14 +73,15 @@ export default function Activation() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure()
   let getUid = async () => {
     try {
       let token = localStorage.getItem("myToken");
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-        setUid(1)
-    } catch (error) {}
+
+    } catch (error) { }
   };
   let validatePassword = (val) => {
     const regex =
@@ -144,7 +165,7 @@ export default function Activation() {
       if (response.data.data[0].birth_place) {
         setBirthPlace(response.data.data[0].birth_place);
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   useEffect(() => {
@@ -229,6 +250,74 @@ export default function Activation() {
         isClosable: true,
         position: "top",
       });
+    }
+  };
+
+
+
+  const getAddress = async () => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let response = await axios.get(`http://localhost:8000/address/get-address`, {
+        headers: {
+          token: token,
+        },
+      });
+      setAllAddress(response.data.data);
+      const main = response.data.data.filter((e) => e.main_address === true);
+      if (!main) {
+        setMainAddress("");
+      } else {
+        setMainAddress(main[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const splitText = (text) => {
+    if (text) {
+      return text.split(".")[1];
+    } else {
+      return "";
+    }
+  };
+
+  const defaultAddress = async (id) => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let data = await axios.patch(
+        `http://localhost:8000/address/main-address/${id}`,
+        {},
+        {
+          headers: {
+            token: token,
+          },
+        }
+      );
+      setRakir({ ...rakir, main_address: true });
+      toast.success("Main Address Changed");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      Navigate(0);
+    }
+  };
+
+  const deleteAddress = async (id) => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let response = await axios.delete(
+        `http://localhost:8000/cart/delete-address/${id}`,
+        {
+          headers: { token: token },
+        }
+      );
+      toast.success("address deleted");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      Navigate(0);
     }
   };
 
@@ -417,8 +506,8 @@ export default function Activation() {
                       {genderValue == 1
                         ? "Male"
                         : genderValue == 2
-                        ? "Female"
-                        : "-"}
+                          ? "Female"
+                          : "-"}
                     </Text>
                   </>
                 )}
@@ -579,6 +668,11 @@ export default function Activation() {
             </Button>
           )}
           <VStack align={["flex-start", "left"]} w="full">
+
+
+
+
+
             <Text
               mb={["50pt"]}
               fontSize={18}
@@ -588,6 +682,102 @@ export default function Activation() {
             >
               Address
             </Text>
+            <>
+              <div className="flex items-center align-middle justify-between">
+                <div>
+                  <p>{mainAddress?.recipient_name}</p>
+                  <p>{mainAddress?.recipient_phone}</p>
+                  <p>{mainAddress?.street_address}</p>
+                  <p>
+                    {mainAddress?.subdistrict}, {splitText(mainAddress?.city)},{" "}
+                    {splitText(mainAddress?.province)}
+                  </p>
+                  <p>{mainAddress?.postal_code}</p>
+                </div>
+
+                <Button
+                  w="120px"
+                  h="34px"
+                  border="1px solid #5D5FEF"
+                  color="#5D5FEF"
+                  borderRadius="3px"
+                  className="font-ibmFontRegular"
+                  onClick={modalSwitch.onOpen}
+                  onClose={modalSwitch.onClose}
+                >
+                  Switch
+                </Button>
+              </div>
+              <Modal
+                isOpen={modalSwitch.isOpen}
+                onClose={modalSwitch.onClose}
+                isCentered
+                motionPreset="slideInBottom"
+                className="z-50"
+                popup={true}
+              >
+                <ModalOverlay
+                  bg="blackAlpha.200"
+                  backdropFilter="blur(10px) hue-rotate(90deg)"
+                />
+                <ModalContent
+                  alignItems="center"
+                  overflowY="scroll"
+                  maxHeight="400px"
+                >
+                  <ModalCloseButton />
+                  {allAddress?.map((v, i) => (
+                    <div
+                      className="flex items-center align-middle justify-between p-10 flex-row"
+                      style={{ width: "100%" }}
+                      key={i}
+                    >
+                      <div>
+                        <p>{v?.recipient_name}</p>
+                        <p>{v?.recipient_phone}</p>
+                        <p>{v?.street_address}</p>
+                        <p>
+                          {v?.subdistrict}, {splitText(v?.city)},{" "}
+                          {splitText(v?.province)}
+                        </p>
+                        <p>{mainAddress?.postal_code}</p>
+                      </div>
+
+                      <Button
+                        w="120px"
+                        h="34px"
+                        border="1px solid #5D5FEF"
+                        color="#5D5FEF"
+                        borderRadius="3px"
+                        className="font-ibmFontRegular"
+                        onClick={() => {
+                          defaultAddress(v?.id);
+                          modalSwitch.onClose();
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        w="120px"
+                        h="34px"
+                        border="1px solid #5D5FEF"
+                        color="#5D5FEF"
+                        borderRadius="3px"
+                        className="font-ibmFontRegular"
+                        onClick={() => {
+                          deleteAddress(v?.id);
+                          modalSwitch.onClose();
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  ))}
+                </ModalContent>
+              </Modal>
+            </>
+
+            <Address />
           </VStack>
         </VStack>
       </Box>
