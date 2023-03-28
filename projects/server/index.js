@@ -27,9 +27,11 @@ app.use(express.static('public'));
 const { userRouter } = require("./router");
 const { productRouter } = require('./router')
 const { cartRouter } = require('./router')
+const { adminRouter } = require('./router')
 app.use("/user", userRouter);
 app.use('/product', productRouter)
 app.use('/cart', cartRouter)
+app.use('/admin', adminRouter)
 
 // app.get("/api", (req, res) => {
 //   res.send(`Hello, this is my API`);

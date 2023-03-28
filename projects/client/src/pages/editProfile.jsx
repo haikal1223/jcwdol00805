@@ -24,7 +24,7 @@ import {
 } from "@chakra-ui/react";
 import "../App.css";
 
-export default function Activation() {
+export default function EditProfile() {
   const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
   const [show, setShow] = useState(false);
@@ -34,7 +34,7 @@ export default function Activation() {
   const handleClickChangePassword = () =>
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
-  const [uid,setUid] = useState(0)
+  const [uid,setUid] = useState('e867cba8-dcd7-4fd2-8dcf-34316567b8c7')
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -59,7 +59,7 @@ export default function Activation() {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-        setUid(1)
+        setUid('e867cba8-dcd7-4fd2-8dcf-34316567b8c7')
     } catch (error) {}
   };
   let validatePassword = (val) => {
@@ -120,7 +120,7 @@ export default function Activation() {
         setProfilePicture(
           `http://localhost:8000/images/${profilePictureSplit}`
         );
-        console.log(profilePicture);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);
