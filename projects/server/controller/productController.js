@@ -32,7 +32,7 @@ module.exports = {
 
       // run query
       let products = await sequelize.query(
-        `SELECT * FROM product ORDER BY id ASC`
+        `SELECT * FROM product ORDER BY RAND()`
       );
 
       // response
@@ -123,12 +123,6 @@ module.exports = {
           data: findProductStock,
         });
 
-      // response
-      // res.status(201).send({
-      //   isError: false,
-      //   message: "Product list returned",
-      //   data: findProductStock,
-      // });
     } catch (error) {
       res.status(404).send({
         isError: true,
