@@ -35,8 +35,8 @@ export default function AdminLogin() {
     return (
         <Tag>
 
-            < Box w={['full', 'md']} p={[8, 20]} mt={[20, '1vh']} mx='auto'>
-                <VStack spacing={4} align='flex-start' w='full'>
+            < Box w={['full', 'md']} p={[8, 10]} mt={[20, '1vh']} mx='auto'>
+                <VStack spacing={6} align='flex-start' w='full'>
                     <HStack spacing={1} align={['flex-start', 'left']} w='full'>
                         <Heading>
                             <Text className='font-ibmReg'>
@@ -46,13 +46,13 @@ export default function AdminLogin() {
                         <ModalCloseButton />
                     </HStack>
                     <FormControl>
-                        <FormLabel><Text className='font-ibmReg'>E-mail</Text></FormLabel>
-                        <Input ref={email} rounded='lg' variant='filled' placeholder='Your Email' />
+                        <FormLabel><Text className='font-ibmMed'>Email</Text></FormLabel>
+                        <Input ref={email} variant='flushed' placeholder='Your email' />
                     </FormControl>
                     <FormControl>
-                        <FormLabel><Text className='font-ibmReg'>Password</Text></FormLabel>
+                        <FormLabel><Text className='font-ibmMed'>Password</Text></FormLabel>
                         <InputGroup>
-                            <Input ref={password} rounded='lg' variant='filled' type={show ? 'text' : 'password'} placeholder='Password' />
+                            <Input ref={password} variant='flushed' type={show ? 'text' : 'password'} placeholder='Password' />
                             <InputRightElement width='4.5rem'>
                                 <Button h='1.75rem' size='sm' onClick={handleClick}>
                                     {show ? <Icon as={ViewIcon} /> : <Icon as={ViewOffIcon} />}
@@ -61,7 +61,7 @@ export default function AdminLogin() {
                         </InputGroup>
                     </FormControl>
                     
-                    <Button rounded='lg' w={['30vh']} alignSelf='center' backgroundColor='#5D5FEF' color='white' className='font-ibmReg' onClick={login} >Login</Button>
+                    <Button rounded='lg' w={['120px']} alignSelf='center' backgroundColor='#5D5FEF' color='white' className='font-ibmReg' onClick={login} >Login</Button>
                     
                 </VStack>
             </Box >

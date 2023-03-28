@@ -1,3 +1,4 @@
+const { sequelize } = require("../sequelize/models");
 // Import Models
 const db = require("../sequelize/models/index");
 
@@ -79,7 +80,11 @@ module.exports = {
           }
     
           const validateTokenResult = validateToken(token);
-          validateTokenResult;
+          return res.status(200).send({
+            isError: false,
+            message: 'Token is found',
+            data: validateTokenResult
+          })
 
         } catch (error) {
           res.status(401).send({
@@ -90,20 +95,28 @@ module.exports = {
         }
     },
 
-    fetchRole : async(req, res) => {
+    fetchWarehouse : async(req, res) => {
         try {
+            // get value
+            let { uid } = req.query
+
             // fetch wh_id
-
-
-
-            // conditional if role === Admin
-
+            let get_whid = await sequelize.query(
+                `SELECT CASE 
+                WHEN a.role='admin' THEN 0
+                WHEN a.role='wh_admin' THEN warehouse_id
+                END AS wh_id
+                FROM wh_admin 
+                JOIN users a
+                ON a.uid = wh_admin.user_uid
+                WHERE user_uid='${uid}'`
+            )
 
             // send response
             res.status(200).send({
                 isError: false,
                 message: 'wh_id admin fetched',
-                data: null
+                data: get_whid
             })
 
         } catch (error) {

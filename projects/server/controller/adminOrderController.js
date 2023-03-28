@@ -36,9 +36,11 @@ module.exports = {
 
             // run query
             let orders = await sequelize.query(
-                `SELECT a.*, b.status 
+                `SELECT a.*, b.status , c.name as wh_name , d.email as user_email
                 FROM db_warehouse.order a 
                 LEFT JOIN order_status b ON a.order_status_id=b.id
+                LEFT JOIN warehouse c ON a.warehouse_id = c.id
+                LEFT JOIN users d ON a.user_uid = d.uid
                 ${whereClause} ORDER BY id DESC`
             )
 
