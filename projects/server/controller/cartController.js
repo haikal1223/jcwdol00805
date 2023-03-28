@@ -107,6 +107,7 @@ module.exports = {
       });
     } catch (error) {}
   },
+
   addAddress: async (req, res) => {
     const t = await sequelize.transaction();
     const { uid } = req.uid;
@@ -312,5 +313,42 @@ module.exports = {
         data: error,
       });
     }
+
+
+  delCart: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let deleteCart = await db.cart.destroy({
+        where: {
+          id,
+        },
+      });
+      res.status(200).send({
+        isError: false,
+        message: "The product is delete",
+        data: null,
+      });
+    } catch (error) {}
+  },
+
+  updateNumberProduct: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let { quantity } = req.body;
+      let updateCart = await db.cart.update(
+        {
+          quantity,
+        },
+        {
+          where: { id },
+        }
+      );
+      res.status(200).send({
+        isError: false,
+        message: "Update cart success",
+        data: null,
+      });
+    } catch (error) {}
+
   },
 };
