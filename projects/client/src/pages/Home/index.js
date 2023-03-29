@@ -72,7 +72,6 @@ export default function Home(props) {
         })
         
     }
-
     const searchButtonHandler = () => {
         const filterResult = products.filter((val) =>{
             return val.name.toLowerCase().includes(filter.searchProductName.toLowerCase())

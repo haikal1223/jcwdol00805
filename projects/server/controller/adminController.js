@@ -103,7 +103,7 @@ module.exports = {
             // fetch wh_id
             let get_whid = await sequelize.query(
                 `SELECT CASE 
-                WHEN a.role='admin' THEN 0
+                WHEN a.role='admin' THEN 'all'
                 WHEN a.role='wh_admin' THEN warehouse_id
                 END AS wh_id
                 FROM wh_admin 
