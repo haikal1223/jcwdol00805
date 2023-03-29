@@ -1,4 +1,4 @@
-import { Box, IconButton, Card, CardHeader, CardFooter, CardBody, Badge, Heading, Text, Button, Image, Stack, Divider, ButtonGroup, Spacer, HStack, useDisclosure } from '@chakra-ui/react';
+import { Box, IconButton, Card, CardHeader, CardFooter, CardBody, Badge, Heading, Text, Button, Image, Stack, Divider, ButtonGroup, Spacer, HStack } from '@chakra-ui/react';
 import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
 import React, { useState } from 'react';
 
@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 const AddressCard = (props) => {
 
 
-    const { isOpen, onOpen, onClose } = useDisclosure()
+
 
 
     const splitText = (text) => {
@@ -43,17 +43,16 @@ const AddressCard = (props) => {
 
                         <ButtonGroup spacing='2' justifyContent='flex-end' ml='auto'>
                             <Stack>
-                                {!props.addressData.main_address ? <Button color={'#FCFCFD'} bg={"#5D5FEF"}>Set Main</Button> : <></>}
+                                {/* {!props.addressData.main_address ? <Button color={'#FCFCFD'} bg={"#5D5FEF"}>Set Main</Button> : <></>}
 
                                 <Button
                                     variant='outline'
                                     color={'#5D5FEF'}
                                     bg={"#FCFCFD"}
-                                    onClick={onOpen}
+                                    onClick={() => props.handleEdit(props.addressData)}
                                 >
                                     Edit
-                                </Button>
-
+                                </Button> */}
                                 <Button variant='ghost' color={'#FCFCFD'} bg={"#FF3838"} onClick={props.handleDelete}>
                                     delete
                                 </Button>
