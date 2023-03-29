@@ -1,4 +1,5 @@
 const { sequelize } = require("../sequelize/models");
+
 // Import Models
 const db = require("../sequelize/models/index");
 

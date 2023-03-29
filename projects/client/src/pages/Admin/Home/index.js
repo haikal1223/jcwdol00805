@@ -24,7 +24,7 @@ const AdminHome = () => {
                   <div><span className='text-purple'>/warehouse</span> - Manage warehouse location</div>
                   <div><span className='text-purple'>/order</span> - Manage order status</div>
                   <div><span className='text-purple'>/mutation</span> - Manage stock mutation between warehouses</div>
-                  <div><span className='text-purple'>/dashboard</span> - Oversee stock condition</div>
+                  <div><span className='text-purple'>/dashboard</span> - Oversee sales & stock condition</div>
                 </div>
               </div>
 

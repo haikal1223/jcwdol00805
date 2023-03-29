@@ -66,7 +66,15 @@ export default function AdminLogin() {
                 </VStack>
             </Box >
 
-            <Toaster />
+
+            <Toaster
+                toastOptions={{
+                style: {
+                height: "50px",
+                width: "175px",
+                },
+                }}
+            />
 
         </Tag>
     )

@@ -21,6 +21,7 @@ import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
 import AdminOrder from "./pages/Admin/Order";
 
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [adminLoggedIn, setAdminLoggedIn] = useState(false)
@@ -56,6 +57,7 @@ function App() {
     keepLoggedIn()
     keepAdminLoggedIn()
   }, []);
+
 
   const RequireAuth = ({ children }) => {
     const userIsLogged = localStorage.getItem("myToken");
@@ -153,7 +155,7 @@ function App() {
               </AuthAdmin>
             }
           />    
-
+          
         </Routes>
         {window.location.pathname.includes('/admin')?<></>:<Footer />}
         <Toaster />
