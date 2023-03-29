@@ -6,7 +6,7 @@ const axios = require("axios");
 module.exports = {
     addAddress: async (req, res) => {
         const t = await sequelize.transaction();
-        const { uid } = req.uid;
+        // const { uid } = req.query;
         const {
             recipient_name,
             recipient_phone,
@@ -16,6 +16,7 @@ module.exports = {
             street_address,
             main_address,
             postal_code,
+            uid
         } = req.body;
 
         try {
@@ -60,7 +61,7 @@ module.exports = {
     },
 
     getAddress: async (req, res) => {
-        const { uid } = req.uid;
+        const { uid } = req.query;
         try {
             const { id } = await db.user.findOne({
                 where: { uid: uid },
@@ -84,6 +85,28 @@ module.exports = {
                 data: error,
             });
         }
+    },
+
+    editAddress: async (req, res) => {
+        const { id } = req.body;
+        try {
+            const address = await db.user_address.findOne({
+                where: { id },
+
+            });
+
+
+            req.status(201).send({
+                isError: false,
+                message: "",
+                data: address,
+
+
+            })
+        } catch (error) {
+
+        }
+
     },
 
     defaultAddress: async (req, res) => {
@@ -120,7 +143,7 @@ module.exports = {
         try {
             const { data } = await axios.get(
                 "https://api.rajaongkir.com/starter/province",
-                { headers: { key: "1c7c205702353d15cd449b7b8e07d22a" } }
+                { headers: { key: "c0cfdbc638201b0930f5a50e41a8f211" } }
             );
             res.status(200).send({
                 isError: false,
@@ -148,7 +171,7 @@ module.exports = {
             let response = await axios.get(
                 `https://api.rajaongkir.com/starter/city?province=${province_id}`,
                 {
-                    headers: { key: "1c7c205702353d15cd449b7b8e07d22a" },
+                    headers: { key: "c0cfdbc638201b0930f5a50e41a8f211" },
                 }
             );
 

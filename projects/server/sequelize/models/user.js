@@ -12,13 +12,16 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.cart, {
         foreignKey: 'user_uid'
       })
+      this.hasMany(models.user_address, {
+        foreignKey: "user_id"
+      })
+
     }
   }
   user.init(
     {
       uid: {
-        allowNull: false,
-        primaryKey: true,
+
         type: DataTypes.UUID,
         defaultValue: UUIDV4,
       },

@@ -31,6 +31,8 @@ export default function Address(props) {
     const [rakir, setRakir] = useState({
         main_address: false,
     });
+
+    const [uid, setUid] = useState('')
     const [address, setAddress] = useState("");
     const [province, setProvince] = useState([]);
     const [city, setCity] = useState([]);
@@ -59,7 +61,7 @@ export default function Address(props) {
         let token = localStorage.getItem("myToken");
         try {
             let postAddress = await axios.post(
-                `http://localhost:8000/address/new-address`,
+                `http://localhost:8000/address/addAddress`,
 
                 {
                     main_address: rakir.main_address,
@@ -70,11 +72,11 @@ export default function Address(props) {
                     recipient_name: data.recipient_name,
                     recipient_phone: data.recipient_phone,
                     postal_code: data.postal_code,
+                    uid,
                 },
-                {
-                    headers: { token: token },
-                }
+
             );
+
             setAddress(postAddress);
             toast.success("Address Added");
         } catch (error) {
@@ -121,22 +123,34 @@ export default function Address(props) {
     const getAddress = async () => {
         let token = localStorage.getItem("myToken");
         try {
-            let response = await axios.get(`http://localhost:8000/address/get-address`, {
-                headers: {
-                    token: token,
-                },
-            });
-            setAllAddress(response.data.data);
-            const main = response.data.data.filter((e) => e.main_address === true);
-            if (!main) {
-                setMainAddress("");
-            } else {
-                setMainAddress(main[0]);
+            let token = localStorage.getItem("myToken");
+            let response = await axios.get(
+                `http://localhost:8000/user/verifytoken?token=${token}`
+            );
+            setUid(response.data.data.uid);
+            if (uid) {
+                let getAddress = await axios.get(
+                    `http://localhost:8000/address/getAddress?uid=${uid}`
+                );
+                setAllAddress(getAddress.data.data);
+                const main = getAddress.data.data.filter(
+                    (e) => e.main_address === true
+                );
+                console.log(main[0])
+                if (!main) {
+                    setMainAddress("");
+                } else {
+                    setMainAddress(main[0]);
+                }
             }
         } catch (error) {
             console.log(error);
         }
     };
+
+    useEffect(() => {
+        getAddress();
+    }, [uid]);
 
     const splitText = (text) => {
         if (text) {
@@ -150,7 +164,7 @@ export default function Address(props) {
         let token = localStorage.getItem("myToken");
         try {
             let data = await axios.patch(
-                `http://localhost:8000/address/main-address/${id}`,
+                `http://localhost:8000/address/defaultAddress/${id}`,
                 {},
                 {
                     headers: {
@@ -167,22 +181,6 @@ export default function Address(props) {
         }
     };
 
-    const deleteAddress = async (id) => {
-        let token = localStorage.getItem("myToken");
-        try {
-            let response = await axios.delete(
-                `http://localhost:8000/cart/delete-address/${id}`,
-                {
-                    headers: { token: token },
-                }
-            );
-            toast.success("address deleted");
-        } catch (error) {
-            console.log(error);
-        } finally {
-            Navigate(0);
-        }
-    };
 
     useEffect(() => {
         rakirCity();

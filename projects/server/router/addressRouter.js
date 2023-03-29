@@ -6,8 +6,8 @@ const { addressController } = require('../controller')
 
 Router.post('/addAddress', addressController.addAddress)
 Router.get('/getAddress', addressController.getAddress)
-Router.patch('/ defaultAddress', addressController.defaultAddress)
-Router.delete('/deleteAddress', addressController.deleteAddress)
+Router.patch('/defaultAddress', addressController.defaultAddress)
+Router.delete('/deleteAddress/:id', addressController.deleteAddress)
 
 
 Router.get('/getProvince', addressController.getProvince)

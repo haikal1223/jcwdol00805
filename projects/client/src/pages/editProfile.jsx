@@ -30,6 +30,7 @@ import {
 import "../App.css";
 import { useNavigate } from "react-router-dom";
 import Address from "../components/address";
+import AddressCard from "../components/addressCard";
 
 export default function EditProfile() {
   const Navigate = useNavigate();
@@ -38,6 +39,10 @@ export default function EditProfile() {
   });
 
   const [allAddress, setAllAddress] = useState([]);
+
+
+
+
 
   const modalAddress = useDisclosure();
   const modalSwitch = useDisclosure();
@@ -54,7 +59,7 @@ export default function EditProfile() {
   const handleClickChangePassword = () =>
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
-  const [uid, setUid] = useState('3dcf1aa9-fed9-4734-bcdd-bfd90bdaea37')
+  const [uid, setUid] = useState('')
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -120,7 +125,7 @@ export default function EditProfile() {
   const handleEditProfile = () => {
     if (editMode) {
       setEditMode(!editMode);
-      axios.patch(`http://localhost:8000/user/updateprofile/${uid}`, {
+      axios.patch(`http://localhost:8000/address/getAddress/${uid}`, {
         first_name: firstName,
         last_name: lastName,
         gender: genderValue,
@@ -131,6 +136,7 @@ export default function EditProfile() {
       setEditMode(!editMode);
     }
   };
+
 
   let getImage = () => {
     axios
@@ -168,11 +174,9 @@ export default function EditProfile() {
     } catch (error) { }
   };
 
-  useEffect(() => {
-    getImage();
-    getData();
-    getUid();
-  }, []);
+
+
+
 
   let handleImage = (e) => {
     if (e.target.files[0]) {
@@ -258,22 +262,41 @@ export default function EditProfile() {
   const getAddress = async () => {
     let token = localStorage.getItem("myToken");
     try {
-      let response = await axios.get(`http://localhost:8000/address/get-address`, {
-        headers: {
-          token: token,
-        },
-      });
-      setAllAddress(response.data.data);
-      const main = response.data.data.filter((e) => e.main_address === true);
-      if (!main) {
-        setMainAddress("");
-      } else {
-        setMainAddress(main[0]);
+      let token = localStorage.getItem("myToken");
+      let response = await axios.get(
+        `http://localhost:8000/user/verifytoken?token=${token}`
+      );
+      setUid(response.data.data.uid);
+      if (uid) {
+        let getAddress = await axios.get(
+          `http://localhost:8000/address/getAddress?uid=${uid}`
+        );
+        setAllAddress(getAddress.data.data);
+        const main = getAddress.data.data.filter(
+          (e) => e.main_address === true
+        );
+        console.log(main[0])
+        if (!main) {
+          setMainAddress("");
+        } else {
+          setMainAddress(main[0]);
+        }
       }
     } catch (error) {
       console.log(error);
     }
   };
+  useEffect(() => {
+    getAddress();
+  }, []);
+  useEffect(() => {
+    getAddress();
+    getImage();
+    getData();
+  }, [uid]);
+
+
+
 
   const splitText = (text) => {
     if (text) {
@@ -308,10 +331,8 @@ export default function EditProfile() {
     let token = localStorage.getItem("myToken");
     try {
       let response = await axios.delete(
-        `http://localhost:8000/cart/delete-address/${id}`,
-        {
-          headers: { token: token },
-        }
+        `http://localhost:8000/address/deleteAddress/${id}`,
+
       );
       toast.success("address deleted");
     } catch (error) {
@@ -320,6 +341,17 @@ export default function EditProfile() {
       Navigate(0);
     }
   };
+
+  const renderAddress = () => {
+
+    return allAddress.map((val, idx) => {
+      return (
+        <AddressCard addressData={val} addressIdx={idx} handleDelete={(e) => deleteAddress(val.id)} />
+      )
+    }
+    )
+  }
+
 
   return (
     <>
@@ -682,99 +714,9 @@ export default function EditProfile() {
             >
               Address
             </Text>
+            {renderAddress()}
+
             <>
-              <div className="flex items-center align-middle justify-between">
-                <div>
-                  <p>{mainAddress?.recipient_name}</p>
-                  <p>{mainAddress?.recipient_phone}</p>
-                  <p>{mainAddress?.street_address}</p>
-                  <p>
-                    {mainAddress?.subdistrict}, {splitText(mainAddress?.city)},{" "}
-                    {splitText(mainAddress?.province)}
-                  </p>
-                  <p>{mainAddress?.postal_code}</p>
-                </div>
-
-                <Button
-                  w="120px"
-                  h="34px"
-                  border="1px solid #5D5FEF"
-                  color="#5D5FEF"
-                  borderRadius="3px"
-                  className="font-ibmFontRegular"
-                  onClick={modalSwitch.onOpen}
-                  onClose={modalSwitch.onClose}
-                >
-                  Switch
-                </Button>
-              </div>
-              <Modal
-                isOpen={modalSwitch.isOpen}
-                onClose={modalSwitch.onClose}
-                isCentered
-                motionPreset="slideInBottom"
-                className="z-50"
-                popup={true}
-              >
-                <ModalOverlay
-                  bg="blackAlpha.200"
-                  backdropFilter="blur(10px) hue-rotate(90deg)"
-                />
-                <ModalContent
-                  alignItems="center"
-                  overflowY="scroll"
-                  maxHeight="400px"
-                >
-                  <ModalCloseButton />
-                  {allAddress?.map((v, i) => (
-                    <div
-                      className="flex items-center align-middle justify-between p-10 flex-row"
-                      style={{ width: "100%" }}
-                      key={i}
-                    >
-                      <div>
-                        <p>{v?.recipient_name}</p>
-                        <p>{v?.recipient_phone}</p>
-                        <p>{v?.street_address}</p>
-                        <p>
-                          {v?.subdistrict}, {splitText(v?.city)},{" "}
-                          {splitText(v?.province)}
-                        </p>
-                        <p>{mainAddress?.postal_code}</p>
-                      </div>
-
-                      <Button
-                        w="120px"
-                        h="34px"
-                        border="1px solid #5D5FEF"
-                        color="#5D5FEF"
-                        borderRadius="3px"
-                        className="font-ibmFontRegular"
-                        onClick={() => {
-                          defaultAddress(v?.id);
-                          modalSwitch.onClose();
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        w="120px"
-                        h="34px"
-                        border="1px solid #5D5FEF"
-                        color="#5D5FEF"
-                        borderRadius="3px"
-                        className="font-ibmFontRegular"
-                        onClick={() => {
-                          deleteAddress(v?.id);
-                          modalSwitch.onClose();
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  ))}
-                </ModalContent>
-              </Modal>
             </>
 
             <Address />
