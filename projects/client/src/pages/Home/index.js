@@ -113,8 +113,9 @@ export default function Home(props) {
   };
 
   const prevPageHandler = () => {
-    if (page > 1) {
-      setPage(page - 1);
+        if (page > 1) {
+            setPage(page - 1);
+        }
     }
 
   // search & filter
