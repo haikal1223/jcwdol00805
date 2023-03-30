@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'
-import { Box, Card, Button, ButtonGroup, Image, IconButton } from '@chakra-ui/react'
+import { Box, Card, Button, ButtonGroup, Image, IconButton, Text } from '@chakra-ui/react'
 
 import axios from "axios"
 import { AddIcon, MinusIcon } from '@chakra-ui/icons';
@@ -39,13 +39,18 @@ const Product = () => {
   const { id } = useParams()
   return (
     <div>
-      <Card maxW='sm'>
+      <Card w='full'>
         <Box borderWidth='1px' borderRadius='lg' overflow='hidden'>
 
           <Image h='200px' w='full' p='2'
             objectFit='contain' src={productData.image_url} />
 
-          {productData.name}
+          <Text align='center'>
+            {productData.name}
+          </Text>
+          <Text align='center'>
+            {productData.price}
+          </Text>
 
           <Box p='5'>
             <Box w='full' as='button' mt={10}>
@@ -58,7 +63,7 @@ const Product = () => {
                   variant='outline'
                   isDisabled={quantity === 1}
                 />
-                <Button w='full' bg='blue.600' color='white' _hover={{ color: 'blue.500', bg: "white", border: '1px solid skyblue' }} >ADD TO CART ({quantity})</Button>
+                <Button w='full' bg={"#5D5FEF"} color='white' _hover={{ color: 'blue.500', bg: "white", border: '1px solid skyblue' }} >ADD TO CART ({quantity})</Button>
                 <IconButton
                   aria-label='increase quantity'
                   icon={<AddIcon />}
