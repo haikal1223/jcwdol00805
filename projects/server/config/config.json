@@ -1,8 +1,8 @@
 {
   "development": {
     "username": "root",
-    "password": "Busthanul13",
-    "database": "db_warehouse",
+    "password": "ddd1234",
+    "database": "Busthanul13",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
