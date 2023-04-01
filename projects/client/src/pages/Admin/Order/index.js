@@ -3,26 +3,27 @@ import Sidebar from "../components/sidebar";
 import axios from "axios";
 import {TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight} from 'react-icons/tb'
 import { 
-    Box,
-    Button,
-    Flex,
-    IconButton,
-    Input,
-    InputGroup,
-    InputRightElement ,
-    Select,
-    Text,
-    Table,
-    Thead,
-    Tbody,
-    Tfoot,
-    Tr,
-    Th,
-    Td,
-    TableCaption,
-    TableContainer,
+    Box
+    , Button
+    , IconButton
+    , Input
+    , InputGroup
+    , InputRightElement
+    , Modal
+    , ModalOverlay
+    , ModalContent
+    , Select
+    , Text
+    , Table
+    , Thead
+    , Tbody
+    , Tr
+    , Td
+    , TableContainer
 } from "@chakra-ui/react";
 import { Search2Icon } from '@chakra-ui/icons'
+import {toast, Toaster} from 'react-hot-toast'
+import OrderDetail from "./components/orderDetail";
 
 const AdminOrder = () => {
     const [uid, setUid] = useState('')
@@ -33,10 +34,14 @@ const AdminOrder = () => {
         filterWarehouse: '' 
     })
     const [filteredOrder, setFilteredOrder] = useState([])
+    const [whList, setWhList] = useState([])
+    const [search, setSearch] = useState(false)
     const [page, setPage] = useState(1)
     const [maxPage, setMaxPage] = useState(0)
     const rowPerPage = 10
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [orderData, setOrderData] = useState({})
 
     const getUid = async () => {
         try {
@@ -64,25 +69,45 @@ const AdminOrder = () => {
     }
 
     const fetchOrder = async() => {
+        const offset = (page - 1) * rowPerPage
         if(whid) {
             try {
                 let response = await axios.get(
-                    `http://localhost:8000/admin-order/view/${whid}`
+                    `http://localhost:8000/admin-order/view/${whid}?id=${filter.searchOrderId}&wh=${filter.filterWarehouse}&offset=${offset}&row=${rowPerPage}`
                 )
-                setOrderList(response.data.data[0])
-                setFilteredOrder(response.data.data[0])
-                setMaxPage(Math.ceil(response.data.data[0].length / rowPerPage))
+                setOrderList(response.data.data.orders[0])
+                setFilteredOrder(response.data.data.orders[0])
+                setMaxPage(Math.ceil(parseInt(response.data.data.countOrders[0][0].num_order) / rowPerPage))
+                setWhList(response.data.data.wh_list[0])
+                if(response.data.data.orders[0].length == 0) {
+                    toast.error(
+                        'No order found. Try different query'
+                    )
+                }
             } catch (error) {
                 console.log(error.message)
             }
         }
     }
 
-    const renderOrder = () => {
-        const startIndex = (page - 1) * rowPerPage
-        const orderPerPage = filteredOrder.slice(startIndex, startIndex + rowPerPage)
+    // Modal Detail
+    const handleModalOpen = async (id) => {
+        try {
+            let response = await axios.get(`http://localhost:8000/admin-order/order-detail/${id}`)
+            setOrderData(response.data.data)
+        } catch (error) {
+            console.log(error.message)
+        }
+        setIsModalOpen(true);
+      };
+    
+      const handleModalClose = () => {
+        setOrderData({})
+        setIsModalOpen(false);
+      };
 
-        return orderPerPage.map((val, idx) => {
+    const renderOrder = () => {
+            return filteredOrder.map((val, idx) => {
             return (
                 <Tr key={idx} className='bg-white'>
                     <Td>{val.id}</Td>
@@ -94,8 +119,13 @@ const AdminOrder = () => {
                     <Td>{val.updatedAt.substr(0,10)}</Td>
                     <Td>{val.status}</Td>
                     <Td className="grid grid-cols-3 w-[250px] sticky right-0 z-50 bg-white shadow-[-10px_0px_30px_0px_#efefef]">
-                        <Button isDisabled={val.status!='Pending Confirmation'} _disabled={{color:'#D9D9D9'}} color={'#5D5FEF'} variant={'link'}>confirm</Button>
-                        <Button isDisabled={val.status!='Processed'} _disabled={{color:'#D9D9D9'}} color={'#4EE476'} variant={'link'}>ship</Button>
+                        <Button color={'#5D5FEF'} variant={'link'} onClick={() => handleModalOpen(val.id)}>view</Button>
+                        {
+                            val.status === 'Pending Payment' || val.status === 'Pending Confirmation'?
+                            <Button isDisabled={val.status!='Pending Confirmation'} _disabled={{color:'#D9D9D9'}} color={'#4EE476'} variant={'link'}>confirm</Button>
+                            :
+                            <Button isDisabled={val.status!='Processed'} _disabled={{color:'#D9D9D9'}} color={'#4EE476'} variant={'link'}>ship</Button>
+                        }
                         <Button color={'red'} variant={'link'}>cancel</Button>
                     </Td>
                 </Tr>
@@ -126,7 +156,7 @@ const AdminOrder = () => {
     }
 
     // search & filter
-    const whOptions = [...new Set(orderList.map(val => val.wh_name))]
+    const whOptions = [...new Set(whList.map(val => val.wh_name))]
     const searchInputHandler = (e) => {
         const name = e.target.name
         const value = e.target.value
@@ -136,17 +166,8 @@ const AdminOrder = () => {
         })
     }
     const searchButtonHandler = () => {
-        const filterResult = orderList.filter((val) =>{
-            if(filter.filterWarehouse == '') {
-                return String(val.id).includes(String(filter.searchOrderId)) && val.wh_name.includes(filter.filterWarehouse)
-            } else {
-                return String(val.id).includes(String(filter.searchOrderId)) && val.wh_name == filter.filterWarehouse
-            }
-        })
-
-        setFilteredOrder(filterResult)
         setPage(1)
-        setMaxPage(Math.ceil(filterResult.length / rowPerPage))
+        setSearch(!search)
     }
     
     useEffect(() => {
@@ -157,7 +178,7 @@ const AdminOrder = () => {
     },[uid])
     useEffect(() => {
         fetchOrder()
-    },[whid])
+    },[whid, page, search])
     
 
   return (
@@ -206,6 +227,12 @@ const AdminOrder = () => {
                         </Tbody>
                     </Table>
                 </TableContainer>
+                <Modal isOpen={isModalOpen} onClose={handleModalClose} scrollBehavior={'inside'} size={'xl'}>
+                    <ModalOverlay />
+                    <ModalContent>
+                        <OrderDetail orderDetail={orderData.order_detail} productDetail={orderData.product_detail}/>
+                    </ModalContent>
+                </Modal >
                 <div className='w-[100%] mt-5 flex justify-center items-center gap-5'>
                     <IconButton isDisabled={page === 1} onClick={firstPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbChevronsLeft color='white' boxsize={'16px'}/>}/>
                     <IconButton isDisabled={page === 1} onClick={prevPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbChevronLeft color='white' boxsize={'16px'}/>}/>
@@ -217,6 +244,7 @@ const AdminOrder = () => {
         
         </div>
       </div>
+      <Toaster/>
     </div>
   );
 };

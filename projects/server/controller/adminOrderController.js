@@ -28,13 +28,23 @@ module.exports = {
         try {
             // limit by warehouse id
             let { wh_id } = req.params
+            let { id, wh, offset, row } = req.query
 
             let whereClause
             if (wh_id === 'all') {
-                whereClause = ''
+                if (id != '') {
+                    whereClause = ` WHERE c.name LIKE '%${wh}%' AND a.id = ${parseInt(id)}`
+                } else {
+                    whereClause = ` WHERE c.name LIKE '%${wh}%'`
+                } 
             } else if (parseInt(wh_id) > 0) {
-                whereClause = ` WHERE warehouse_id = ${wh_id}`
+                if (id != '') {
+                    whereClause = ` WHERE warehouse_id = ${wh_id} AND a.id = ${parseInt(id)}`
+                } else {
+                    whereClause = ` WHERE warehouse_id = ${wh_id}`
+                } 
             }
+
 
             // run query
             let orders = await sequelize.query(
@@ -44,15 +54,81 @@ module.exports = {
                 LEFT JOIN warehouse c ON a.warehouse_id = c.id
                 LEFT JOIN users d ON a.user_uid = d.uid
                 LEFT JOIN order_detail e ON a.id = e.order_id
-                ${whereClause} GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13 ORDER BY id DESC`
+                ${whereClause} GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13 ORDER BY id DESC LIMIT ${row} OFFSET ${offset}`
+            )
+
+            let countOrders = await sequelize.query(
+                `SELECT count(DISTINCT a.id) as num_order
+                FROM db_warehouse.order a 
+                LEFT JOIN order_status b ON a.order_status_id=b.id
+                LEFT JOIN warehouse c ON a.warehouse_id = c.id
+                LEFT JOIN users d ON a.user_uid = d.uid
+                LEFT JOIN order_detail e ON a.id = e.order_id
+                ${whereClause}`
+            )
+
+            let wh_list = await sequelize.query(
+                `SELECT DISTINCT c.name AS wh_name
+                FROM db_warehouse.order a 
+                LEFT JOIN order_status b ON a.order_status_id=b.id
+                LEFT JOIN warehouse c ON a.warehouse_id = c.id
+                LEFT JOIN users d ON a.user_uid = d.uid
+                LEFT JOIN order_detail e ON a.id = e.order_id
+                ${wh_id === 'all'?'':`WHERE warehouse_id = ${wh_id}`}`
             )
 
             // response
             res.status(201).send({
                 isError: false,
                 message: 'Order list returned',
-                data: orders
+                data: {
+                    orders,
+                    countOrders,
+                    wh_list
+                }
             })
+
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: error.message,
+                data: null
+            })
+        }
+    },
+
+    orderDetail: async(req, res) => {
+        try {
+            // fetch order id
+            let { id } = req.params
+            // run query
+            const order_detail = await sequelize.query(
+                `SELECT a.*, b.status , c.name as wh_name , d.email as user_email
+                FROM db_warehouse.order a 
+                LEFT JOIN order_status b ON a.order_status_id=b.id
+                LEFT JOIN warehouse c ON a.warehouse_id = c.id
+                LEFT JOIN users d ON a.user_uid = d.uid
+                WHERE a.id=${id}`
+            )
+
+            const product_detail = await sequelize.query(
+                `SELECT a.*, b.name
+                FROM db_warehouse.order_detail a
+                LEFT JOIN product b
+                ON a.product_id = b.id
+                WHERE order_id=${id}`
+            )
+
+            //response
+            res.status(201).send({
+                isError: false,
+                message: 'order detail fetched',
+                data: {
+                    order_detail,
+                    product_detail
+                }
+            })
+
 
         } catch (error) {
             res.status(404).send({
