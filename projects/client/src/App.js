@@ -19,6 +19,9 @@ import EditProfile from "./pages/editProfile";
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
+import AdminOrder from "./pages/Admin/Order";
+import AdminProduct from "./pages/Admin/Product/Home";
+import AdminProductDetail from "./pages/Admin/Product/Detail";
 
 
 function App() {
@@ -100,9 +103,8 @@ function App() {
     return (
         <>
             {localStorage.removeItem('adminToken')}
-            {navigate('/admin')}
             {setTimeout(() => {
-              window.location.reload()
+              window.location.href ='/admin'
             }, 200)}
             {toast.success('You have been logged out', {
                 id: 'logout',
@@ -154,6 +156,30 @@ function App() {
                 </AuthAdmin>
               }
             />
+            <Route 
+              path='/admin/order' 
+              element={
+                <AuthAdmin>
+                  <AdminOrder />
+                </AuthAdmin>
+              }
+            />
+            <Route 
+              path='/admin/product' 
+              element={
+                <AuthAdmin>
+                  <AdminProduct />
+                </AuthAdmin>
+              }
+            />  
+            <Route 
+              path='/admin/product/1' 
+              element={
+                <AuthAdmin>
+                  <AdminProductDetail />
+                </AuthAdmin>
+              }
+            />      
             
         </Routes>
         {window.location.pathname.includes('/admin')?<></>:<Footer />}
