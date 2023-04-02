@@ -18,8 +18,19 @@ export default function ProductCard(props) {
                             <div className="font-ibmMed text-[12px] text-purple">Rp</div>
                             <div className="font-ibmMed text-[18px]">{props.productData.price.toLocaleString()}</div>
                         </div>
-                        <Button h={'24px'} bg='#5D5FEF' color='white' onClick={props.func} zIndex={5}>
-                            <div className="text-[12px]">Add to cart</div> 
+
+                        <Button 
+                            isDisabled={props.productData.total_stock === 0} 
+                            _disabled={{bg:'#D9D9D9', color:'#9AA0B4', border:'0px', _hover:{bg:'#D9D9D9',color:'#9AA0B4', border:'0px'}}} 
+                            _hover={{bg:'white', color:'#5D5FEF', border:'1px', borderColor:'#5D5FEF'}}
+                            h={'24px'} 
+                            bg='#5D5FEF' 
+                            color='white' 
+                            onClick={props.func} 
+                            zIndex={5} >
+                            <div className="text-[12px]">
+                                {props.productData.total_stock === 0? 'Out of stock' : 'Add to cart'}
+                            </div> 
                         </Button>
                     </div>
                 </div>

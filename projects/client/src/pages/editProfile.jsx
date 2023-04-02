@@ -50,6 +50,10 @@ export default function EditProfile() {
 
 
 
+<<<<<<< GP5-8-Fix
+=======
+export default function EditProfile() {
+>>>>>>> main
   const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
   const [show, setShow] = useState(false);
