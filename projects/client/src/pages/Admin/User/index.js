@@ -27,11 +27,18 @@ import {
   InputRightElement,
   Icon,
   Select,
+  IconButton,
 } from "@chakra-ui/react";
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/sidebar";
 import axios from "axios";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import {
+  TbChevronLeft,
+  TbChevronRight,
+  TbChevronsLeft,
+  TbChevronsRight,
+} from "react-icons/tb";
 import toast, { Toaster } from "react-hot-toast";
 
 const AdminUser = () => {
@@ -46,6 +53,11 @@ const AdminUser = () => {
   const [editFirstName, setEditFirstName] = useState("");
   const [editLastName, setEditLastName] = useState("");
   const [editRole, setEditRole] = useState("");
+  const [pageAdmin, setPageAdmin] = useState(1);
+  const [maxPageAdmin, setMaxPageAdmin] = useState(0);
+  const [pageUser, setPageUser] = useState(1);
+  const [maxPageUser, setMaxPageUser] = useState(0);
+  const rowPerPage = 5;
 
   const {
     isOpen: isOpenAdd,
@@ -72,28 +84,49 @@ const AdminUser = () => {
   let changeDataMode = () => {
     setAdminDataMode(!adminDataMode);
     setUserDataMode(!userDataMode);
+    setPageAdmin(1);
+    setMaxPageAdmin(0);
   };
 
   let getAdminData = async () => {
+    const offset = (pageAdmin - 1) * rowPerPage;
     try {
       let getAdminData = await axios.get(
-        "http://localhost:8000/admin/adminData"
+        `http://localhost:8000/admin/adminData?offset=${offset}&row=${rowPerPage}`
       );
-      setAdminData(getAdminData.data.data);
-    } catch (error) {}
+      setAdminData(getAdminData.data.data.findAdmin);
+      setMaxPageAdmin(
+        Math.ceil(getAdminData.data.data.findAdminAll.length / rowPerPage)
+      );
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   let getUserData = async () => {
+    const offset = (pageUser - 1) * rowPerPage;
     try {
-      let getUserData = await axios.get("http://localhost:8000/admin/userData");
-      setUserData(getUserData.data.data);
-    } catch (error) {}
+      let getUserData = await axios.get(
+        `http://localhost:8000/admin/userData?offset=${offset}&row=${rowPerPage}`
+      );
+      setUserData(getUserData.data.data.findUser);
+      setMaxPageUser(
+        Math.ceil(getUserData.data.data.findUserAll.length / rowPerPage)
+      );
+    } catch (error) {
+      console.log(error.essage);
+    }
   };
 
   useEffect(() => {
     getAdminData();
+    renderPageButton();
+  }, [pageAdmin, maxPageAdmin]);
+
+  useEffect(() => {
     getUserData();
-  }, []);
+    renderPageButton();
+  }, [pageUser, maxPageUser]);
 
   let handleEdit = (val) => {
     setEditEmail(val.email);
@@ -123,11 +156,13 @@ const AdminUser = () => {
       return (
         <>
           <Tr>
+            <Td>{val.id}</Td>
             <Td>{val.email}</Td>
             <Td>{val.first_name}</Td>
             <Td>{val.last_name}</Td>
-            <Td>{val.role}</Td>
-            <Td>{val.created_at}</Td>
+            <Td>{val.role === "wh_admin" ? "Warehouse Admin" : "Admin"}</Td>
+            <Td></Td>
+            <Td>{val.createdAt}</Td>
             <Td>
               <Button
                 colorScheme="green"
@@ -135,7 +170,7 @@ const AdminUser = () => {
                 onClick={() => handleEdit(val)}
               >
                 Edit Profile
-              </Button>{" "}
+              </Button>
               <Button
                 colorScheme="red"
                 size="md"
@@ -156,6 +191,7 @@ const AdminUser = () => {
       return (
         <>
           <Tr>
+            <Td>{val.id}</Td>
             <Td>{val.email}</Td>
             <Td>{val.first_name}</Td>
             <Td>{val.last_name}</Td>
@@ -166,11 +202,116 @@ const AdminUser = () => {
             <Td>{val.birth_date ? val.birth_date : "-"}</Td>
             <Td>{val.birth_place ? val.birth_place : "-"}</Td>
             <Td>{val.is_verified === 1 ? "Verified" : "Not Verified"}</Td>
-            <Td>{val.created_at}</Td>
+            <Td>{val.createdAt}</Td>
           </Tr>
         </>
       );
     });
+  };
+
+  const nextPageHandler = () => {
+    if (pageAdmin < maxPageAdmin) {
+      setPageAdmin(pageAdmin + 1);
+    }
+  };
+  const prevPageHandler = () => {
+    if (pageAdmin > 1) {
+      setPageAdmin(pageAdmin - 1);
+    }
+  };
+  const firstPageHandler = () => {
+    if (pageAdmin > 1) {
+      setPageAdmin(1);
+    }
+  };
+  const maxPageHandler = () => {
+    if (pageAdmin < maxPageAdmin) {
+      setPageAdmin(maxPageAdmin);
+    }
+  };
+
+  let renderPageButton = () => {
+    return (
+      <>
+        {adminDataMode ? (
+          <div className="w-[100%] mt-5 flex justify-start items-center gap-5">
+            <IconButton
+              isDisabled={pageAdmin === 1}
+              onClick={firstPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="previous page"
+              icon={<TbChevronsLeft color="white" boxsize={"16px"} />}
+            />
+            <IconButton
+              isDisabled={pageAdmin === 1}
+              onClick={prevPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="previous page"
+              icon={<TbChevronLeft color="white" boxsize={"16px"} />}
+            />
+            <div className="font-ibmReg text-dgrey">
+              Page {pageAdmin} / {maxPageAdmin}
+            </div>
+            <IconButton
+              isDisabled={pageAdmin === maxPageAdmin}
+              onClick={nextPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="next page"
+              icon={<TbChevronRight color="white" boxsize={"16px"} />}
+            />
+            <IconButton
+              isDisabled={pageAdmin === maxPageAdmin}
+              onClick={maxPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="next page"
+              icon={<TbChevronsRight color="white" boxsize={"16px"} />}
+            />
+          </div>
+        ) : (
+          <div className="w-[100%] mt-5 flex justify-start items-center gap-5">
+            <IconButton
+              isDisabled={pageUser === 1}
+              onClick={firstPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="previous page"
+              icon={<TbChevronsLeft color="white" boxsize={"16px"} />}
+            />
+            <IconButton
+              isDisabled={pageUser === 1}
+              onClick={prevPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="previous page"
+              icon={<TbChevronLeft color="white" boxsize={"16px"} />}
+            />
+            <div className="font-ibmReg text-dgrey">
+              Page {pageUser} / {maxPageUser}
+            </div>
+            <IconButton
+              isDisabled={pageUser === maxPageUser}
+              onClick={nextPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="next page"
+              icon={<TbChevronRight color="white" boxsize={"16px"} />}
+            />
+            <IconButton
+              isDisabled={pageUser === maxPageUser}
+              onClick={maxPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="next page"
+              icon={<TbChevronsRight color="white" boxsize={"16px"} />}
+            />
+          </div>
+        )}
+      </>
+    );
   };
 
   let addAdmin = async () => {
@@ -222,29 +363,31 @@ const AdminUser = () => {
           <div className="w-[1500px] h-[1800px]">
             <Stack spacing={4} direction="row" align="center">
               {adminDataMode ? (
-                <Button colorScheme="purple" size="lg">
+                <Button bg="#5D5FEF" color="white" size="lg">
                   Admin Data
                 </Button>
               ) : (
                 <Button
-                  colorScheme="purple"
                   size="lg"
                   variant="outline"
                   onClick={changeDataMode}
+                  color="#5D5FEF"
+                  borderColor="#5D5FEF"
                 >
                   Admin Data
                 </Button>
               )}
               {userDataMode ? (
-                <Button colorScheme="purple" size="lg">
+                <Button bg="#5D5FEF" color="white" size="lg">
                   User Data
                 </Button>
               ) : (
                 <Button
-                  colorScheme="purple"
                   size="lg"
                   variant="outline"
                   onClick={changeDataMode}
+                  color="#5D5FEF"
+                  borderColor="#5D5FEF"
                 >
                   User Data
                 </Button>
@@ -352,9 +495,7 @@ const AdminUser = () => {
                               borderColor={"#D9D9D9"}
                             >
                               <option value="admin">admin</option>
-                              <option value="warehouse admin">
-                                warehouse admin
-                              </option>
+                              <option value="wh_admin">warehouse admin</option>
                             </Select>
                           </FormControl>
                           <FormControl>
@@ -496,9 +637,7 @@ const AdminUser = () => {
                               }
                             >
                               <option value="admin">admin</option>
-                              <option value="warehouse admin">
-                                warehouse admin
-                              </option>
+                              <option value="wh_admin">warehouse admin</option>
                             </Select>
                           </FormControl>
                           <Button
@@ -516,20 +655,23 @@ const AdminUser = () => {
                     </ModalContent>
                   </Modal>
                   <TableContainer mt="10px">
-                    <Table variant="simple" w="1000px">
-                      <Thead>
+                    <Table variant="striped" colorScheme="gray" w="1000px">
+                      <Thead bg="#5D5FEF">
                         <Tr>
-                          <Th>Email</Th>
-                          <Th>First Name</Th>
-                          <Th>Last Name</Th>
-                          <Th>Role</Th>
-                          <Th>Created At</Th>
-                          <Th>Action</Th>
+                          <Th color="white">ID</Th>
+                          <Th color="white">Email</Th>
+                          <Th color="white">First Name</Th>
+                          <Th color="white">Last Name</Th>
+                          <Th color="white">Role</Th>
+                          <Th color="white">Warehouse Location</Th>
+                          <Th color="white">Created At</Th>
+                          <Th color="white">Action</Th>
                         </Tr>
                       </Thead>
                       <Tbody>{renderAdminData()}</Tbody>
                     </Table>
                   </TableContainer>
+                  {renderPageButton()}
                   <Modal isOpen={isOpenDelete} onClose={onCloseDelete}>
                     <ModalOverlay />
                     <ModalContent>
@@ -580,7 +722,6 @@ const AdminUser = () => {
                       </Box>
                     </ModalContent>
                   </Modal>
-                  ;
                 </>
               ) : userDataMode ? (
                 <>
@@ -597,23 +738,25 @@ const AdminUser = () => {
                     </Text>
                   </Text>
                   <TableContainer mt="10px">
-                    <Table variant="simple" w="1000px">
-                      <Thead>
+                    <Table variant="striped" colorScheme="gray" w="1000px">
+                      <Thead bg="#5D5FEF">
                         <Tr>
-                          <Th>Email</Th>
-                          <Th>First Name</Th>
-                          <Th>Last Name</Th>
-                          <Th>Role</Th>
-                          <Th>Gender</Th>
-                          <Th>Birth Date</Th>
-                          <Th>Birth Place</Th>
-                          <Th>Verified Status</Th>
-                          <Th>Created At</Th>
+                          <Th color="white">ID</Th>
+                          <Th color="white">Email</Th>
+                          <Th color="white">First Name</Th>
+                          <Th color="white">Last Name</Th>
+                          <Th color="white">Role</Th>
+                          <Th color="white">Gender</Th>
+                          <Th color="white">Birth Date</Th>
+                          <Th color="white">Birth Place</Th>
+                          <Th color="white">Verified Status</Th>
+                          <Th color="white">Created At</Th>
                         </Tr>
                       </Thead>
                       <Tbody>{renderUserData()}</Tbody>
                     </Table>
                   </TableContainer>
+                  {renderPageButton()}
                 </>
               ) : (
                 <></>

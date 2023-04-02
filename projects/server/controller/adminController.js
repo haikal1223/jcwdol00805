@@ -69,16 +69,24 @@ module.exports = {
   },
   adminData: async (req, res) => {
     try {
+      let { offset, row } = req.query;
       let findAdmin = await db.user.findAll({
         where: {
-          [Sequelize.Op.or]: [{ role: "admin" }, { role: "warehouse admin" }],
+          [Sequelize.Op.or]: [{ role: "admin" }, { role: "wh_admin" }],
+        },
+        limit: parseInt(row),
+        offset: parseInt(offset),
+      });
+      let findAdminAll = await db.user.findAll({
+        where: {
+          [Sequelize.Op.or]: [{ role: "admin" }, { role: "wh_admin" }],
         },
       });
 
       res.status(200).send({
         isError: false,
         message: "Get Admin Data Success",
-        data: findAdmin,
+        data: { findAdmin, findAdminAll },
       });
     } catch (error) {
       res.status(500).send({
@@ -91,14 +99,21 @@ module.exports = {
 
   userData: async (req, res) => {
     try {
+      let { offset, row } = req.query;
       let findUser = await db.user.findAll({
+        where: { role: "user" },
+        limit: parseInt(row),
+        offset: parseInt(offset),
+      });
+
+      let findUserAll = await db.user.findAll({
         where: { role: "user" },
       });
 
       res.status(200).send({
         isError: false,
         message: "Get User Data Success",
-        data: findUser,
+        data: { findUser, findUserAll },
       });
     } catch (error) {
       res.status(500).send({
