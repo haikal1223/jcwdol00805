@@ -32,7 +32,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/sidebar";
 import axios from "axios";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { ViewIcon, ViewOffIcon, Search2Icon } from "@chakra-ui/icons";
 import {
   TbChevronLeft,
   TbChevronRight,
@@ -53,11 +53,23 @@ const AdminUser = () => {
   const [editFirstName, setEditFirstName] = useState("");
   const [editLastName, setEditLastName] = useState("");
   const [editRole, setEditRole] = useState("");
+  const [editWarehouse, setEditWarehouse] = useState("");
   const [pageAdmin, setPageAdmin] = useState(1);
   const [maxPageAdmin, setMaxPageAdmin] = useState(0);
   const [pageUser, setPageUser] = useState(1);
   const [maxPageUser, setMaxPageUser] = useState(0);
-  const rowPerPage = 5;
+  const rowPerPage = 10;
+  const [adminWarehouse, setAdminWarehouse] = useState(false);
+  const [editAdminWarehouse, setEditAdminWarehouse] = useState(false);
+  const [whList, setWhList] = useState([]);
+
+  const [filter, setFilter] = useState({
+    searchUserName: "",
+  });
+  const [sort, setSort] = useState({
+    sortBy: "",
+  });
+  const [sortMode, setSortMode] = useState("ASC");
 
   const {
     isOpen: isOpenAdd,
@@ -79,6 +91,7 @@ const AdminUser = () => {
   const firstName = useRef();
   const lastName = useRef();
   const role = useRef();
+  const warehouseName = useRef();
   const password = useRef();
 
   let changeDataMode = () => {
@@ -88,11 +101,26 @@ const AdminUser = () => {
     setMaxPageAdmin(0);
   };
 
+  let getWarehouse = async () => {
+    try {
+      let getWarehouse = await axios.get(
+        `http://localhost:8000/admin/adminWarehouse`
+      );
+      setWhList(getWarehouse.data.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  useEffect(() => {
+    getWarehouse();
+  }, []);
+
   let getAdminData = async () => {
     const offset = (pageAdmin - 1) * rowPerPage;
     try {
       let getAdminData = await axios.get(
-        `http://localhost:8000/admin/adminData?offset=${offset}&row=${rowPerPage}`
+        `http://localhost:8000/admin/adminData?offset=${offset}&row=${rowPerPage}&name=${filter.searchUserName}&sort=${sort.sortBy}&sortMode=${sortMode}`
       );
       setAdminData(getAdminData.data.data.findAdmin);
       setMaxPageAdmin(
@@ -107,32 +135,36 @@ const AdminUser = () => {
     const offset = (pageUser - 1) * rowPerPage;
     try {
       let getUserData = await axios.get(
-        `http://localhost:8000/admin/userData?offset=${offset}&row=${rowPerPage}`
+        `http://localhost:8000/admin/userData?offset=${offset}&row=${rowPerPage}&name=${filter.searchUserName}&sort=${sort.sortBy}&sortMode=${sortMode}`
       );
       setUserData(getUserData.data.data.findUser);
       setMaxPageUser(
         Math.ceil(getUserData.data.data.findUserAll.length / rowPerPage)
       );
     } catch (error) {
-      console.log(error.essage);
+      console.log(error.message);
     }
   };
 
   useEffect(() => {
     getAdminData();
     renderPageButton();
-  }, [pageAdmin, maxPageAdmin]);
+  }, [pageAdmin, maxPageAdmin, filter, sort, sortMode]);
 
   useEffect(() => {
     getUserData();
     renderPageButton();
-  }, [pageUser, maxPageUser]);
+  }, [pageUser, maxPageUser, filter, sort, sortMode]);
 
   let handleEdit = (val) => {
     setEditEmail(val.email);
     setEditFirstName(val.first_name);
     setEditLastName(val.last_name);
     setEditRole(val.role);
+    if (val?.wh_admins[0]?.warehouse?.name) {
+      setEditWarehouse(val?.wh_admins[0]?.warehouse?.name);
+      setEditAdminWarehouse(true);
+    }
     onOpenEdit();
   };
 
@@ -161,9 +193,25 @@ const AdminUser = () => {
             <Td>{val.first_name}</Td>
             <Td>{val.last_name}</Td>
             <Td>{val.role === "wh_admin" ? "Warehouse Admin" : "Admin"}</Td>
-            <Td></Td>
-            <Td>{val.createdAt}</Td>
             <Td>
+              {val.role === "admin" ? (
+                "-"
+              ) : (
+                <>{val?.wh_admins[0]?.warehouse?.name}</>
+              )}
+            </Td>
+            <Td>
+              {new Date(val.createdAt).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+                second: "numeric",
+                timeZoneName: "short",
+              })}
+            </Td>
+            <Td className="flex justify-center w-[250px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
               <Button
                 colorScheme="green"
                 size="md"
@@ -202,7 +250,17 @@ const AdminUser = () => {
             <Td>{val.birth_date ? val.birth_date : "-"}</Td>
             <Td>{val.birth_place ? val.birth_place : "-"}</Td>
             <Td>{val.is_verified === 1 ? "Verified" : "Not Verified"}</Td>
-            <Td>{val.createdAt}</Td>
+            <Td>
+              {new Date(val.createdAt).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+                second: "numeric",
+                timeZoneName: "short",
+              })}
+            </Td>
           </Tr>
         </>
       );
@@ -213,20 +271,32 @@ const AdminUser = () => {
     if (pageAdmin < maxPageAdmin) {
       setPageAdmin(pageAdmin + 1);
     }
+    if (pageUser < maxPageUser) {
+      setPageUser(pageUser + 1);
+    }
   };
   const prevPageHandler = () => {
     if (pageAdmin > 1) {
       setPageAdmin(pageAdmin - 1);
+    }
+    if (pageUser > 1) {
+      setPageUser(pageUser - 1);
     }
   };
   const firstPageHandler = () => {
     if (pageAdmin > 1) {
       setPageAdmin(1);
     }
+    if (pageUser > 1) {
+      setPageUser(1);
+    }
   };
   const maxPageHandler = () => {
     if (pageAdmin < maxPageAdmin) {
       setPageAdmin(maxPageAdmin);
+    }
+    if (pageUser < maxPageUser) {
+      setPageUser(maxPageUser);
     }
   };
 
@@ -234,7 +304,7 @@ const AdminUser = () => {
     return (
       <>
         {adminDataMode ? (
-          <div className="w-[100%] mt-5 flex justify-start items-center gap-5">
+          <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
             <IconButton
               isDisabled={pageAdmin === 1}
               onClick={firstPageHandler}
@@ -272,7 +342,7 @@ const AdminUser = () => {
             />
           </div>
         ) : (
-          <div className="w-[100%] mt-5 flex justify-start items-center gap-5">
+          <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
             <IconButton
               isDisabled={pageUser === 1}
               onClick={firstPageHandler}
@@ -314,14 +384,42 @@ const AdminUser = () => {
     );
   };
 
+  const searchInputHandler = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    setFilter({
+      ...filter,
+      [name]: value,
+    });
+    console.log(filter);
+  };
+
+  const sortHandler = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    setSort({
+      ...sort,
+      [name]: value,
+    });
+    console.log(sort);
+  };
+
+  const changeSort = () => {
+    if (sortMode === "ASC") {
+      setSortMode("DESC");
+    } else {
+      setSortMode("ASC");
+    }
+  };
+
   let addAdmin = async () => {
     try {
-      console.log(role);
       let addAdmin = await axios.post("http://localhost:8000/admin/addAdmin", {
         email: email.current.value,
         first_name: firstName.current.value,
         last_name: lastName.current.value,
         role: role.current.value,
+        warehouse_name: warehouseName?.current?.value,
         password: password.current.value,
       });
       toast.success(addAdmin.data.message);
@@ -329,15 +427,36 @@ const AdminUser = () => {
       firstName.current.value = "";
       lastName.current.value = "";
       password.current.value = "";
+      if (warehouseName?.current?.value) {
+        warehouseName.current.value = "";
+      }
       window.location.reload();
     } catch (error) {
-      toast.error(error.response.data.message);
+      console.log(error);
+      toast.error(error?.response?.data?.message);
     }
   };
 
+  let handleRole = (val) => {
+    if (val === "wh_admin") {
+      setAdminWarehouse(true);
+    } else {
+      setAdminWarehouse(false);
+    }
+  };
+  let handleEditRole = (val) => {
+    if (val === "wh_admin") {
+      setEditAdminWarehouse(true);
+    } else {
+      setEditAdminWarehouse(false);
+      setEditWarehouse("");
+    }
+  };
+
+  const whOptions = [...new Set(whList.map((val) => val.name))];
+
   let editAdmin = async () => {
     try {
-      console.log(editRole);
       let editAdmin = await axios.patch(
         "http://localhost:8000/admin/editAdmin",
         {
@@ -345,12 +464,14 @@ const AdminUser = () => {
           first_name: editFirstName,
           last_name: editLastName,
           role: editRole,
+          warehouseName: editWarehouse,
         }
       );
       console.log(editAdmin);
       toast.success(editAdmin.data.message);
       window.location.reload();
     } catch (error) {
+      console.log(error);
       toast.error(error.response);
     }
   };
@@ -360,7 +481,7 @@ const AdminUser = () => {
       <div className="w-[100%] flex flex-1 justify-between">
         <Sidebar />
         <div className="bg-white w-[1240px] h-auto z-0 shadow-inner flex flex-col overflow-auto py-[40px] pl-[50px]">
-          <div className="w-[1500px] h-[1800px]">
+          <div className="w-[1140px] h-auto">
             <Stack spacing={4} direction="row" align="center">
               {adminDataMode ? (
                 <Button bg="#5D5FEF" color="white" size="lg">
@@ -417,7 +538,13 @@ const AdminUser = () => {
                   >
                     <Text>Add Admin Data</Text>
                   </Button>
-                  <Modal isOpen={isOpenAdd} onClose={onCloseAdd}>
+                  <Modal
+                    isOpen={isOpenAdd}
+                    onClose={(e) => {
+                      onCloseAdd();
+                      setAdminWarehouse(false);
+                    }}
+                  >
                     <ModalOverlay />
                     <ModalContent>
                       <Box
@@ -493,11 +620,36 @@ const AdminUser = () => {
                               bg="#f5f5f5"
                               border-1
                               borderColor={"#D9D9D9"}
+                              onChange={(e) => handleRole(role.current.value)}
                             >
-                              <option value="admin">admin</option>
-                              <option value="wh_admin">warehouse admin</option>
+                              <option value="admin">Admin</option>
+                              <option value="wh_admin">Warehouse Admin</option>
                             </Select>
                           </FormControl>
+                          {adminWarehouse ? (
+                            <FormControl>
+                              <FormLabel>
+                                <Text className="font-ibmMed">
+                                  Warehouse Name
+                                </Text>
+                              </FormLabel>
+                              <Select
+                                ref={warehouseName}
+                                rounded="lg"
+                                variant="filled"
+                                placeholder="Choose Warehouse"
+                                bg="#f5f5f5"
+                                border-1
+                                borderColor={"#D9D9D9"}
+                              >
+                                {whOptions.map((val, idx) => {
+                                  return <option value={val}>{val}</option>;
+                                })}
+                              </Select>
+                            </FormControl>
+                          ) : (
+                            <></>
+                          )}
                           <FormControl>
                             <FormLabel>
                               <Text className="font-ibmMed">Password</Text>
@@ -543,7 +695,13 @@ const AdminUser = () => {
                       </Box>
                     </ModalContent>
                   </Modal>
-                  <Modal isOpen={isOpenEdit} onClose={onCloseEdit}>
+                  <Modal
+                    isOpen={isOpenEdit}
+                    onClose={(e) => {
+                      onCloseEdit();
+                      setEditAdminWarehouse(false);
+                    }}
+                  >
                     <ModalOverlay />
                     <ModalContent>
                       <Box
@@ -632,14 +790,43 @@ const AdminUser = () => {
                               border-1
                               borderColor={"#D9D9D9"}
                               value={editRole}
-                              onChange={(event) =>
-                                setEditRole(event.target.value)
-                              }
+                              onChange={(event) => {
+                                handleEditRole(role.current.value);
+                                setEditRole(event.target.value);
+                              }}
                             >
-                              <option value="admin">admin</option>
-                              <option value="wh_admin">warehouse admin</option>
+                              <option value="admin">Admin</option>
+                              <option value="wh_admin">Warehouse Admin</option>
                             </Select>
                           </FormControl>
+                          {editAdminWarehouse ? (
+                            <FormControl>
+                              <FormLabel>
+                                <Text className="font-ibmMed">
+                                  Warehouse Name
+                                </Text>
+                              </FormLabel>
+                              <Select
+                                ref={warehouseName}
+                                rounded="lg"
+                                variant="filled"
+                                placeholder="Choose Warehouse"
+                                bg="#f5f5f5"
+                                border-1
+                                borderColor={"#D9D9D9"}
+                                value={editWarehouse}
+                                onChange={(event) => {
+                                  setEditWarehouse(event?.target?.value);
+                                }}
+                              >
+                                {whOptions.map((val, idx) => {
+                                  return <option value={val}>{val}</option>;
+                                })}
+                              </Select>
+                            </FormControl>
+                          ) : (
+                            <></>
+                          )}
                           <Button
                             rounded="lg"
                             alignSelf="center"
@@ -654,21 +841,58 @@ const AdminUser = () => {
                       </Box>
                     </ModalContent>
                   </Modal>
-                  <TableContainer mt="10px">
-                    <Table variant="striped" colorScheme="gray" w="1000px">
-                      <Thead bg="#5D5FEF">
-                        <Tr>
-                          <Th color="white">ID</Th>
-                          <Th color="white">Email</Th>
-                          <Th color="white">First Name</Th>
-                          <Th color="white">Last Name</Th>
-                          <Th color="white">Role</Th>
-                          <Th color="white">Warehouse Location</Th>
-                          <Th color="white">Created At</Th>
-                          <Th color="white">Action</Th>
+                  <div className="flex justify-between mt-4">
+                    <div className="mb-4">
+                      <InputGroup>
+                        <Input
+                          w="350px"
+                          name="searchUserName"
+                          placeholder="Search by First Name or Last Name"
+                          className="p-1"
+                          onChange={searchInputHandler}
+                        />
+                        <InputRightElement
+                          pointerEvents="none"
+                          children={<Search2Icon />}
+                        />
+                      </InputGroup>
+                    </div>
+                    <div className="mb-4 flex justify-between" w="450px">
+                      <Select
+                        name="sortBy"
+                        placeholder="Sort By"
+                        color={"gray"}
+                        w="200px"
+                        onChange={sortHandler}
+                      >
+                        <option value="sortId">ID</option>
+                        <option value="sortEmail">Email</option>
+                        <option value="sortFirstName">First Name</option>
+                        <option value="sortLastName">Last Name</option>
+                        <option value="sortRole">Role</option>
+                      </Select>
+                      <Button w="100px" ml="20px" onClick={changeSort}>
+                        {sortMode === "ASC" ? "A to Z" : "Z to A"}
+                      </Button>
+                    </div>
+                  </div>
+                  <TableContainer mt="10px" w="1140px">
+                    <Table variant="simple" w="1000px">
+                      <Thead>
+                        <Tr className="font-bold bg-[#f1f1f1]">
+                          <Th>ID</Th>
+                          <Th>Email</Th>
+                          <Th>First Name</Th>
+                          <Th>Last Name</Th>
+                          <Th>Role</Th>
+                          <Th>Warehouse Name</Th>
+                          <Th>Created At</Th>
+                          <Th className="flex justify-center w-[250px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
+                            Action
+                          </Th>
                         </Tr>
                       </Thead>
-                      <Tbody>{renderAdminData()}</Tbody>
+                      <Tbody className="bg-white">{renderAdminData()}</Tbody>
                     </Table>
                   </TableContainer>
                   {renderPageButton()}
@@ -737,23 +961,58 @@ const AdminUser = () => {
                       <span> Data List</span>
                     </Text>
                   </Text>
+                  <div className="flex justify-between mt-4">
+                    <div className="mb-4">
+                      <InputGroup>
+                        <Input
+                          w="350px"
+                          name="searchUserName"
+                          placeholder="Search by First Name or Last Name"
+                          className="p-1"
+                          onChange={searchInputHandler}
+                        />
+                        <InputRightElement
+                          pointerEvents="none"
+                          children={<Search2Icon />}
+                        />
+                      </InputGroup>
+                    </div>
+                    <div className="mb-4 flex justify-between" w="450px">
+                      <Select
+                        name="sortBy"
+                        placeholder="Sort By"
+                        color={"gray"}
+                        w="200px"
+                        onChange={sortHandler}
+                      >
+                        <option value="sortId">ID</option>
+                        <option value="sortEmail">Email</option>
+                        <option value="sortFirstName">First Name</option>
+                        <option value="sortLastName">Last Name</option>
+                        <option value="sortGender">Gender</option>
+                      </Select>
+                      <Button w="100px" ml="20px" onClick={changeSort}>
+                        {sortMode === "ASC" ? "A to Z" : "Z to A"}
+                      </Button>
+                    </div>
+                  </div>
                   <TableContainer mt="10px">
-                    <Table variant="striped" colorScheme="gray" w="1000px">
-                      <Thead bg="#5D5FEF">
-                        <Tr>
-                          <Th color="white">ID</Th>
-                          <Th color="white">Email</Th>
-                          <Th color="white">First Name</Th>
-                          <Th color="white">Last Name</Th>
-                          <Th color="white">Role</Th>
-                          <Th color="white">Gender</Th>
-                          <Th color="white">Birth Date</Th>
-                          <Th color="white">Birth Place</Th>
-                          <Th color="white">Verified Status</Th>
-                          <Th color="white">Created At</Th>
+                    <Table variant="simple" w="1000px">
+                      <Thead>
+                        <Tr className="font-bold bg-[#f1f1f1]">
+                          <Th>ID</Th>
+                          <Th>Email</Th>
+                          <Th>First Name</Th>
+                          <Th>Last Name</Th>
+                          <Th>Role</Th>
+                          <Th>Gender</Th>
+                          <Th>Birth Date</Th>
+                          <Th>Birth Place</Th>
+                          <Th>Verified Status</Th>
+                          <Th>Created At</Th>
                         </Tr>
                       </Thead>
-                      <Tbody>{renderUserData()}</Tbody>
+                      <Tbody className="bg-white">{renderUserData()}</Tbody>
                     </Table>
                   </TableContainer>
                   {renderPageButton()}

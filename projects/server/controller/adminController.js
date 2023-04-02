@@ -7,6 +7,7 @@ const { matchPassword, hashPassword } = require("../lib/hash");
 // Import jwt
 const { createToken } = require("../lib/jwt");
 const { Sequelize } = require("../sequelize/models/index");
+const warehouse = require("../sequelize/models/warehouse");
 
 module.exports = {
   login: async (req, res) => {
@@ -67,19 +68,56 @@ module.exports = {
       });
     }
   },
+
   adminData: async (req, res) => {
     try {
-      let { offset, row } = req.query;
+      let { offset, row, name, sort, sortMode } = req.query;
+      let column = "id";
+      switch (sort) {
+        case "sortId":
+          column = "id";
+          break;
+        case "sortEmail":
+          column = "email";
+          break;
+        case "sortFirstName":
+          column = "first_name";
+          break;
+        case "sortLastName":
+          column = "last_name";
+          break;
+        case "sortRole":
+          column = "role";
+          break;
+      }
+
       let findAdmin = await db.user.findAll({
+        include: [
+          {
+            model: db.wh_admin,
+            include: [{ model: db.warehouse }],
+          },
+        ],
+
         where: {
-          [Sequelize.Op.or]: [{ role: "admin" }, { role: "wh_admin" }],
+          role: { [Sequelize.Op.like]: `%admin%` },
+          [Sequelize.Op.or]: [
+            { first_name: { [Sequelize.Op.like]: `%${name}%` } },
+            { last_name: { [Sequelize.Op.like]: `%${name}%` } },
+          ],
         },
+        order: [[column, sortMode]],
         limit: parseInt(row),
         offset: parseInt(offset),
       });
+
       let findAdminAll = await db.user.findAll({
         where: {
-          [Sequelize.Op.or]: [{ role: "admin" }, { role: "wh_admin" }],
+          role: { [Sequelize.Op.like]: `%admin%` },
+          [Sequelize.Op.or]: [
+            { first_name: { [Sequelize.Op.like]: `%${name}%` } },
+            { last_name: { [Sequelize.Op.like]: `%${name}%` } },
+          ],
         },
       });
 
@@ -97,17 +135,67 @@ module.exports = {
     }
   },
 
+  adminWarehouse: async (req, res) => {
+    try {
+      let findWarehouse = await db.warehouse.findAll({});
+      res.status(200).send({
+        isError: false,
+        message: "Get Warehouse Data Success",
+        data: findWarehouse,
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: true,
+      });
+    }
+  },
+
   userData: async (req, res) => {
     try {
-      let { offset, row } = req.query;
+      let { offset, row, name, sort, sortMode } = req.query;
+      console.log(offset)
+      let column = "id";
+      switch (sort) {
+        case "sortId":
+          column = "id";
+          break;
+        case "sortEmail":
+          column = "email";
+          break;
+        case "sortFirstName":
+          column = "first_name";
+          break;
+        case "sortLastName":
+          column = "last_name";
+          break;
+        case "sortGender":
+          column = "gender";
+          break;
+      }
+
       let findUser = await db.user.findAll({
-        where: { role: "user" },
+        where: {
+          role: "user",
+          [Sequelize.Op.or]: [
+            { first_name: { [Sequelize.Op.like]: `%${name}%` } },
+            { last_name: { [Sequelize.Op.like]: `%${name}%` } },
+          ],
+        },
+        order: [[column, sortMode]],
         limit: parseInt(row),
         offset: parseInt(offset),
       });
 
       let findUserAll = await db.user.findAll({
-        where: { role: "user" },
+        where: {
+          role: "user",
+          [Sequelize.Op.or]: [
+            { first_name: { [Sequelize.Op.like]: `%${name}%` } },
+            { last_name: { [Sequelize.Op.like]: `%${name}%` } },
+          ],
+        },
       });
 
       res.status(200).send({
@@ -126,7 +214,8 @@ module.exports = {
 
   addAdmin: async (req, res) => {
     try {
-      let { email, first_name, last_name, role, password } = req.body;
+      let { email, first_name, last_name, role, warehouse_name, password } =
+        req.body;
 
       if (!email || !first_name || !last_name || !role || !password)
         return res.status(404).send({
@@ -134,6 +223,15 @@ module.exports = {
           message: "Please Complete Registration Data",
           data: null,
         });
+
+      if (role === "wh_admin") {
+        if (!warehouse_name)
+          return res.status(404).send({
+            isError: true,
+            message: "Please Complete Registration Data",
+            data: null,
+          });
+      }
 
       let findEmail = await db.user.findOne({
         where: {
@@ -149,6 +247,7 @@ module.exports = {
         });
 
       const hashedPassword = await hashPassword(password);
+
       let dataToSend = await db.user.create({
         email,
         first_name,
@@ -157,6 +256,25 @@ module.exports = {
         is_verified: 1,
         role,
       });
+
+      findEmail = await db.user.findOne({
+        where: {
+          email: email,
+        },
+      });
+
+      if (role === "wh_admin") {
+        let findWarehouse = await db.warehouse.findOne({
+          where: {
+            name: warehouse_name,
+          },
+        });
+
+        let whAdminData = await db.wh_admin.create({
+          user_id: findEmail.dataValues.id,
+          warehouse_id: findWarehouse.dataValues.id,
+        });
+      }
 
       res.status(201).send({
         isError: false,
@@ -174,7 +292,7 @@ module.exports = {
 
   editAdmin: async (req, res) => {
     try {
-      let { email, first_name, last_name, role } = req.body;
+      let { email, first_name, last_name, role, warehouseName } = req.body;
 
       if (!email || !first_name || !last_name || !role)
         return res.status(404).send({
@@ -196,6 +314,58 @@ module.exports = {
         }
       );
 
+      let findEmail = await db.user.findOne({
+        where: {
+          email: email,
+        },
+      });
+
+      if (role === "wh_admin") {
+        let findWarehouse = await db.warehouse.findOne({
+          where: {
+            name: warehouseName,
+          },
+        });
+
+        let checkWarehouseAdmin = await db.wh_admin.findOne({
+          where: {
+            user_id: findEmail.dataValues.id,
+          },
+        });
+
+        if (checkWarehouseAdmin) {
+          let warehouseAdminSend = await db.wh_admin.update(
+            {
+              warehouse_id: findWarehouse.dataValues.id,
+            },
+            {
+              where: {
+                user_id: findEmail.dataValues.id,
+              },
+            }
+          );
+        } else {
+          let warehouseAdminAdd = await db.wh_admin.create({
+            warehouse_id: findWarehouse.dataValues.id,
+            user_id: findEmail.dataValues.id,
+          });
+        }
+      } else {
+        let checkWarehouseAdmin = await db.wh_admin.findOne({
+          where: {
+            user_id: findEmail.dataValues.id,
+          },
+        });
+
+        if (checkWarehouseAdmin) {
+          let warehouseAdminSend = await db.wh_admin.destroy({
+            where: {
+              user_id: findEmail.dataValues.id,
+            },
+          });
+        }
+      }
+
       res.status(201).send({
         isError: false,
         message: "Edit Profile Success",
@@ -213,6 +383,20 @@ module.exports = {
   deleteAdminData: async (req, res) => {
     try {
       let { email } = req.query;
+
+      let findEmail = await db.user.findOne({
+        where: {
+          email,
+        },
+      });
+
+      if (findEmail.dataValues.role === "wh_admin") {
+        let deleteWarehouseAdmin = await db.wh_admin.destroy({
+          where: {
+            user_id: findEmail.dataValues.id,
+          },
+        });
+      }
 
       let deleteAdminData = await db.user.destroy({
         where: {
