@@ -5,6 +5,7 @@ const Router = express.Router()
 const { adminOrderController } = require('../controller')
 
 Router.get('/view/:wh_id', adminOrderController.viewOrder)
+Router.get('/order-detail/:id', adminOrderController.orderDetail)
 
 
 module.exports = Router
