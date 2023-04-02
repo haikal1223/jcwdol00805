@@ -90,10 +90,28 @@ function App() {
     return children;
   };
 
+  const AuthMainAdmin = ({ children }) => {
+    const adminRoleLogged = localStorage.getItem("role");
+
+    if (adminRoleLogged != "admin") {
+      return (
+        <>
+          <Navigate to="/admin" />
+          {toast.error("You don't have access to this page", {
+            id: "adminlogin",
+            duration: 2000,
+          })}
+        </>
+      );
+    }
+    return children;
+  };
+
   const onLogout = () => {
     return (
       <>
         {localStorage.removeItem("adminToken")}
+        {localStorage.removeItem("role")}
         {navigate("/admin")}
         {setTimeout(() => {
           window.location.reload();
@@ -125,7 +143,7 @@ function App() {
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
           <Route path="/edit-profile" element={<EditProfile />} />
-          <Route path="/product/:id" element={<Product />} />
+          <Route path="/product/:id" element={<Product login={isLoggedIn} />} />
           <Route
             path="/cart"
             element={
@@ -151,7 +169,9 @@ function App() {
             path="/admin/user"
             element={
               <AuthAdmin>
-                <AdminUser />
+                <AuthMainAdmin>
+                  <AdminUser />
+                </AuthMainAdmin>
               </AuthAdmin>
             }
           />

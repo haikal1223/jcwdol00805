@@ -2,10 +2,11 @@
 const db = require("../sequelize/models/index");
 
 // Import Hashing
-const { matchPassword } = require("../lib/hash");
+const { matchPassword, hashPassword } = require("../lib/hash");
 
 // Import jwt
 const { createToken } = require("../lib/jwt");
+const { Sequelize } = require("../sequelize/models/index");
 
 module.exports = {
   login: async (req, res) => {
@@ -69,13 +70,15 @@ module.exports = {
   adminData: async (req, res) => {
     try {
       let findAdmin = await db.user.findAll({
-        where: { role: "admin" },
+        where: {
+          [Sequelize.Op.or]: [{ role: "admin" }, { role: "warehouse admin" }],
+        },
       });
 
       res.status(200).send({
         isError: false,
         message: "Get Admin Data Success",
-        data: findAdmin
+        data: findAdmin,
       });
     } catch (error) {
       res.status(500).send({
@@ -95,13 +98,123 @@ module.exports = {
       res.status(200).send({
         isError: false,
         message: "Get User Data Success",
-        data: findUser
+        data: findUser,
       });
     } catch (error) {
       res.status(500).send({
         isError: true,
         message: error.message,
         data: true,
+      });
+    }
+  },
+
+  addAdmin: async (req, res) => {
+    try {
+      let { email, first_name, last_name, role, password } = req.body;
+
+      if (!email || !first_name || !last_name || !role || !password)
+        return res.status(404).send({
+          isError: true,
+          message: "Please Complete Registration Data",
+          data: null,
+        });
+
+      let findEmail = await db.user.findOne({
+        where: {
+          email: email,
+        },
+      });
+
+      if (findEmail)
+        return res.status(404).send({
+          isError: true,
+          message: "Email already exist",
+          data: null,
+        });
+
+      const hashedPassword = await hashPassword(password);
+      let dataToSend = await db.user.create({
+        email,
+        first_name,
+        last_name,
+        password: hashedPassword,
+        is_verified: 1,
+        role,
+      });
+
+      res.status(201).send({
+        isError: false,
+        message: "Registration Success",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Registration Failed",
+        data: error,
+      });
+    }
+  },
+
+  editAdmin: async (req, res) => {
+    try {
+      let { email, first_name, last_name, role } = req.body;
+
+      if (!email || !first_name || !last_name || !role)
+        return res.status(404).send({
+          isError: true,
+          message: "Please Complete Registration Data",
+          data: null,
+        });
+
+      let dataToSend = await db.user.update(
+        {
+          first_name,
+          last_name,
+          role,
+        },
+        {
+          where: {
+            email,
+          },
+        }
+      );
+
+      res.status(201).send({
+        isError: false,
+        message: "Edit Profile Success",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Edit Profile Failed",
+        data: error,
+      });
+    }
+  },
+
+  deleteAdminData: async (req, res) => {
+    try {
+      let { email } = req.query;
+
+      let deleteAdminData = await db.user.destroy({
+        where: {
+          email,
+        },
+      });
+
+      res.status(201).send({
+        isError: false,
+        message: "Delete Profile Success",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Delete Profile Failed",
+        data: error,
       });
     }
   },

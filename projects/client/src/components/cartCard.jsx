@@ -50,19 +50,19 @@ export default function CartCard(props) {
               {products[props.cartData.product_id - 1]?.name}
             </Text>
             <Text fontSize={16} fontWeight={700} className="font-ibmFont">
-              {props.cartData.price.toLocaleString()}
+              Rp{props.cartData.price.toLocaleString()}.00
             </Text>
             <HStack>
-              <Button>
+              <Button onClick={props.deleteFunction}>
                 <DeleteIcon />
               </Button>
-              <Button>
+              <Button onClick={props.minFunction}>
                 <MinusIcon />
               </Button>
               <Box w="50px" textAlign="center">
                 {props.cartData.quantity}
               </Box>
-              <Button>
+              <Button onClick={props.addFunction}>
                 <AddIcon />
               </Button>
             </HStack>

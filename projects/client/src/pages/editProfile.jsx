@@ -34,7 +34,7 @@ export default function EditProfile() {
   const handleClickChangePassword = () =>
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
-  const [uid,setUid] = useState('e867cba8-dcd7-4fd2-8dcf-34316567b8c7')
+  const [uid,setUid] = useState('994de40d-249e-45a2-bee8-531dabf884d1')
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");

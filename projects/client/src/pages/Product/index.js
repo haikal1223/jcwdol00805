@@ -18,7 +18,7 @@ import { useRef, useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
 
 export default function Product(props) {
-  const [uid, setUid] = useState("");
+  const [userId, setUserId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [stock, setStock] = useState(0);
@@ -44,10 +44,10 @@ export default function Product(props) {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setUid(response.data.data.uid);
-      let user_uid = response.data.data.uid;
+      setUserId(response.data.data.id);
+      let user_id = response.data.data.id;
       let getCartFilterProduct = await axios.get(
-        `http://localhost:8000/cart/getCartFilterProduct?user_uid=${user_uid}&product_id=${id}`
+        `http://localhost:8000/cart/getCartFilterProduct?user_id=${user_id}&product_id=${id}`
       );
       if (getCartFilterProduct.data.data[0]) {
         setQuantity(getCartFilterProduct.data.data[0].quantity + 1);
@@ -85,12 +85,14 @@ export default function Product(props) {
         });
       } else {
         if (quantity === 1) {
+          console.log(userId)
           let addCart = await axios.post(`http://localhost:8000/cart/addCart`, {
             quantity,
             price,
-            user_uid: uid,
+            user_id: userId,
             product_id: id,
           });
+
           toast.success("Added to cart", {
             duration: 3000,
           });
@@ -101,7 +103,7 @@ export default function Product(props) {
             });
           } else {
             let updateCart = await axios.patch(
-              `http://localhost:8000/cart/updateCart?user_uid=${uid}&product_id=${id}`,
+              `http://localhost:8000/cart/updateCart?user_id=${userId}&product_id=${id}`,
               {
                 quantity,
                 price,
@@ -114,7 +116,9 @@ export default function Product(props) {
         }
         getCartFilterProduct();
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   return (

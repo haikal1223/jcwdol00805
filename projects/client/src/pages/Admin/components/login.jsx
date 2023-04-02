@@ -25,6 +25,7 @@ export default function AdminLogin() {
 
             toast.success(response?.data?.message, {duration: 3000})
             setProfile(response?.data?.data)
+            localStorage.setItem('role',response.data.data.role)
             localStorage.setItem('adminToken', response.data.data.token)
             window.location.reload()
         } catch (error) {

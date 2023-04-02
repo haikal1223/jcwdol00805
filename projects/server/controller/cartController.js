@@ -28,10 +28,10 @@ const bcrypt = require("bcrypt");
 module.exports = {
   getCartFilterProduct: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       const findCart = await db.cart.findAll({
         where: {
-          user_uid,
+          user_id,
           product_id,
         },
       });
@@ -47,10 +47,10 @@ module.exports = {
 
   getUserCart: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       const findUserCart = await db.cart.findAll({
         where: {
-          user_uid,
+          user_id,
         },
       });
       return res.status(200).send({
@@ -65,12 +65,11 @@ module.exports = {
 
   addCartProduct: async (req, res) => {
     try {
-      let { quantity, price, user_uid, product_id } = req.body;
-
+      let { quantity, price, user_id, product_id } = req.body;
       let dataToSend = await db.cart.create({
         quantity,
         price,
-        user_uid,
+        user_id,
         product_id,
       });
 
@@ -79,12 +78,18 @@ module.exports = {
         message: "Your product is add to cart",
         data: null,
       });
-    } catch (error) {}
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Something Error",
+        data: error,
+      });
+    }
   },
 
   updateCartProduct: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       let { quantity, price } = req.body;
       let dataToSend = await db.cart.update(
         {
@@ -93,7 +98,7 @@ module.exports = {
         },
         {
           where: {
-            user_uid,
+            user_id,
             product_id,
           },
         }
@@ -102,6 +107,42 @@ module.exports = {
       res.status(201).send({
         isError: false,
         message: "Your product is updated",
+        data: null,
+      });
+    } catch (error) {}
+  },
+
+  delCart: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let deleteCart = await db.cart.destroy({
+        where: {
+          id,
+        },
+      });
+      res.status(200).send({
+        isError: false,
+        message: "The product is delete",
+        data: null,
+      });
+    } catch (error) {}
+  },
+
+  updateNumberProduct: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let { quantity } = req.body;
+      let updateCart = await db.cart.update(
+        {
+          quantity,
+        },
+        {
+          where: { id },
+        }
+      );
+      res.status(200).send({
+        isError: false,
+        message: "Update cart success",
         data: null,
       });
     } catch (error) {}

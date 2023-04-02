@@ -11,16 +11,63 @@ import {
   Tbody,
   Td,
   Tfoot,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalCloseButton,
+  Box,
+  VStack,
+  HStack,
+  Heading,
+  FormControl,
+  FormLabel,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Icon,
+  Select,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/sidebar";
 import axios from "axios";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import toast, { Toaster } from "react-hot-toast";
 
 const AdminUser = () => {
   const [adminDataMode, setAdminDataMode] = useState(true);
   const [userDataMode, setUserDataMode] = useState(false);
   const [adminData, setAdminData] = useState([]);
   const [userData, setUserData] = useState([]);
+  const [show, setShow] = useState(false);
+  const handleClick = () => setShow(!show);
+  const [selectedValue, setSelectedValue] = useState({});
+  const [editEmail, setEditEmail] = useState("");
+  const [editFirstName, setEditFirstName] = useState("");
+  const [editLastName, setEditLastName] = useState("");
+  const [editRole, setEditRole] = useState("");
+
+  const {
+    isOpen: isOpenAdd,
+    onOpen: onOpenAdd,
+    onClose: onCloseAdd,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenEdit,
+    onOpen: onOpenEdit,
+    onClose: onCloseEdit,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenDelete,
+    onOpen: onOpenDelete,
+    onClose: onCloseDelete,
+  } = useDisclosure();
+
+  const email = useRef();
+  const firstName = useRef();
+  const lastName = useRef();
+  const role = useRef();
+  const password = useRef();
 
   let changeDataMode = () => {
     setAdminDataMode(!adminDataMode);
@@ -48,6 +95,29 @@ const AdminUser = () => {
     getUserData();
   }, []);
 
+  let handleEdit = (val) => {
+    setEditEmail(val.email);
+    setEditFirstName(val.first_name);
+    setEditLastName(val.last_name);
+    setEditRole(val.role);
+    onOpenEdit();
+  };
+
+  let openDeleteModal = async (val) => {
+    try {
+      onOpenDelete();
+      setSelectedValue(val);
+    } catch (error) {}
+  };
+
+  let deleteAdminData = async () => {
+    let deleteAdminData = await axios.delete(
+      `http://localhost:8000/admin/deleteAdminData?email=${selectedValue.email}`
+    );
+
+    window.location.reload();
+  };
+
   let renderAdminData = () => {
     return adminData.map((val, idx) => {
       return (
@@ -58,7 +128,23 @@ const AdminUser = () => {
             <Td>{val.last_name}</Td>
             <Td>{val.role}</Td>
             <Td>{val.created_at}</Td>
-            <Td>text</Td>
+            <Td>
+              <Button
+                colorScheme="green"
+                size="md"
+                onClick={() => handleEdit(val)}
+              >
+                Edit Profile
+              </Button>{" "}
+              <Button
+                colorScheme="red"
+                size="md"
+                ml="10px"
+                onClick={() => openDeleteModal(val)}
+              >
+                Delete
+              </Button>
+            </Td>
           </Tr>
         </>
       );
@@ -79,13 +165,53 @@ const AdminUser = () => {
             </Td>
             <Td>{val.birth_date ? val.birth_date : "-"}</Td>
             <Td>{val.birth_place ? val.birth_place : "-"}</Td>
-            <Td>{val.is_verified === 1 ? "Yes" : "No"}</Td>
+            <Td>{val.is_verified === 1 ? "Verified" : "Not Verified"}</Td>
             <Td>{val.created_at}</Td>
-            <Td>text</Td>
           </Tr>
         </>
       );
     });
+  };
+
+  let addAdmin = async () => {
+    try {
+      console.log(role);
+      let addAdmin = await axios.post("http://localhost:8000/admin/addAdmin", {
+        email: email.current.value,
+        first_name: firstName.current.value,
+        last_name: lastName.current.value,
+        role: role.current.value,
+        password: password.current.value,
+      });
+      toast.success(addAdmin.data.message);
+      email.current.value = "";
+      firstName.current.value = "";
+      lastName.current.value = "";
+      password.current.value = "";
+      window.location.reload();
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+  };
+
+  let editAdmin = async () => {
+    try {
+      console.log(editRole);
+      let editAdmin = await axios.patch(
+        "http://localhost:8000/admin/editAdmin",
+        {
+          email: editEmail,
+          first_name: editFirstName,
+          last_name: editLastName,
+          role: editRole,
+        }
+      );
+      console.log(editAdmin);
+      toast.success(editAdmin.data.message);
+      window.location.reload();
+    } catch (error) {
+      toast.error(error.response);
+    }
   };
 
   return (
@@ -139,6 +265,256 @@ const AdminUser = () => {
                       <span> Data List</span>
                     </Text>
                   </Text>
+                  <Button
+                    colorScheme="purple"
+                    size="md"
+                    variant="outline"
+                    mt="10px"
+                    onClick={onOpenAdd}
+                  >
+                    <Text>Add Admin Data</Text>
+                  </Button>
+                  <Modal isOpen={isOpenAdd} onClose={onCloseAdd}>
+                    <ModalOverlay />
+                    <ModalContent>
+                      <Box
+                        w={["full", "md"]}
+                        p={[8, 20]}
+                        mt={[20, "1vh"]}
+                        mx="auto"
+                      >
+                        <VStack spacing={4} align="flex-start" w="full">
+                          <HStack
+                            spacing={1}
+                            align={["flex-start", "left"]}
+                            w="full"
+                          >
+                            <Heading>
+                              <Text className="font-ibmReg">
+                                Add Admin Data
+                              </Text>
+                            </Heading>
+                            <ModalCloseButton />
+                          </HStack>
+                          <FormControl>
+                            <FormLabel>
+                              <Text className="font-ibmMed">Email</Text>
+                            </FormLabel>
+                            <Input
+                              ref={email}
+                              rounded="lg"
+                              variant="filled"
+                              placeholder="Admin Email"
+                              bg="#f5f5f5"
+                              border-1
+                              borderColor={"#D9D9D9"}
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>
+                              <Text className="font-ibmMed">First Name</Text>
+                            </FormLabel>
+                            <Input
+                              ref={firstName}
+                              rounded="lg"
+                              variant="filled"
+                              placeholder="Admin First Name"
+                              bg="#f5f5f5"
+                              border-1
+                              borderColor={"#D9D9D9"}
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>
+                              <Text className="font-ibmMed">Last Name</Text>
+                            </FormLabel>
+                            <Input
+                              ref={lastName}
+                              rounded="lg"
+                              variant="filled"
+                              placeholder="Admin Last Name"
+                              bg="#f5f5f5"
+                              border-1
+                              borderColor={"#D9D9D9"}
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>
+                              <Text className="font-ibmMed">Role</Text>
+                            </FormLabel>
+                            <Select
+                              ref={role}
+                              rounded="lg"
+                              variant="filled"
+                              placeholder="Choose Admin Role"
+                              bg="#f5f5f5"
+                              border-1
+                              borderColor={"#D9D9D9"}
+                            >
+                              <option value="admin">admin</option>
+                              <option value="warehouse admin">
+                                warehouse admin
+                              </option>
+                            </Select>
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>
+                              <Text className="font-ibmMed">Password</Text>
+                            </FormLabel>
+                            <InputGroup>
+                              <Input
+                                ref={password}
+                                rounded="lg"
+                                variant="filled"
+                                type={show ? "text" : "password"}
+                                placeholder="Admin Password"
+                                bg="#f5f5f5"
+                                border-1
+                                borderColor={"#D9D9D9"}
+                              />
+                              <InputRightElement width="4.5rem">
+                                <Button
+                                  h="1.75rem"
+                                  size="sm"
+                                  onClick={handleClick}
+                                >
+                                  {show ? (
+                                    <Icon as={ViewIcon} />
+                                  ) : (
+                                    <Icon as={ViewOffIcon} />
+                                  )}
+                                </Button>
+                              </InputRightElement>
+                            </InputGroup>
+                          </FormControl>
+
+                          <Button
+                            rounded="lg"
+                            alignSelf="center"
+                            backgroundColor="#5D5FEF"
+                            color="white"
+                            className="font-ibmReg"
+                            onClick={addAdmin}
+                          >
+                            Add Admin
+                          </Button>
+                        </VStack>
+                      </Box>
+                    </ModalContent>
+                  </Modal>
+                  <Modal isOpen={isOpenEdit} onClose={onCloseEdit}>
+                    <ModalOverlay />
+                    <ModalContent>
+                      <Box
+                        w={["full", "md"]}
+                        p={[8, 20]}
+                        mt={[20, "1vh"]}
+                        mx="auto"
+                      >
+                        <VStack spacing={4} align="flex-start" w="full">
+                          <HStack
+                            spacing={1}
+                            align={["flex-start", "left"]}
+                            w="full"
+                          >
+                            <Heading>
+                              <Text className="font-ibmReg">
+                                Edit Admin Data
+                              </Text>
+                            </Heading>
+                            <ModalCloseButton />
+                          </HStack>
+                          <FormControl>
+                            <FormLabel>
+                              <Text className="font-ibmMed">Email</Text>
+                            </FormLabel>
+                            <Input
+                              ref={email}
+                              rounded="lg"
+                              variant="filled"
+                              value={editEmail}
+                              isDisabled="true"
+                              bg="#f5f5f5"
+                              border-1
+                              borderColor={"#D9D9D9"}
+                              onChange={(event) =>
+                                setEditEmail(event.target.value)
+                              }
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>
+                              <Text className="font-ibmMed">First Name</Text>
+                            </FormLabel>
+                            <Input
+                              ref={firstName}
+                              rounded="lg"
+                              variant="filled"
+                              placeholder="Admin First Name"
+                              value={editFirstName}
+                              bg="#f5f5f5"
+                              border-1
+                              borderColor={"#D9D9D9"}
+                              onChange={(event) =>
+                                setEditFirstName(event.target.value)
+                              }
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>
+                              <Text className="font-ibmMed">Last Name</Text>
+                            </FormLabel>
+                            <Input
+                              ref={lastName}
+                              rounded="lg"
+                              variant="filled"
+                              placeholder="Admin Last Name"
+                              value={editLastName}
+                              onChange={(event) =>
+                                setEditLastName(event.target.value)
+                              }
+                              bg="#f5f5f5"
+                              border-1
+                              borderColor={"#D9D9D9"}
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>
+                              <Text className="font-ibmMed">Role</Text>
+                            </FormLabel>
+                            <Select
+                              ref={role}
+                              rounded="lg"
+                              variant="filled"
+                              placeholder="Choose Admin Role"
+                              bg="#f5f5f5"
+                              border-1
+                              borderColor={"#D9D9D9"}
+                              value={editRole}
+                              onChange={(event) =>
+                                setEditRole(event.target.value)
+                              }
+                            >
+                              <option value="admin">admin</option>
+                              <option value="warehouse admin">
+                                warehouse admin
+                              </option>
+                            </Select>
+                          </FormControl>
+                          <Button
+                            rounded="lg"
+                            alignSelf="center"
+                            backgroundColor="#5D5FEF"
+                            color="white"
+                            className="font-ibmReg"
+                            onClick={editAdmin}
+                          >
+                            Edit Profile
+                          </Button>
+                        </VStack>
+                      </Box>
+                    </ModalContent>
+                  </Modal>
                   <TableContainer mt="10px">
                     <Table variant="simple" w="1000px">
                       <Thead>
@@ -154,6 +530,57 @@ const AdminUser = () => {
                       <Tbody>{renderAdminData()}</Tbody>
                     </Table>
                   </TableContainer>
+                  <Modal isOpen={isOpenDelete} onClose={onCloseDelete}>
+                    <ModalOverlay />
+                    <ModalContent>
+                      <Box
+                        w={["full", "md"]}
+                        p={[8, 20]}
+                        mt={[20, "1vh"]}
+                        mx="auto"
+                      >
+                        <VStack spacing={4} align="flex-start" w="full">
+                          <HStack
+                            spacing={1}
+                            align={["flex-start", "left"]}
+                            w="full"
+                          >
+                            <Heading>
+                              <Text className="font-ibmReg">
+                                Do you want to delete this user?
+                              </Text>
+                            </Heading>
+                            <ModalCloseButton />
+                          </HStack>
+
+                          <Button
+                            rounded="lg"
+                            alignSelf="center"
+                            backgroundColor="#5D5FEF"
+                            color="white"
+                            className="font-ibmReg"
+                            onClick={deleteAdminData}
+                            size="lg"
+                          >
+                            Delete
+                          </Button>
+                          <Button
+                            rounded="lg"
+                            alignSelf="center"
+                            backgroundColor="white"
+                            color="#5D5FEF"
+                            className="font-ibmReg"
+                            variant="outline"
+                            onClick={onCloseDelete}
+                            size="lg"
+                          >
+                            Cancel
+                          </Button>
+                        </VStack>
+                      </Box>
+                    </ModalContent>
+                  </Modal>
+                  ;
                 </>
               ) : userDataMode ? (
                 <>
@@ -180,9 +607,8 @@ const AdminUser = () => {
                           <Th>Gender</Th>
                           <Th>Birth Date</Th>
                           <Th>Birth Place</Th>
-                          <Th>Verified User?</Th>
+                          <Th>Verified Status</Th>
                           <Th>Created At</Th>
-                          <Th>Action</Th>
                         </Tr>
                       </Thead>
                       <Tbody>{renderUserData()}</Tbody>
@@ -196,6 +622,7 @@ const AdminUser = () => {
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };
