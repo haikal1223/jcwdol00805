@@ -24,7 +24,7 @@ import {
 } from "@chakra-ui/react";
 import "../App.css";
 
-export default function EditProfile() {
+export default function Activation() {
   const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
   const [show, setShow] = useState(false);

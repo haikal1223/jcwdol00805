@@ -15,6 +15,7 @@ const { createToken } = require("../lib/jwt");
 
 // Import Filesystem
 const fs = require("fs").promises;
+const axios = require("axios");
 
 // Import Transporter
 const transporter = require("../helper/transporter");
@@ -47,19 +48,52 @@ module.exports = {
 
   getUserCart: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      const { uid } = req.uid;
+
+      // Validate uid parameter
+      if (!uid) {
+        return res.status(400).send({
+          isError: true,
+          message: "Invalid user ID",
+          data: null,
+        });
+      }
+
       const findUserCart = await db.cart.findAll({
         where: {
-          user_uid,
+          user_uid: uid,
         },
+        include: [
+          {
+            model: db.product,
+            attributes: ["name", "price", "product_category_id", "image_url"],
+            include: [
+              {
+                model: db.product_stock,
+                include: [
+                  {
+                    model: db.warehouse,
+                    attributes: ["city"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       });
+
       return res.status(200).send({
         isError: false,
-        message: "Ok",
+        message: "Cart items fetched successfully",
         data: findUserCart,
       });
     } catch (error) {
-      console.log(error);
+      // Send error response to the client
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
     }
   },
 
@@ -106,40 +140,240 @@ module.exports = {
       });
     } catch (error) {}
   },
+  addAddress: async (req, res) => {
+    const t = await sequelize.transaction();
+    const { uid } = req.uid;
+    const {
+      recipient_name,
+      recipient_phone,
+      province,
+      city,
+      subdistrict,
+      street_address,
+      main_address,
+      postal_code,
+    } = req.body;
 
-  delCart: async (req, res) => {
     try {
-      let { id } = req.query;
-      let deleteCart = await db.cart.destroy({
-        where: {
-          id,
+      const { id } = await db.user.findOne({ where: { uid } });
+      if (main_address) {
+        await db.user_address.update(
+          { main_address: false },
+          { where: { [Op.and]: [{ main_address }, { user_id: id }] } },
+          { transaction: t }
+        );
+      }
+
+      await db.user_address.create(
+        {
+          recipient_name,
+          recipient_phone,
+          province,
+          city,
+          subdistrict,
+          street_address,
+          main_address,
+          postal_code,
+          user_id: id,
         },
-      });
-      res.status(200).send({
+        { transaction: t }
+      );
+      t.commit();
+      res.status(201).send({
         isError: false,
-        message: "The product is delete",
+        message: "Address Successfully Added",
         data: null,
       });
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      t.rollback(),
+        res.status(400).send({
+          isError: true,
+          message: error.message,
+          data: error,
+        });
+    }
   },
 
-  updateNumberProduct: async (req, res) => {
+  getAddress: async (req, res) => {
+    const { uid } = req.uid;
     try {
-      let { id } = req.query;
-      let { quantity } = req.body;
-      let updateCart = await db.cart.update(
-        {
-          quantity,
-        },
-        {
-          where: { id },
-        }
+      const { id } = await db.user.findOne({
+        where: { uid: uid },
+      });
+
+      const address = await db.user_address.findAll({
+        where: { user_id: id },
+      });
+
+      res.status(201).send({
+        isError: false,
+        message: "Masuk",
+        data: address,
+      });
+    } catch (error) {
+      console.log(error);
+
+      res.status(400).send({
+        isError: true,
+        message: error.message,
+        data: error,
+      });
+    }
+  },
+
+  defaultAddress: async (req, res) => {
+    const { id } = req.params;
+    const t = await sequelize.transaction();
+    try {
+      await db.user_address.update(
+        { main_address: false },
+        { where: { main_address: true } },
+        { transaction: t }
+      );
+      await db.user_address.update(
+        { main_address: true },
+        { where: { id } },
+        { transaction: t }
+      );
+      t.commit();
+      res.status(201).send({
+        isError: false,
+        messagae: "Main Address Selected",
+        data: null,
+      });
+    } catch (error) {
+      t.rollback();
+      res.status(400).send({
+        isError: true,
+        message: error.message,
+        data: error,
+      });
+    }
+  },
+
+  getProvince: async (req, res) => {
+    try {
+      const { data } = await axios.get(
+        "https://api.rajaongkir.com/starter/province",
+        { headers: { key: "96dc80599e54e6d84bbd8f3b948da258" } }
       );
       res.status(200).send({
         isError: false,
-        message: "Update cart success",
+        message: "Rajaongkir Province",
+        data: data.rajaongkir.results,
+      });
+    } catch (error) {
+      res.status(400).send({
+        isError: true,
+        message: error.message,
+        data: error,
+      });
+    }
+  },
+
+  getCity: async (req, res) => {
+    const { province_id } = req.query;
+    try {
+      if (!province_id)
+        return res.status(404).send({
+          isError: true,
+          message: "Province_id is not found",
+          data: null,
+        });
+      let response = await axios.get(
+        `https://api.rajaongkir.com/starter/city?province=${province_id}`,
+        {
+          headers: { key: "96dc80599e54e6d84bbd8f3b948da258" },
+        }
+      );
+
+      res.status(200).send({
+        isError: false,
+        message: "Raja Ongkir City by Province",
+        data: {
+          rajaongkir: {
+            country: "Indonesia",
+            city: response.data.rajaongkir.results,
+          },
+        },
+      });
+    } catch (error) {
+      res.status(400).send({
+        isError: true,
+        message: error.message,
+        data: error,
+      });
+    }
+  },
+
+  deleteAddress: async (req, res) => {
+    const { id } = req.params;
+    try {
+      await db.user_address.destroy({ where: { id } });
+      res.status(201).send({
+        isError: false,
+        message: "Address deleted",
         data: null,
       });
-    } catch (error) {}
+    } catch (error) {
+      res.status(400).send({
+        isError: true,
+        message: error.message,
+        data: error,
+      });
+    }
+  },
+
+  getStockOrigin: async (req, res) => {
+    const { uid } = req.uid;
+    try {
+      const user = await db.user.findOne({
+        where: { uid: uid },
+        include: [
+          {
+            model: db.cart,
+            include: [
+              {
+                model: db.product,
+                include: [
+                  {
+                    model: db.product_stock,
+                    include: [
+                      {
+                        model: db.warehouse,
+                        attributes: ["city"],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      const cart = user.carts.map((cart) => {
+        return {
+          quantity: cart.quantity,
+          price: cart.price,
+          product: {
+            name: cart.product.name,
+            price: cart.product.price,
+            image_url: cart.product.image_url,
+            stock: cart.product.product_stocks[0].stock,
+            warehouse_city: cart.product.product_stocks[0].warehouse.city,
+          },
+        };
+      });
+
+      res.send({ cart });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: error,
+      });
+    }
   },
 };

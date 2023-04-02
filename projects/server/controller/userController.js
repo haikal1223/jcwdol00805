@@ -4,6 +4,8 @@ const { Op } = require("sequelize");
 
 const { UUIDV4 } = require("sequelize");
 
+const HTTPStatus = require("../helper/HTTPStatus");
+
 // Import Models
 const db = require("../sequelize/models/index");
 
@@ -27,6 +29,8 @@ const handlebars = require("handlebars");
 const { kStringMaxLength } = require("buffer");
 
 const bcrypt = require("bcrypt");
+
+module.exports = {};
 
 module.exports = {
   registerUser: async (req, res) => {
@@ -105,6 +109,8 @@ module.exports = {
         data: findUsers,
       });
   },
+
+
 
   inputPassword: async (req, res) => {
     try {
@@ -323,11 +329,7 @@ module.exports = {
       }
 
       const validateTokenResult = validateToken(token);
-      return res.status(200).send({
-        isError: true,
-        message: "Token is found",
-        data: validateTokenResult,
-      });
+      validateTokenResult;
     } catch (error) {
       res.status(401).send({
         isError: true,
@@ -351,7 +353,7 @@ module.exports = {
           message: "Data is found",
           data: findUsers,
         });
-    } catch (error) {}
+    } catch (error) { }
   },
 
   uploadPhoto: async (req, res) => {
@@ -490,4 +492,74 @@ module.exports = {
       });
     }
   },
+
+  getUser: async (req, res) => {
+    const { uid } = req.uid;
+    try {
+      const {
+        id,
+        first_name,
+        last_name,
+        email,
+        gender,
+        birth_date,
+        birth_place,
+        is_Updated,
+        user_addresses,
+      } = await db.user.findOne({
+        where: { uid },
+        include: { model: db.user_address },
+      });
+      const httpStatus = new HTTPStatus(res, {
+        id,
+        first_name,
+        last_name,
+        email,
+        gender,
+        birth_date,
+        birth_place,
+        is_Updated,
+        user_addresses: {
+          main_address: user_addresses.filter((value) => {
+            return value.main_address === true;
+          }),
+          address: user_addresses.filter((value) => {
+            return value.main_address === false;
+          }),
+        },
+      }).success("Get user profile");
+      httpStatus.send();
+    } catch (error) {
+      console.log(error);
+
+      res.status(400).send({
+        isError: true,
+        message: error.message,
+        data: error,
+      });
+    }
+  },
+
+  getToken: async (req, res) => {
+    try {
+
+      res.status(201).send({
+        isError: false,
+        message: "token ada",
+        data: req.uid,
+      })
+
+
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: error
+      })
+    }
+  }
+
 };
+
+
+

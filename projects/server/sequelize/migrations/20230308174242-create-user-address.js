@@ -2,14 +2,21 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('warehouse', {
+    await queryInterface.createTable('user_addresses', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
+      main_address: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+      street_address: {
+        type: Sequelize.STRING
+      },
+      subdistrict: {
         type: Sequelize.STRING
       },
       city: {
@@ -18,25 +25,26 @@ module.exports = {
       province: {
         type: Sequelize.STRING
       },
-      lat: {
-        type: Sequelize.GEOMETRY('POINT')
+      recipient_name: {
+        type: Sequelize.STRING
       },
-      lng: {
-        type: Sequelize.GEOMETRY('POINT')
+      recipient_phone: {
+        type: Sequelize.INTEGER
+      },
+      postal_code: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
-        , defaultValue: Sequelize.NOW
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
-        , defaultValue: Sequelize.NOW
       }
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('warehouse');
+    await queryInterface.dropTable('user_addresses');
   }
 };
