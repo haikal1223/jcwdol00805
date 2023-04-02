@@ -49,7 +49,7 @@ const Product = () => {
             {productData.name}
           </Text>
           <Text align='center'>
-            {productData.price}
+            {productData.price?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
           </Text>
 
           <Box p='5'>

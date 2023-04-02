@@ -112,7 +112,7 @@ export default function Activation() {
     };
 
     let navigateLogin = () => {
-        navigate("/login");
+        navigate("/");
     };
 
     let navigateRegister = () => {
