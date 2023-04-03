@@ -150,7 +150,7 @@ export default function Cart() {
           >
             Total Price:{" "}
             <Text fontSize={24} fontWeight={700}>
-              Rp{totalPrice.toLocaleString()}.00
+              Rp{totalPrice.toLocaleString('id-ID')}
             </Text>
           </Text>
         </>
