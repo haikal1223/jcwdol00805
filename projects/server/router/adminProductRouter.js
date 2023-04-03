@@ -5,7 +5,7 @@ const Router = express.Router()
 const { adminProductController } = require('../controller')
 
 Router.get('/fetch/:id', adminProductController.fetchDetail)
-Router.get('/edit-stock/:id', adminProductController.editStock)
+Router.patch('/edit-stock/:id', adminProductController.editStock)
 
 
 module.exports = Router

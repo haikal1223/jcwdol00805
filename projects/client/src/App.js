@@ -173,7 +173,7 @@ function App() {
               }
             />  
             <Route 
-              path='/admin/product/1' 
+              path='/admin/product/:product_id' 
               element={
                 <AuthAdmin>
                   <AdminProductDetail />

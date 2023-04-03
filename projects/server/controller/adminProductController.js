@@ -47,10 +47,12 @@ module.exports = {
             )
 
             let log = await sequelize.query(
-                `SELECT a.*, b.email, b.role
+                `SELECT a.*, b.email, b.role, c.name
                 FROM stock_log a
                 LEFT JOIN users b
                 ON a.user_uid = b.uid
+                LEFT JOIN warehouse c
+                ON a.warehouse_id = c.id
                 WHERE a.product_id = ${id}
                 ORDER BY createdAt DESC`
             )

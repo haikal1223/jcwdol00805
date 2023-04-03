@@ -40,11 +40,11 @@ export default function OrderDetail(props) {
                 <Text className="font-ibmMed text-lg">User info</Text>
                 <hr className="border border-lgrey w-[100%]" />
                 <HStack w="full" justify={"space-between"}>
-                    <Text className="text-grey">user_id</Text>
+                    <Text className="font-ibmReg text-grey">user_id</Text>
                     <Text className="font-ibmMed">{user_uid}</Text>
                 </HStack>
                 <HStack w="full" justify={"space-between"}>
-                    <Text className="text-grey">email</Text>
+                    <Text className="font-ibmReg text-grey">email</Text>
                     <Text className="font-ibmMed">{user_email}</Text>
                 </HStack>
                 <br />
@@ -65,7 +65,7 @@ export default function OrderDetail(props) {
                                 {val.name}
                                 </Link>
                                 <HStack w="full" justify={"space-between"}>
-                                    <Text className="text-grey">{val.product_quantity} x Rp {val.product_price.toLocaleString()}</Text>
+                                    <Text className="font-ibmReg text-grey">{val.product_quantity} x Rp {val.product_price.toLocaleString()}</Text>
                                     <Text color={"#5D5FEF"} className='font-ibmMed'>Rp {val.subtotal.toLocaleString()}</Text>
                                 </HStack>
                             </VStack>
@@ -77,11 +77,11 @@ export default function OrderDetail(props) {
                 <Text className="font-ibmMed text-lg">Shipping</Text>
                 <hr className="border border-lgrey w-[100%]" />
                 <HStack w="full" justify={"space-between"}>
-                    <Text className="text-grey">warehouse</Text>
+                    <Text className="font-ibmReg text-grey">warehouse</Text>
                     <Text className="font-ibmMed">{wh_name}</Text>
                 </HStack>
                 <HStack w="full" justify={"space-between"}>
-                    <Text className="text-grey">shipping cost</Text>
+                    <Text className="font-ibmReg text-grey">shipping cost</Text>
                     <Text color={"#5D5FEF"} className="font-ibmMed">Rp {shipping_cost.toLocaleString()}</Text>
                 </HStack>
                 <br />
@@ -89,11 +89,11 @@ export default function OrderDetail(props) {
                 <Text className="font-ibmMed text-lg">Transaction</Text>
                 <hr className="border border-lgrey w-[100%]" />
                 <HStack w="full" justify={"space-between"}>
-                    <Text className="text-grey">paid amount</Text>
+                    <Text className="font-ibmReg text-grey">paid amount</Text>
                     <Text color={"#5D5FEF"} className="font-ibmMed">Rp {paid_amount.toLocaleString()}</Text>
                 </HStack>
                 <HStack w="full" justify={"space-between"}>
-                    <Text className="text-grey">payment proof</Text>
+                    <Text className="font-ibmReg text-grey">payment proof</Text>
                     <Text maxWidth={'200px'} className="line-clamp-1 font-ibmMed">{payment_proof}</Text>
                 </HStack>
             </VStack>
