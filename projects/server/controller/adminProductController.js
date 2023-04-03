@@ -39,7 +39,7 @@ module.exports = {
             )
             
             let stock = await sequelize.query(
-                `SELECT b.name, a.stock
+                `SELECT b.id, b.name, b.city, a.stock
                 FROM product_stock a
                 LEFT JOIN warehouse b
                 ON a.warehouse_id = b.id
