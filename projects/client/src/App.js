@@ -145,6 +145,16 @@ function App() {
           />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
+                  {/* Admin Routing */}
+            <Route path='/admin' element={<AdminHome />}/>
+            <Route 
+              path='/admin/user' 
+              element={
+                <AuthAdmin>
+                  <AdminUser />
+                </AuthAdmin>
+              }
+            />
 
         </Routes>
         {window.location.pathname.includes('/admin')?<></>:<Footer />}
