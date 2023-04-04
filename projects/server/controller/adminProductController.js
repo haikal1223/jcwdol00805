@@ -123,5 +123,136 @@ module.exports = {
                 data: null
             })
         }
+    },
+
+    fetchWarehouse: async(req, res) => {
+        try {
+            // fetch product id
+            let { id } = req.params
+            let { whid } = req.query
+
+            let whLimit = ''
+            if (whid != 'all') {
+                whLimit = ` AND id = ${parseInt(whid)}`
+            }
+
+            // run query
+            let warehouses = await sequelize.query(
+                `SELECT id, name from warehouse
+                WHERE id NOT IN (
+                    SELECT warehouse_id FROM product_stock
+                    WHERE product_id = ${id}
+                )${whLimit}`
+            )
+            
+            // response
+            res.status(201).send({
+                isError: false,
+                message: 'Available warehouse fetched',
+                data: warehouses
+            })
+
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: error.message,
+                data: null
+            })
+        }
+    },
+
+    addStock: async(req, res) => {
+        try {
+            // fetch product id, wh id, stock
+            let { id } = req.params
+            let { whid, stock, uid } = req.body
+
+            // verify if wh available
+            let verifyWh = await db.product_stock.findOne({
+                where: {
+                    product_id: parseInt(id),
+                    warehouse_id: whid,
+                }
+            })
+
+            // if wh already exist
+            if(verifyWh) {
+                return res.status(500).send({
+                    isError: true,
+                    message: 'stock for this warehouse already exist',
+                    data: null
+                })
+            } else {
+                // run query
+                await db.product_stock.create({
+                    product_id: parseInt(id),
+                    warehouse_id: whid,
+                    stock: stock
+                })
+
+                await db.stock_log.create({
+                    product_id: parseInt(id),
+                    warehouse_id: whid,
+                    old_stock: 0,
+                    new_stock: stock,
+                    operation: 'edit',
+                    user_uid: uid
+                }) 
+            }
+
+            // response
+            res.status(201).send({
+                isError: false,
+                message: 'Stock added',
+                data: true
+            })
+
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: error.message,
+                data: null
+            })
+        }
+    },
+
+    deleteStock: async(req, res) => {
+        try {
+            // fetch product id & wh id
+            let { id } = req.params
+            let { wh, stock, uid } = req.query
+
+            // run query
+            await db.product_stock.destroy({
+                where : {
+                    product_id: parseInt(id),
+                    warehouse_id: parseInt(wh)
+                }
+            })
+
+            await db.stock_log.create({
+                product_id: parseInt(id),
+                warehouse_id: wh,
+                old_stock: stock,
+                new_stock: 0,
+                operation: 'edit',
+                user_uid: uid
+            }) 
+
+            // response
+            res.status(201).send({
+                isError: false,
+                message: 'Stock deleted',
+                data: true
+            })
+
+
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: error.message,
+                data: null
+            })
+        }
     }
 }
