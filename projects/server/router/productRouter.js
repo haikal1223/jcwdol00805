@@ -13,5 +13,6 @@ Router.get('/view', productController.viewProduct)
 Router.get('/productData', productController.viewProductData)
 Router.get('/detail', productController.viewDetailProduct)
 Router.get('/productStock', productController.viewProductStock)
+Router.get('/fetchProduct', productController.fetchProduct)
 
 module.exports = Router
