@@ -28,6 +28,7 @@ module.exports = {
         try {
             // fetch product id
             let { id } = req.params
+            let { row, offset } = req.query
 
             // run query
             let detail = await sequelize.query(
@@ -54,7 +55,12 @@ module.exports = {
                 LEFT JOIN warehouse c
                 ON a.warehouse_id = c.id
                 WHERE a.product_id = ${id}
-                ORDER BY createdAt DESC`
+                ORDER BY createdAt DESC LIMIT ${row} OFFSET ${offset}`
+            )
+
+            let countLog = await sequelize.query(
+                `SELECT count(id) as num_log FROM stock_log
+                WHERE product_id = ${id}`
             )
 
             // response
@@ -64,7 +70,8 @@ module.exports = {
                 data: {
                     detail,
                     stock,
-                    log
+                    log,
+                    countLog
                 }
             })
 

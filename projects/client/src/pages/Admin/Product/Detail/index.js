@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/sidebar";
+import {TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight} from 'react-icons/tb'
 import { 
   Box
   , Button
   , HStack
+  , IconButton
   , Image
   , Text
   , Table
@@ -22,11 +24,16 @@ const AdminProductDetail = () => {
   const { product_id } = useParams()
 
   const [uid, setUid] = useState('')
+  const [whAdmin, setWhAdmin] = useState('')
   const [productDetail, setProductDetail] = useState([])
   const [stockDetail, setStockDetail] = useState([])
   const [log, setLog] = useState([])
   const [editMode, setEditMode] = useState(false)
   const [editStock, setEditStock] = useState({})
+
+  const [page, setPage] = useState(1)
+  const [maxPage, setMaxPage] = useState(0)
+  const rowPerPage = 5
 
   const getUid = async () => {
     try {
@@ -40,9 +47,23 @@ const AdminProductDetail = () => {
     }
   };
 
+  const fetchWarehouse = async () => {
+    if(uid) {
+        try {
+            let response = await axios.get(
+                `http://localhost:8000/admin/fetch-warehouse?uid=${uid}`
+            )
+            setWhAdmin(response.data.data[0][0].wh_id)
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
+}
+
   const fetchProductDetail = async() => {
+    const offset = (page - 1) * rowPerPage
     try {
-      let response = await axios.get(`http://localhost:8000/admin-product/fetch/${product_id}`)
+      let response = await axios.get(`http://localhost:8000/admin-product/fetch/${product_id}?row=${rowPerPage}&offset=${offset}`)
       setProductDetail(response.data.data.detail[0][0])
       setStockDetail(response.data.data.stock[0])
       setLog(response.data.data.log[0])
@@ -52,6 +73,7 @@ const AdminProductDetail = () => {
           return obj
         }, {})
       )
+      setMaxPage(Math.ceil(parseInt(response.data.data.countLog[0][0].num_log) / rowPerPage))
     } catch (error) {
       console.log(error.message)
     }
@@ -62,20 +84,48 @@ const AdminProductDetail = () => {
   }
 
   const handleSaveStock = async (whId, oldVal) => {
-    console.log(oldVal, editStock[whId], whId, uid)
-    await axios.patch(`http://localhost:8000/admin-product/edit-stock/${product_id}`,{
-      whid: whId, 
-      oldStock: oldVal, 
-      newStock: editStock[whId], 
-      uid: uid
-    })
-    setEditMode({...editMode, [whId]: false})
+    if(oldVal !== parseInt(editStock[whId])) {
+      await axios.patch(`http://localhost:8000/admin-product/edit-stock/${product_id}`,{
+        whid: whId, 
+        oldStock: oldVal, 
+        newStock: parseInt(editStock[whId]), 
+        uid: uid
+      })
+      setEditMode({...editMode, [whId]: false})
+    } else {
+      setEditMode({...editMode, [whId]: false})
+    }
+  }
+
+  // pagination
+  const nextPageHandler = () => {
+    if(page < maxPage) {
+        setPage(page + 1)
+    }
+  }
+  const prevPageHandler = () => {
+      if(page > 1) {
+          setPage(page - 1)
+      }
+  }
+  const firstPageHandler = () => {
+      if(page > 1) {
+          setPage(1)
+      }
+  }
+  const maxPageHandler = () => {
+      if(page < maxPage) {
+          setPage(maxPage)
+      }
   }
 
   useEffect(() => {
     fetchProductDetail()
     getUid()
-  }, [editMode])
+  }, [editMode, page])
+  useEffect(() => {
+    fetchWarehouse()
+  },[uid])
   
   return (
     <div className="w-[100%] flex flex-1 justify-between">
@@ -84,7 +134,7 @@ const AdminProductDetail = () => {
         <div className="w-[1140px] min-h-screen flex justify-center items-start overflow-auto ">
           
             {/*REPLACE BELOW FOR CONTENT*/}
-            <Box className="bg-white w-full h-[1100px] drop-shadow-md p-9">
+            <Box className="bg-white w-full h-auto drop-shadow-md p-9">
                 <Text className="font-ibmMed text-4xl">Product #{productDetail.id}</Text>
                 <br />
                 <VStack spacing={2} align="flex-start" w="full"className="pb-5">
@@ -121,60 +171,66 @@ const AdminProductDetail = () => {
 
                   <Text className="font-ibmMed text-lg">Stock Breakdown</Text>
                   <hr className="w-[100%] my-4 border-[2px]"/>
-                  <TableContainer>
-                    <Table variant='simple'>
-                        <Thead>
-                        <Tr className="font-bold bg-[#f1f1f1]">
-                            <Td>warehouse</Td>
-                            <Td className="w-[250px]">city</Td>
-                            <Td w={'80px'}>stock</Td>
-                            <Td>action</Td>
-                        </Tr>
-                        </Thead>
-                        <Tbody className="bg-white">
-                            {
-                              stockDetail.map((val, idx) => {
-                                return (
-                                  <Tr key={idx} className='bg-white'>
-                                      <Td>{val.name}</Td>
-                                      <Td className="w-[250px]">{val.city}</Td>
-                                      <Td w={'80px'}>
-                                        {
-                                          editMode[val.id]?
-                                          <Input 
-                                            w={'80px'}
-                                            variant="filled"
-                                            value={editStock[val.id]}
-                                            onChange={(event) => setEditStock({
-                                              ...editStock,
-                                              [val.id]:event.target.value
-                                            })}
-                                          />
-                                          :
-                                          <>{val.stock}</>
-                                        }
-                                      </Td>
-                                      <Td>
+                  <Box maxH={'300px'} overflow={'auto'}>
+                      <Table h={'100%'} variant='simple'>
+                          <Thead position='sticky' top={0} zIndex={1}>
+                          <Tr position='sticky' top={0} zIndex={1} className="font-bold bg-[#f1f1f1]">
+                              <Td>warehouse</Td>
+                              <Td className="w-[250px]">city</Td>
+                              <Td w={'80px'}>stock</Td>
+                              <Td>action</Td>
+                          </Tr>
+                          </Thead>
+                          <Tbody className="bg-white">
+                              {
+                                stockDetail.map((val, idx) => {
+                                  return (
+                                    <Tr key={idx} className='bg-white'>
+                                        <Td>{val.name}</Td>
+                                        <Td className="w-[250px]">{val.city}</Td>
+                                        <Td w={'80px'}>
                                           {
                                             editMode[val.id]?
-                                            <Button 
-                                              isDisabled={editStock[val.id] === ''} 
-                                              color={'#5D5FEF'} 
-                                              variant={'ghost'} 
-                                              onClick={() => handleSaveStock(val.id, val.stock)}>
-                                              save
-                                            </Button>
-                                            : 
-                                            <Button color={'#5D5FEF'} variant={'ghost'} onClick={() => handleEditStock(val.id)}>edit</Button>
+                                            <Input 
+                                              w={'80px'}
+                                              variant="filled"
+                                              value={editStock[val.id]}
+                                              onChange={(event) => setEditStock({
+                                                ...editStock,
+                                                [val.id]:event.target.value
+                                              })}
+                                            />
+                                            :
+                                            <>{val.stock}</>
                                           }
-                                      </Td>
-                                  </Tr>
-                                )
-                              })
-                            }
-                        </Tbody>
-                    </Table>
-                  </TableContainer>
+                                        </Td>
+                                        <Td>
+                                            {
+                                              editMode[val.id]?
+                                              <Button 
+                                                isDisabled={editStock[val.id] === ''} 
+                                                color={'#5D5FEF'} 
+                                                variant={'ghost'} 
+                                                onClick={() => handleSaveStock(val.id, val.stock)}>
+                                                save
+                                              </Button>
+                                              : 
+                                              <Button 
+                                                isDisabled={whAdmin !== 'all' && whAdmin != val.id}
+                                                color={'#5D5FEF'} 
+                                                variant={'ghost'} 
+                                                onClick={() => handleEditStock(val.id)}>
+                                                  edit
+                                              </Button>
+                                            }
+                                        </Td>
+                                    </Tr>
+                                  )
+                                })
+                              }
+                          </Tbody>
+                      </Table>
+                  </Box>
                   <br />
 
                   <Text className="font-ibmMed text-lg">Log</Text>
@@ -221,6 +277,13 @@ const AdminProductDetail = () => {
                         </Tbody>
                     </Table>
                   </TableContainer>
+                  <div className='w-[100%] mt-5 flex justify-center items-center gap-5'>
+                      <IconButton isDisabled={page === 1} onClick={firstPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbChevronsLeft color='white' boxsize={'16px'}/>}/>
+                      <IconButton isDisabled={page === 1} onClick={prevPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbChevronLeft color='white' boxsize={'16px'}/>}/>
+                          <div className='font-ibmReg text-dgrey'>Page {page} / {maxPage}</div>
+                      <IconButton isDisabled={page === maxPage} onClick={nextPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbChevronRight color='white' boxsize={'16px'}/>}/>
+                      <IconButton isDisabled={page === maxPage} onClick={maxPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbChevronsRight color='white' boxsize={'16px'}/>}/>
+                  </div>
                   <br />
 
                 </VStack>
