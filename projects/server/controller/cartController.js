@@ -313,6 +313,7 @@ module.exports = {
         data: error,
       });
     }
+  },
 
 
   delCart: async (req, res) => {
