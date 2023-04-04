@@ -14,7 +14,6 @@ module.exports = {
 
     try {
       const validateTokenResult = validateToken(token);
-      // console.log(validateTokenResult)
       req.uid = validateTokenResult;
 
       next();
