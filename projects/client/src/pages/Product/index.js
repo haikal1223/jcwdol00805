@@ -45,14 +45,15 @@ export default function Product(props) {
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
       setUserId(response.data.data.id);
-      let user_id = response.data.data.id;
-      let getCartFilterProduct = await axios.get(
-        `http://localhost:8000/cart/getCartFilterProduct?user_id=${user_id}&product_id=${id}`
-      );
-      if (getCartFilterProduct.data.data[0]) {
-        setQuantity(getCartFilterProduct.data.data[0].quantity + 1);
-      } else {
-        setQuantity(1);
+      if (id) {
+        let getCartFilterProduct = await axios.get(
+          `http://localhost:8000/cart/getCartFilterProduct?user_id=${userId}&product_id=${id}`
+        );
+        if (getCartFilterProduct.data.data[0]) {
+          setQuantity(getCartFilterProduct.data.data[0].quantity + 1);
+        } else {
+          setQuantity(1);
+        }
       }
     } catch (error) {}
   };
@@ -73,9 +74,11 @@ export default function Product(props) {
 
   useEffect(() => {
     getProductDetail();
-    getCartFilterProduct();
     getProductStock();
   }, []);
+  useEffect(() => {
+    getCartFilterProduct();
+  }, [userId]);
 
   let handleAddOrder = async () => {
     try {
