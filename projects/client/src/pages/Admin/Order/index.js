@@ -5,6 +5,7 @@ import {TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight} from 're
 import { 
     Box
     , Button
+    , HStack
     , IconButton
     , Input
     , InputGroup
@@ -36,6 +37,7 @@ const AdminOrder = () => {
     const [filteredOrder, setFilteredOrder] = useState([])
     const [whList, setWhList] = useState([])
     const [search, setSearch] = useState(false)
+    const [sort, setSort] = useState('ORDER BY a.createdAt DESC, a.id DESC')
     const [page, setPage] = useState(1)
     const [maxPage, setMaxPage] = useState(0)
     const rowPerPage = 10
@@ -49,7 +51,7 @@ const AdminOrder = () => {
           let response = await axios.get(
             `http://localhost:8000/admin/verify-token?token=${token}`
           );
-            setUid(response.data.data.uid)
+            setUid(response.data.data.id)
         } catch (error) {
             console.log(error.message)
         }
@@ -59,7 +61,7 @@ const AdminOrder = () => {
         if(uid) {
             try {
                 let response = await axios.get(
-                    `http://localhost:8000/admin/fetch-warehouse?uid=${uid}`
+                    `http://localhost:8000/admin/fetch-warehouse?id=${uid}`
                 )
                 setWhid(response.data.data[0][0].wh_id)
             } catch (error) {
@@ -73,7 +75,7 @@ const AdminOrder = () => {
         if(whid) {
             try {
                 let response = await axios.get(
-                    `http://localhost:8000/admin-order/view/${whid}?id=${filter.searchOrderId}&wh=${filter.filterWarehouse}&offset=${offset}&row=${rowPerPage}`
+                    `http://localhost:8000/admin-order/view/${whid}?id=${filter.searchOrderId}&wh=${filter.filterWarehouse}&sort=${sort}&offset=${offset}&row=${rowPerPage}`
                 )
                 setOrderList(response.data.data.orders[0])
                 setFilteredOrder(response.data.data.orders[0])
@@ -108,6 +110,23 @@ const AdminOrder = () => {
 
     const renderOrder = () => {
             return filteredOrder.map((val, idx) => {
+            const createDate = new Date(val.createdAt)
+            const formattedCreateDate = createDate.getFullYear() + '-' + 
+                                        ('0' + (createDate.getMonth()+1)).slice(-2) + '-' + 
+                                        ('0' + createDate.getDate()).slice(-2) + ' ' +
+                                        ('0' + createDate.getHours()).slice(-2) + ':' + 
+                                        ('0' + createDate.getMinutes()).slice(-2) + ':' + 
+                                        ('0' + createDate.getSeconds()).slice(-2) + ' ' +
+                                        '+' + ('0' + (-createDate.getTimezoneOffset()/60)).slice(-2) + '00';
+            const updateDate = new Date(val.updatedAt)
+            const formattedUpdateDate = updateDate.getFullYear() + '-' + 
+                                        ('0' + (updateDate.getMonth()+1)).slice(-2) + '-' + 
+                                        ('0' + updateDate.getDate()).slice(-2) + ' ' +
+                                        ('0' + updateDate.getHours()).slice(-2) + ':' + 
+                                        ('0' + updateDate.getMinutes()).slice(-2) + ':' + 
+                                        ('0' + updateDate.getSeconds()).slice(-2) + ' ' +
+                                        '+' + ('0' + (-updateDate.getTimezoneOffset()/60)).slice(-2) + '00';
+
             return (
                 <Tr key={idx} className='bg-white'>
                     <Td>{val.id}</Td>
@@ -115,8 +134,8 @@ const AdminOrder = () => {
                     <Td>{val.num_item}</Td>
                     <Td>{"Rp "+val.paid_amount.toLocaleString()}</Td>
                     <Td>{val.wh_name}</Td>
-                    <Td>{val.createdAt.substr(0,10)}</Td>
-                    <Td>{val.updatedAt.substr(0,10)}</Td>
+                    <Td>{formattedCreateDate}</Td>
+                    <Td>{formattedUpdateDate}</Td>
                     <Td>{val.status}</Td>
                     <Td className="grid grid-cols-3 w-[250px] sticky right-0 z-50 bg-white shadow-[-10px_0px_30px_0px_#efefef]">
                         <Button color={'#5D5FEF'} variant={'link'} onClick={() => handleModalOpen(val.id)}>view</Button>
@@ -155,7 +174,7 @@ const AdminOrder = () => {
         }
     }
 
-    // search & filter
+    // search, sort & filter
     const whOptions = [...new Set(whList.map(val => val.wh_name))]
     const searchInputHandler = (e) => {
         const name = e.target.name
@@ -169,6 +188,10 @@ const AdminOrder = () => {
         setPage(1)
         setSearch(!search)
     }
+    const sortHandler = (e) => {
+        const value = e.target.value
+        setSort(value)
+    }
     
     useEffect(() => {
         getUid()
@@ -178,7 +201,7 @@ const AdminOrder = () => {
     },[uid])
     useEffect(() => {
         fetchOrder()
-    },[whid, page, search])
+    },[whid, page, search, sort])
     
 
   return (
@@ -191,22 +214,28 @@ const AdminOrder = () => {
             <Box className="bg-white w-full h-[1100px] drop-shadow-md p-9">
                 <Text className="font-ibmMed text-4xl">Order List</Text>
                 <hr className="my-4 border-[2px]"/>
-                <div className="flex justify-start gap-2">
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                        <InputGroup>
-                            <Input name="searchOrderId" onChange={searchInputHandler} placeholder='... search by order id' className='p-1'/>
-                            <InputRightElement pointerEvents='none' children={<Search2Icon/>}/>
-                        </InputGroup>
-                        <Select name="filterWarehouse" placeholder='All warehouse' color={'gray'} onChange={searchInputHandler}>
-                            {whOptions.map((val,idx) => {
-                                return (
-                                    <option value={val}>{val}</option>
-                                )
-                            })}
-                        </Select>
+                <HStack justifyContent={'space-between'} className="mb-4">
+                    <div className="flex justify-start gap-2">
+                        <div className="grid grid-cols-2 gap-2">
+                            <InputGroup>
+                                <Input name="searchOrderId" onChange={searchInputHandler} placeholder='... search by order id' className='p-1'/>
+                                <InputRightElement pointerEvents='none' children={<Search2Icon/>}/>
+                            </InputGroup>
+                            <Select name="filterWarehouse" placeholder='All warehouse' color={'gray'} onChange={searchInputHandler}>
+                                {whOptions.map((val,idx) => {
+                                    return (
+                                        <option value={val} key={idx}>{val}</option>
+                                    )
+                                })}
+                            </Select>
+                        </div>
+                        <IconButton onClick={searchButtonHandler} bg='#5D5FEF' aria-label='search product' icon={<Search2Icon color='white'/>}/>
                     </div>
-                    <IconButton onClick={searchButtonHandler} bg='#5D5FEF' aria-label='search product' icon={<Search2Icon color='white'/>}/>
-                </div>
+                    <Select w={'auto'} color={'gray'} onChange={sortHandler}>
+                        <option value="ORDER BY a.createdAt DESC, a.id DESC">order by create date (Z-A)</option>
+                        <option value="ORDER BY a.createdAt ASC, a.id ASC">order by create date (A-Z)</option>
+                    </Select>
+                </HStack>
                 <TableContainer>
                     <Table variant='simple'>
                         <Thead>

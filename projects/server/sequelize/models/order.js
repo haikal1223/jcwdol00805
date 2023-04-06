@@ -15,12 +15,18 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'order_status_id'
       })
       this.belongsTo(models.user, {
-        foreignKey: 'user_uid'
+        foreignKey: 'user_id'
       })
       this.belongsTo(models.warehouse, {
         foreignKey: 'warehouse_id'
       })
       this.hasMany(models.order_detail,{
+        foreignKey: 'order_id'
+      })
+      this.hasMany(models.stock_mutation,{
+        foreignKey: 'order_id'
+      })
+      this.hasMany(models.stock_log,{
         foreignKey: 'order_id'
       })
     }
