@@ -53,7 +53,7 @@ module.exports = {
                     isError: false,
                     message: "Login Success",
                     data: {
-                        token: createToken({uid: findEmail.dataValues.uid}),
+                        token: createToken({id: findEmail.dataValues.id}),
                         email: findEmail.dataValues.email,
                         role: findEmail.dataValues.role
                     },
@@ -99,7 +99,7 @@ module.exports = {
     fetchWarehouse : async(req, res) => {
         try {
             // get value
-            let { uid } = req.query
+            let { id } = req.query
 
             // fetch wh_id
             let get_whid = await sequelize.query(
@@ -109,8 +109,8 @@ module.exports = {
                 END AS wh_id
                 FROM wh_admin 
                 JOIN users a
-                ON a.uid = wh_admin.user_uid
-                WHERE user_uid='${uid}'`
+                ON a.id = wh_admin.user_id
+                WHERE user_id='${id}'`
             )
 
             // send response

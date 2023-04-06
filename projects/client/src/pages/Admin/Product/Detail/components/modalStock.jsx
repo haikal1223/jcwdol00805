@@ -30,7 +30,7 @@ const ModalStock = (props) => {
 
     const addStock = async () => {
         try {
-          await axios.post(`http://localhost:8000/admin-product/add-stock/22`, {
+          await axios.post(`http://localhost:8000/admin-product/add-stock/${props.id}`, {
             whid: data.warehouse,
             stock: data.stock,
             uid: props.uid
@@ -45,7 +45,7 @@ const ModalStock = (props) => {
             console.log(error.message)
         }
     }
-
+console.log(props.id)
   return (
     <>
         <ModalCloseButton/>

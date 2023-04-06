@@ -66,7 +66,7 @@ const AdminProductDetail = () => {
       let response = await axios.get(
         `http://localhost:8000/admin/verify-token?token=${token}`
       );
-      setUid(response.data.data.uid);
+      setUid(response.data.data.id);
     } catch (error) {
       console.log(error.message);
     }
@@ -76,7 +76,7 @@ const AdminProductDetail = () => {
     if (uid) {
       try {
         let response = await axios.get(
-          `http://localhost:8000/admin/fetch-warehouse?uid=${uid}`
+          `http://localhost:8000/admin/fetch-warehouse?id=${uid}`
         );
         setWhAdmin(response.data.data[0][0].wh_id);
       } catch (error) {
@@ -338,7 +338,7 @@ const AdminProductDetail = () => {
               <Modal isOpen={isModalOpen} onClose={handleModalClose} scrollBehavior={'inside'} size={'lg'}>
                   <ModalOverlay />
                   <ModalContent>
-                      <ModalStock data={whList} uid={uid} close={handleModalClose}/>
+                      <ModalStock data={whList} uid={uid} id={product_id} close={handleModalClose}/>
                   </ModalContent>
               </Modal >
               <br />

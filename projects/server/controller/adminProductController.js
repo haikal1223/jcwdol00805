@@ -51,7 +51,7 @@ module.exports = {
                 `SELECT a.*, b.email, b.role, c.name
                 FROM stock_log a
                 LEFT JOIN users b
-                ON a.user_uid = b.uid
+                ON a.user_id = b.id
                 LEFT JOIN warehouse c
                 ON a.warehouse_id = c.id
                 WHERE a.product_id = ${id}
@@ -105,7 +105,7 @@ module.exports = {
                 old_stock: oldStock,
                 new_stock: newStock,
                 operation: 'edit',
-                user_uid: uid
+                user_id: uid
             }) 
 
             // response
@@ -196,7 +196,7 @@ module.exports = {
                     old_stock: 0,
                     new_stock: stock,
                     operation: 'edit',
-                    user_uid: uid
+                    user_id: uid
                 }) 
             }
 
@@ -236,7 +236,7 @@ module.exports = {
                 old_stock: stock,
                 new_stock: 0,
                 operation: 'edit',
-                user_uid: uid
+                user_id: uid
             }) 
 
             // response

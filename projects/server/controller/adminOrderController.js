@@ -28,7 +28,7 @@ module.exports = {
         try {
             // limit by warehouse id
             let { wh_id } = req.params
-            let { id, wh, offset, row } = req.query
+            let { id, wh, sort, offset, row } = req.query
 
             let whereClause
             if (wh_id === 'all') {
@@ -52,9 +52,9 @@ module.exports = {
                 FROM db_warehouse.order a 
                 LEFT JOIN order_status b ON a.order_status_id=b.id
                 LEFT JOIN warehouse c ON a.warehouse_id = c.id
-                LEFT JOIN users d ON a.user_uid = d.uid
+                LEFT JOIN users d ON a.user_id = d.id
                 LEFT JOIN order_detail e ON a.id = e.order_id
-                ${whereClause} GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13 ORDER BY id DESC LIMIT ${row} OFFSET ${offset}`
+                ${whereClause} GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13 ${sort} LIMIT ${row} OFFSET ${offset}`
             )
 
             let countOrders = await sequelize.query(
@@ -62,7 +62,7 @@ module.exports = {
                 FROM db_warehouse.order a 
                 LEFT JOIN order_status b ON a.order_status_id=b.id
                 LEFT JOIN warehouse c ON a.warehouse_id = c.id
-                LEFT JOIN users d ON a.user_uid = d.uid
+                LEFT JOIN users d ON a.user_id = d.id
                 LEFT JOIN order_detail e ON a.id = e.order_id
                 ${whereClause}`
             )
@@ -72,7 +72,7 @@ module.exports = {
                 FROM db_warehouse.order a 
                 LEFT JOIN order_status b ON a.order_status_id=b.id
                 LEFT JOIN warehouse c ON a.warehouse_id = c.id
-                LEFT JOIN users d ON a.user_uid = d.uid
+                LEFT JOIN users d ON a.user_id = d.id
                 LEFT JOIN order_detail e ON a.id = e.order_id
                 ${wh_id === 'all'?'':`WHERE warehouse_id = ${wh_id}`}`
             )
@@ -107,7 +107,7 @@ module.exports = {
                 FROM db_warehouse.order a 
                 LEFT JOIN order_status b ON a.order_status_id=b.id
                 LEFT JOIN warehouse c ON a.warehouse_id = c.id
-                LEFT JOIN users d ON a.user_uid = d.uid
+                LEFT JOIN users d ON a.user_id = d.id
                 WHERE a.id=${id}`
             )
 

@@ -19,7 +19,7 @@ export default function OrderDetail(props) {
         paid_amount,
         payment_proof,
         shipping_cost,
-        user_uid,
+        user_id,
         user_email,
         wh_name,
         status
@@ -41,7 +41,7 @@ export default function OrderDetail(props) {
                 <hr className="border border-lgrey w-[100%]" />
                 <HStack w="full" justify={"space-between"}>
                     <Text className="font-ibmReg text-grey">user_id</Text>
-                    <Text className="font-ibmMed">{user_uid}</Text>
+                    <Text className="font-ibmMed">{user_id}</Text>
                 </HStack>
                 <HStack w="full" justify={"space-between"}>
                     <Text className="font-ibmReg text-grey">email</Text>
