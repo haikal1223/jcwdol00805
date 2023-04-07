@@ -68,6 +68,7 @@ module.exports = {
       const findUserCart = await db.cart.findAll({
         where: {
           user_id: id,
+          is_checked: 1,
         },
         include: [
           {
@@ -87,6 +88,14 @@ module.exports = {
           },
         ],
       });
+
+      if (!findUserCart) {
+        return res.status(404).send({
+          isError: true,
+          message: "Cart is empty",
+          data: null,
+        });
+      }
 
       return res.status(200).send({
         isError: false,
