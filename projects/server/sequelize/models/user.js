@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'user_id'
       })
       this.hasMany(models.cart, {
-        foreignKey: 'user_id'
+        foreignKey: 'user_uid'
       })
       this.hasMany(models.stock_mutation, {
         foreignKey: 'user_id'

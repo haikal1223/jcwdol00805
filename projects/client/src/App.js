@@ -14,6 +14,7 @@ import RegisterUser from './pages/Register';
 import ForgotPassword from './pages/forgotPassword';
 import UpdatePassword from './pages/newPassword';
 import EditProfile from "./pages/editProfile";
+import CheckOut from "./pages/CheckOut";
 
 //Admin Components
 import AdminHome from "./pages/Admin/Home";
@@ -117,7 +118,8 @@ function App() {
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
           <Route path="/edit-profile" element={<EditProfile />} />
-          <Route path="/product/:id" element={<Product />} />
+          <Route path="/product/:id" element={<Product login={isLoggedIn} />} />
+          <Route path="/checkout" element={<CheckOut />} />
           <Route
             path="/cart"
             element={
@@ -134,6 +136,7 @@ function App() {
               </RequireAuth>
             }
           />
+
           <Route path='/forgotpassword' element={<ForgotPassword />} />
           <Route path='/updatePassword/:uid' element={<UpdatePassword />} />
 
@@ -156,6 +159,7 @@ function App() {
             }
           />    
           
+
         </Routes>
         {window.location.pathname.includes('/admin')?<></>:<Footer />}
         <Toaster />
