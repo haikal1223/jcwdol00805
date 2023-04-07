@@ -29,10 +29,10 @@ const bcrypt = require("bcrypt");
 module.exports = {
   getCartFilterProduct: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       const findCart = await db.cart.findAll({
         where: {
-          user_uid,
+          user_id,
           product_id,
         },
       });
@@ -59,9 +59,15 @@ module.exports = {
         });
       }
 
+      const { id } = await db.user.findOne({
+        where: {
+          uid,
+        },
+      });
+
       const findUserCart = await db.cart.findAll({
         where: {
-          user_uid: uid,
+          user_id: id,
         },
         include: [
           {
@@ -99,12 +105,12 @@ module.exports = {
 
   addCartProduct: async (req, res) => {
     try {
-      let { quantity, price, user_uid, product_id } = req.body;
+      let { quantity, price, user_id, product_id } = req.body;
 
       let dataToSend = await db.cart.create({
         quantity,
         price,
-        user_uid,
+        user_id,
         product_id,
       });
 
@@ -118,7 +124,7 @@ module.exports = {
 
   updateCartProduct: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       let { quantity, price } = req.body;
       let dataToSend = await db.cart.update(
         {
@@ -127,7 +133,7 @@ module.exports = {
         },
         {
           where: {
-            user_uid,
+            user_id,
             product_id,
           },
         }
@@ -156,6 +162,7 @@ module.exports = {
 
     try {
       const { id } = await db.user.findOne({ where: { uid } });
+      console.log("id", id);
       if (main_address) {
         await db.user_address.update(
           { main_address: false },
