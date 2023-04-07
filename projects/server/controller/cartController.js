@@ -29,10 +29,10 @@ const bcrypt = require("bcrypt");
 module.exports = {
   getCartFilterProduct: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       const findCart = await db.cart.findAll({
         where: {
-          user_uid,
+          user_id,
           product_id,
         },
       });
@@ -48,30 +48,69 @@ module.exports = {
 
   getUserCart: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
-      const findUserCart = await db.cart.findAll({
+      const { uid } = req.uid;
+
+      // Validate uid parameter
+      if (!uid) {
+        return res.status(400).send({
+          isError: true,
+          message: "Invalid user ID",
+          data: null,
+        });
+      }
+
+      const { id } = await db.user.findOne({
         where: {
-          user_uid,
+          uid,
         },
       });
+
+      const findUserCart = await db.cart.findAll({
+        where: {
+          user_id: id,
+        },
+        include: [
+          {
+            model: db.product,
+            attributes: ["name", "price", "product_category_id", "image_url"],
+            include: [
+              {
+                model: db.product_stock,
+                include: [
+                  {
+                    model: db.warehouse,
+                    attributes: ["city"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
       return res.status(200).send({
         isError: false,
-        message: "Ok",
+        message: "Cart items fetched successfully",
         data: findUserCart,
       });
     } catch (error) {
-      console.log(error);
+      // Send error response to the client
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
     }
   },
 
   addCartProduct: async (req, res) => {
     try {
-      let { quantity, price, user_uid, product_id } = req.body;
+      let { quantity, price, user_id, product_id } = req.body;
 
       let dataToSend = await db.cart.create({
         quantity,
         price,
-        user_uid,
+        user_id,
         product_id,
       });
 
@@ -85,7 +124,7 @@ module.exports = {
 
   updateCartProduct: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       let { quantity, price } = req.body;
       let dataToSend = await db.cart.update(
         {
@@ -94,7 +133,7 @@ module.exports = {
         },
         {
           where: {
-            user_uid,
+            user_id,
             product_id,
           },
         }
@@ -107,7 +146,6 @@ module.exports = {
       });
     } catch (error) {}
   },
-
   addAddress: async (req, res) => {
     const t = await sequelize.transaction();
     const { uid } = req.uid;
@@ -124,6 +162,7 @@ module.exports = {
 
     try {
       const { id } = await db.user.findOne({ where: { uid } });
+      console.log("id", id);
       if (main_address) {
         await db.user_address.update(
           { main_address: false },
@@ -224,7 +263,7 @@ module.exports = {
     try {
       const { data } = await axios.get(
         "https://api.rajaongkir.com/starter/province",
-        { headers: { key: "98114927956fc9abdce23deeef6cfb17" } }
+        { headers: { key: "96dc80599e54e6d84bbd8f3b948da258" } }
       );
       res.status(200).send({
         isError: false,
@@ -252,7 +291,7 @@ module.exports = {
       let response = await axios.get(
         `https://api.rajaongkir.com/starter/city?province=${province_id}`,
         {
-          headers: { key: "98114927956fc9abdce23deeef6cfb17" },
+          headers: { key: "96dc80599e54e6d84bbd8f3b948da258" },
         }
       );
 
@@ -293,18 +332,48 @@ module.exports = {
     }
   },
 
-  getCart: async (req, res) => {
+  getStockOrigin: async (req, res) => {
     const { uid } = req.uid;
     try {
-      const { id } = await db.user.findOne({
+      const user = await db.user.findOne({
         where: { uid: uid },
+        include: [
+          {
+            model: db.cart,
+            include: [
+              {
+                model: db.product,
+                include: [
+                  {
+                    model: db.product_stock,
+                    include: [
+                      {
+                        model: db.warehouse,
+                        attributes: ["city"],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       });
 
-      const cart = await db.cart.findAll({
-        where: { user_id: id },
+      const cart = user.carts.map((cart) => {
+        return {
+          quantity: cart.quantity,
+          price: cart.price,
+          product: {
+            name: cart.product.name,
+            price: cart.product.price,
+            image_url: cart.product.image_url,
+            stock: cart.product.product_stocks[0].stock,
+            warehouse_city: cart.product.product_stocks[0].warehouse.city,
+          },
+        };
       });
 
-      console.log(cart);
       res.send({ cart });
     } catch (error) {
       res.status(404).send({
@@ -313,43 +382,5 @@ module.exports = {
         data: error,
       });
     }
-  },
-
-
-  delCart: async (req, res) => {
-    try {
-      let { id } = req.query;
-      let deleteCart = await db.cart.destroy({
-        where: {
-          id,
-        },
-      });
-      res.status(200).send({
-        isError: false,
-        message: "The product is delete",
-        data: null,
-      });
-    } catch (error) {}
-  },
-
-  updateNumberProduct: async (req, res) => {
-    try {
-      let { id } = req.query;
-      let { quantity } = req.body;
-      let updateCart = await db.cart.update(
-        {
-          quantity,
-        },
-        {
-          where: { id },
-        }
-      );
-      res.status(200).send({
-        isError: false,
-        message: "Update cart success",
-        data: null,
-      });
-    } catch (error) {}
-
   },
 };
