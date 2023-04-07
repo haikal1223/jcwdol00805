@@ -1,0 +1,523 @@
+import {
+  ModalOverlay,
+  ModalContent,
+  Input,
+  FormControl,
+  FormLabel,
+  Card,
+  CardBody,
+  Textarea,
+  ModalCloseButton,
+  useDisclosure,
+  Select,
+  Modal,
+  Checkbox,
+  Button,
+  VStack,
+  Text,
+  Heading,
+  Box,
+} from "@chakra-ui/react";
+import { Label, Spinner } from "flowbite-react";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { data } from "autoprefixer";
+import axios from "axios";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+
+export default function CheckOut(props) {
+  const Navigate = useNavigate();
+  const [rakir, setRakir] = useState({
+    main_address: false,
+  });
+  const [address, setAddress] = useState("");
+  const [addresses, setAddresses] = useState([]);
+  const [province, setProvince] = useState([]);
+  const [city, setCity] = useState([]);
+  const [xCity, setxCity] = useState([]);
+  const [allAddress, setAllAddress] = useState([]);
+  const [mainAddress, setMainAddress] = useState({});
+  const [show, setShow] = useState({
+    changeAddress: false,
+    addNewAddress: false,
+    loading: false,
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm();
+
+  const modalAddress = useDisclosure();
+  const modalSwitch = useDisclosure();
+
+  const onAddAddress = async (data) => {
+    setShow({ ...show, loading: true });
+    let token = localStorage.getItem("myToken");
+    try {
+      let postAddress = await axios.post(
+        `http://localhost:8000/cart/new-address`,
+
+        {
+          main_address: rakir.main_address,
+          street_address: data.street_address,
+          subdistrict: data.subdistrict,
+          city: data.city,
+          province: data.province,
+          recipient_name: data.recipient_name,
+          recipient_phone: data.recipient_phone,
+          postal_code: data.postal_code,
+        },
+        {
+          headers: { token: token },
+        }
+      );
+      setAddress(postAddress);
+      toast.success("Address Added");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setShow({ ...show, loading: false });
+      Navigate(0);
+      modalAddress.onClose();
+    }
+  };
+
+  const rakirCity = async (province_id) => {
+    try {
+      let data = await axios.get(
+        `http://localhost:8000/cart/rajaongkir-city?province_id=${province_id}`,
+        {
+          headers: {
+            key: "98114927956fc9abdce23deeef6cfb17",
+          },
+        }
+      );
+      setCity(data.data.data.rajaongkir.city);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const rakirProvince = async () => {
+    try {
+      let data = await axios.get(
+        `http://localhost:8000/cart/rajaongkir-province`,
+        {
+          headers: {
+            key: "98114927956fc9abdce23deeef6cfb17",
+          },
+        }
+      );
+      setProvince(data.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAddress = async () => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let response = await axios.get(`http://localhost:8000/cart/get-address`, {
+        headers: {
+          token: token,
+        },
+      });
+      setAllAddress(response.data.data);
+      const main = response.data.data.filter((e) => e.main_address === true);
+      if (!main) {
+        setMainAddress("");
+      } else {
+        setMainAddress(main[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const splitText = (text) => {
+    if (text) {
+      return text.split(".")[1];
+    } else {
+      return "";
+    }
+  };
+
+  const defaultAddress = async (id) => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let data = await axios.patch(
+        `http://localhost:8000/cart/main-address/${id}`,
+        {},
+        {
+          headers: {
+            token: token,
+          },
+        }
+      );
+      setRakir({ ...rakir, main_address: true });
+      toast.success("Main Address Changed");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      Navigate(0);
+    }
+  };
+
+  const deleteAddress = async (id) => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let response = await axios.delete(
+        `http://localhost:8000/cart/delete-address/${id}`,
+        {
+          headers: { token: token },
+        }
+      );
+      toast.success("address deleted");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      Navigate(0);
+    }
+  };
+
+  useEffect(() => {
+    rakirCity();
+    rakirProvince();
+    getAddress();
+  }, []);
+
+  return (
+    <>
+      <div className=" mt-[15px] pl-[24px] ">
+        <div className="border-b-2">
+          <h1 className="font-ibmBold">CheckOut</h1>
+        </div>
+        <div className="mt-[18px] flex">
+          <img
+            alt="ProductImage"
+            src="https://cdn.eraspace.com/media/catalog/product/i/p/iphone_13_blue_1_4.jpg"
+            className="w-[84px] h-[84px]"
+          />
+          <div className="ml-[13px]">
+            <h1>Test</h1>
+            <h1 className=" text-[#5D5FEF]  text-[18px]  font-ibmMed">
+              Rp.999,999
+            </h1>
+          </div>
+        </div>
+        <div className="border-b-2 pt-[35px]">
+          <h1 className="font-ibmBold">Shipping</h1>
+        </div>
+        {mainAddress !== "" ? (
+          <>
+            <div className="flex items-center align-middle justify-between border-2 border-gray-300 rounded-lg p-4 mt-5">
+              <div>
+                <p className="text-sm font-bold font-ibmMed">
+                  {mainAddress?.recipient_name}
+                </p>
+                <p className="text-sm font-bold font-ibmMed">
+                  {mainAddress?.recipient_phone}
+                </p>
+                <p className="text-sm font-bold font-ibmMed">
+                  {mainAddress?.street_address}
+                </p>
+                <p className="text-sm font-bold font-ibmMed">
+                  {mainAddress?.subdistrict}, {splitText(mainAddress?.city)},{" "}
+                  {splitText(mainAddress?.province)}
+                </p>
+                <p className="text-sm font-bold font-ibmMed">
+                  {mainAddress?.postal_code}
+                </p>
+              </div>
+
+              <Button
+                w="120px"
+                h="34px"
+                border="1px solid #5D5FEF"
+                color="#5D5FEF"
+                borderRadius="3px"
+                className="font-ibmFontRegular"
+                onClick={modalSwitch.onOpen}
+                onClose={modalSwitch.onClose}
+              >
+                Switch
+              </Button>
+            </div>
+            <Modal
+              isOpen={modalSwitch.isOpen}
+              onClose={modalSwitch.onClose}
+              isCentered
+              w="300px"
+              motionPreset="slideInBottom"
+              className="z-50"
+              popup={true}
+            >
+              <ModalOverlay
+                bg="blackAlpha.200"
+                backdropFilter="blur(10px) hue-rotate(90deg)"
+              />
+              <ModalContent
+                alignItems="center"
+                overflowY="scroll"
+                maxHeight="400px"
+              >
+                <ModalCloseButton />
+                {allAddress?.map((v, i) => (
+                  <div
+                    className="flex items-center align-middle justify-between p-10 flex-row"
+                    style={{ width: "100%" }}
+                    key={i}
+                  >
+                    <div>
+                      <p className="text-sm font-bold font-ibmMed">
+                        {v?.recipient_name}
+                      </p>
+                      <p className="text-sm font-bold font-ibmMed">
+                        {v?.recipient_phone}
+                      </p>
+                      <p className="text-sm font-bold font-ibmMed">
+                        {v?.street_address}
+                      </p>
+                      <p className="text-sm font-bold font-ibmMed">
+                        {v?.subdistrict}, {splitText(v?.city)},{" "}
+                        {splitText(v?.province)}
+                      </p>
+                      <p className="text-sm font-bold font-ibmMed">
+                        {mainAddress?.postal_code}
+                      </p>
+                    </div>
+                    <div className=" flex flex-col p-2 justify-between">
+                      <Button
+                        w="80px"
+                        h="34px"
+                        border="1px solid #5D5FEF"
+                        color="#5D5FEF"
+                        borderRadius="3px"
+                        className="font-ibmFontRegular"
+                        onClick={() => {
+                          defaultAddress(v?.id);
+                          modalSwitch.onClose();
+                        }}
+                      >
+                        Switch
+                      </Button>
+                      <Button
+                        w="80px"
+                        h="34px"
+                        border="1px solid #5D5FEF"
+                        color="#5D5FEF"
+                        borderRadius="3px"
+                        className="font-ibmFontRegular"
+                        onClick={() => {
+                          deleteAddress(v?.id);
+                          modalSwitch.onClose();
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </ModalContent>
+            </Modal>
+          </>
+        ) : (
+          <></>
+        )}
+
+        <div className="flex justify-center mt-[18px]">
+          <Button
+            w="325px"
+            h="34px"
+            border="1px solid #5D5FEF"
+            color="#5D5FEF"
+            borderRadius="3px"
+            className="font-ibmFontRegular"
+            onClick={modalAddress.onOpen}
+            onClose={modalAddress.onClose}
+          >
+            +add new address
+          </Button>
+
+          <Modal
+            isOpen={modalAddress.isOpen}
+            onClose={modalAddress.onClose}
+            isCentered
+            motionPreset="slideInBottom"
+            className="z-50"
+            popup={true}
+          >
+            <ModalOverlay
+              bg="blackAlpha.200"
+              backdropFilter="blur(10px) hue-rotate(90deg)"
+            />
+            <ModalContent alignItems="center">
+              <ModalCloseButton />
+              <>
+                <form onSubmit={handleSubmit(onAddAddress)}>
+                  <Card maxWidth="300px" className="mt-[30px] ">
+                    <h1 className="font-ibmBold text-[20px] ">
+                      Address Detail
+                    </h1>
+                    <CardBody>
+                      <FormControl>
+                        <FormLabel size="sm">Recepient Name</FormLabel>
+                        <Input
+                          type="text"
+                          bg="white"
+                          borderColor="#d8dee4"
+                          size="sm"
+                          borderRadius="6px"
+                          placeholder=""
+                          {...register("recipient_name")}
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel size="sm">Phone Number</FormLabel>
+                        <Input
+                          type="text"
+                          bg="white"
+                          borderColor="#d8dee4"
+                          size="sm"
+                          borderRadius="6px"
+                          placeholder=""
+                          {...register("recipient_phone")}
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel size="sm">Province</FormLabel>
+                        <Select
+                          name="province"
+                          bg="white"
+                          borderColor="#d8dee4"
+                          size="sm"
+                          borderRadius="6px"
+                          onChange={(e) => {
+                            rakirCity(e.target.value);
+                            setValue("province", e.target.value);
+                          }}
+                        >
+                          <option value="">Select Province</option>
+                          {province?.map((val, idx) => {
+                            return (
+                              <option
+                                value={`${val.province_id}.${val.province}`}
+                                key={idx}
+                              >
+                                {val.province}
+                              </option>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel size="sm">City</FormLabel>
+                        <Select
+                          name="city"
+                          bg="white"
+                          borderColor="#d8dee4"
+                          size="sm"
+                          borderRadius="6px"
+                          {...register("city")}
+                          onChange={(e) => setValue("xCity", e.target.value)}
+                        >
+                          <option value="selected">Select City</option>
+                          {city.map((val, idx) => {
+                            return (
+                              <option
+                                value={`${val.city_id}.${val.city_name}`}
+                                key={idx}
+                              >
+                                {val.city_name}
+                              </option>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel size="sm">Subdistrict</FormLabel>
+                        <Input
+                          type="text"
+                          bg="white"
+                          borderColor="#d8dee4"
+                          size="sm"
+                          borderRadius="6px"
+                          placeholder=""
+                          {...register("subdistrict")}
+                          required={true}
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel size="sm">Street Address</FormLabel>
+                        <Textarea
+                          type="text-area"
+                          bg="white"
+                          borderColor="#d8dee4"
+                          size="sm"
+                          borderRadius="6px"
+                          placeholder=""
+                          {...register("street_address")}
+                          required={true}
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel size="sm">Postal Code</FormLabel>
+                        <Input
+                          type="text"
+                          bg="white"
+                          borderColor="#d8dee4"
+                          size="sm"
+                          borderRadius="6px"
+                          placeholder=""
+                          {...register("postal_code")}
+                        />
+                      </FormControl>
+                      <div className="flex items-center gap-2 mt-[20px]">
+                        <Checkbox
+                          id="remember"
+                          onChange={() =>
+                            setRakir({
+                              ...rakir,
+                              main_address: rakir.main_address ? false : true,
+                            })
+                          }
+                        />
+                        <Label htmlFor="remember" className="font-ibmBold">
+                          Main Address
+                        </Label>
+                      </div>
+                      <div className="w-full flex justify-end">
+                        {show.loading ? (
+                          <button>
+                            <Spinner aria-label="Default status example" />
+                          </button>
+                        ) : (
+                          <Button
+                            backgroundColor="#5D5FEF"
+                            color="white"
+                            mt="5"
+                            type="submit"
+                            w="265px"
+                            h="34px"
+                            alignSelf="center"
+                            rounded="3xl"
+                          >
+                            Save Address
+                          </Button>
+                        )}
+                      </div>
+                    </CardBody>
+                  </Card>
+                </form>
+              </>
+            </ModalContent>
+          </Modal>
+        </div>
+      </div>
+    </>
+  );
+}
