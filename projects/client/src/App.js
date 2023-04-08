@@ -23,6 +23,7 @@ import AdminNavbar from "./pages/Admin/components/navbar";
 import AdminOrder from "./pages/Admin/Order";
 import AdminProduct from "./pages/Admin/Product/Home";
 import AdminProductDetail from "./pages/Admin/Product/Detail";
+import AdminMutation from "./pages/Admin/Mutation";
 
 
 function App() {
@@ -178,6 +179,14 @@ function App() {
               element={
                 <AuthAdmin>
                   <AdminProductDetail />
+                </AuthAdmin>
+              }
+            />
+            <Route 
+              path='/admin/mutation' 
+              element={
+                <AuthAdmin>
+                  <AdminMutation />
                 </AuthAdmin>
               }
             />   

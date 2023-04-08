@@ -30,6 +30,8 @@ const { adminRouter } = require('./router')
 const { adminOrderRouter } = require('./router')
 const { cartRouter } = require('./router')
 const { adminProductRouter } = require('./router')
+const { adminMutationRouter } = require('./router')
+app.use('/admin-mutation', adminMutationRouter)
 app.use('/admin-product', adminProductRouter)
 app.use('/cart', cartRouter)
 app.use("/user", userRouter);
