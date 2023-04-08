@@ -29,7 +29,6 @@ import OrderDetail from "./components/orderDetail";
 const AdminOrder = () => {
     const [uid, setUid] = useState('')
     const [whid, setWhid] = useState('')
-    const [orderList, setOrderList] = useState([])
     const [filter, setFilter] = useState({
         searchOrderId: '',
         filterWarehouse: '' 
@@ -77,7 +76,6 @@ const AdminOrder = () => {
                 let response = await axios.get(
                     `http://localhost:8000/admin-order/view/${whid}?id=${filter.searchOrderId}&wh=${filter.filterWarehouse}&sort=${sort}&offset=${offset}&row=${rowPerPage}`
                 )
-                setOrderList(response.data.data.orders[0])
                 setFilteredOrder(response.data.data.orders[0])
                 setMaxPage(Math.ceil(parseInt(response.data.data.countOrders[0][0].num_order) / rowPerPage))
                 setWhList(response.data.data.wh_list[0])
