@@ -1,3 +1,5 @@
+const { sequelize } = require("../sequelize/models");
+
 // Import Models
 const db = require("../sequelize/models/index");
 
@@ -5,7 +7,7 @@ const db = require("../sequelize/models/index");
 const { matchPassword } = require("../lib/hash");
 
 // Import jwt
-const { createToken } = require("../lib/jwt");
+const { createToken, validateToken } = require("../lib/jwt");
 
 module.exports = {
     login: async (req, res) => {
@@ -63,6 +65,67 @@ module.exports = {
                 message: error.message,
                 data: true,
             });
+        }
+    },
+
+    verifyToken: async (req, res) => {
+        try {
+          let { token } = req.query;
+
+          if (!token) {
+            return res.status(401).send({
+              isError: true,
+              message: "Token not found",
+              data: null,
+            });
+          }
+
+          const validateTokenResult = validateToken(token);
+          return res.status(200).send({
+            isError: false,
+            message: 'Token is found',
+            data: validateTokenResult
+          })
+
+        } catch (error) {
+          res.status(401).send({
+            isError: true,
+            message: "Invalid Token",
+            data: null,
+          });
+        }
+    },
+
+    fetchWarehouse : async(req, res) => {
+        try {
+            // get value
+            let { id } = req.query
+
+            // fetch wh_id
+            let get_whid = await sequelize.query(
+                `SELECT CASE 
+                WHEN a.role='admin' THEN 'all'
+                WHEN a.role='wh_admin' THEN warehouse_id
+                END AS wh_id
+                FROM wh_admin 
+                JOIN users a
+                ON a.id = wh_admin.user_id
+                WHERE user_id='${id}'`
+            )
+
+            // send response
+            res.status(200).send({
+                isError: false,
+                message: 'wh_id admin fetched',
+                data: get_whid
+            })
+
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: error.message,
+                data: null
+            })
         }
     }
 }
