@@ -37,6 +37,7 @@ import {
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {toast, Toaster} from 'react-hot-toast'
+import Cookies from "js-cookie";
 
 const AdminProductDetail = () => {
   const { product_id } = useParams();
@@ -62,7 +63,7 @@ const AdminProductDetail = () => {
 
   const getUid = async () => {
     try {
-      let token = localStorage.getItem("adminToken");
+      let token = Cookies.get('adminToken');
       let response = await axios.get(
         `http://localhost:8000/admin/verify-token?token=${token}`
       );
@@ -200,7 +201,7 @@ const AdminProductDetail = () => {
   }, [uid]);
   useEffect(() => {
     handleExistWh();
-  }, [stockDetail, uid]);
+  }, [stockDetail, uid, whAdmin]);
 
   return (
     <div className="w-[100%] flex flex-1 justify-between">

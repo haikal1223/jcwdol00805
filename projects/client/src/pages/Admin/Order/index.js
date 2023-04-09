@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/sidebar";
 import axios from "axios";
+import Cookies from 'js-cookie';
 import {TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight} from 'react-icons/tb'
 import { 
     Box
@@ -46,7 +47,7 @@ const AdminOrder = () => {
 
     const getUid = async () => {
         try {
-          let token = localStorage.getItem("adminToken");
+          let token = Cookies.get('adminToken');
           let response = await axios.get(
             `http://localhost:8000/admin/verify-token?token=${token}`
           );

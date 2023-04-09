@@ -23,6 +23,12 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.stock_log, {
         foreignKey: 'warehouse_id'
       })
+      this.hasMany(models.stock_mutation, {
+        foreignKey: 'origin_wh_id'
+      })
+      this.hasMany(models.stock_mutation, {
+        foreignKey: 'target_wh_id'
+      })
     }
   }
   warehouse.init({

@@ -53,7 +53,7 @@ module.exports = {
                     isError: false,
                     message: "Login Success",
                     data: {
-                        token: createToken({uid: findEmail.dataValues.uid}),
+                        token: createToken({id: findEmail.dataValues.id}),
                         email: findEmail.dataValues.email,
                         role: findEmail.dataValues.role
                     },
@@ -108,9 +108,9 @@ module.exports = {
                 WHEN a.role='wh_admin' THEN warehouse_id
                 END AS wh_id
                 FROM wh_admin 
-                JOIN users a
+                RIGHT JOIN users a
                 ON a.id = wh_admin.user_id
-                WHERE user_id='${id}'`
+                WHERE a.id='${id}'`
             )
 
             // send response

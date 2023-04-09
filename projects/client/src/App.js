@@ -2,6 +2,7 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
+import Cookies from 'js-cookie';
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Order from "./pages/Order";
@@ -46,7 +47,7 @@ function App() {
 
   const keepAdminLoggedIn = () => {
     try {
-      const token = localStorage.getItem('adminToken')
+      const token = Cookies.get('adminToken')
       if (token) {
         setAdminLoggedIn(true)
       } else {
@@ -84,7 +85,7 @@ function App() {
   };
 
   const AuthAdmin = ({children}) => {
-    const adminIsLogged = localStorage.getItem('adminToken')
+    const adminIsLogged = Cookies.get('adminToken')
 
     if (!adminIsLogged) {
       return (
@@ -101,10 +102,10 @@ function App() {
     
   }
 
-  const onLogout = () => {
+  const adminLogout = () => {
     return (
         <>
-            {localStorage.removeItem('adminToken')}
+            {Cookies.remove('adminToken')}
             {setTimeout(() => {
               window.location.href ='/admin'
             }, 200)}
@@ -121,7 +122,7 @@ function App() {
 
 
       <div className={window.location.pathname.includes('/admin')?"w-[1440px] z-0":"w-[480px] z-0"}>
-        {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={onLogout}/>:<Navbar login={isLoggedIn} />}
+        {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={adminLogout}/>:<Navbar login={isLoggedIn} />}
         <Routes>
 
           <Route path="/" element={<Home login={isLoggedIn} />} />
