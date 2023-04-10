@@ -25,6 +25,7 @@ const handlebars = require("handlebars");
 const { kStringMaxLength } = require("buffer");
 
 const bcrypt = require("bcrypt");
+const order = require("../sequelize/models/order");
 
 module.exports = {
   getCartFilterProduct: async (req, res) => {
@@ -272,7 +273,7 @@ module.exports = {
     try {
       const { data } = await axios.get(
         "https://api.rajaongkir.com/starter/province",
-        { headers: { key: "96dc80599e54e6d84bbd8f3b948da258" } }
+        { headers: { key: "38cc0e5fdc569640ad614c40fcf5432c" } }
       );
       res.status(200).send({
         isError: false,
@@ -300,7 +301,7 @@ module.exports = {
       let response = await axios.get(
         `https://api.rajaongkir.com/starter/city?province=${province_id}`,
         {
-          headers: { key: "96dc80599e54e6d84bbd8f3b948da258" },
+          headers: { key: "38cc0e5fdc569640ad614c40fcf5432c" },
         }
       );
 
@@ -389,6 +390,104 @@ module.exports = {
         isError: true,
         message: error.message,
         data: error,
+      });
+    }
+  },
+  sendDataToOrder: async (req, res) => {
+    try {
+      t = await sequelize.transaction();
+      const { uid } = req.uid;
+      const {
+        paid_amount,
+        user_address_id,
+        shipping_cost,
+        warehouse_id,
+        order_status_id,
+      } = req.body;
+      if (!uid) {
+        return res.status(400).send({
+          isError: true,
+          message: "Invalid user ID",
+          data: null,
+        });
+      }
+
+      const { id: user_id } = await db.user.findOne({
+        where: {
+          uid,
+        },
+      });
+
+      const cartItems = await db.cart.findAll({
+        where: {
+          user_id,
+          is_checked: 1,
+        },
+      });
+      console.log(cartItems);
+
+      const order_status = await db.order_status.create({
+        id: order_status_id,
+        status: "Pending",
+      });
+
+      const order = await db.order.create(
+        {
+          user_id,
+          user_address_id,
+          paid_amount,
+          shipping_cost,
+          warehouse_id,
+          payment_proof: "Pending",
+          order_status_id: order_status.id,
+          carts: cartItems, // include the associated cart items
+        },
+        { transaction: t }
+      );
+
+      const t2 = await sequelize.transaction();
+      await db.cart.destroy({
+        where: {
+          user_id,
+          is_checked: 1,
+        },
+        transaction: t2,
+      });
+      await t2.commit();
+
+      const orderDetailsArray = [];
+
+      for (const cart of cartItems) {
+        const order_details = await db.order_detail.create(
+          {
+            product_price: cart.price,
+            product_quantity: cart.quantity,
+            subtotal: cart.price * cart.quantity,
+            order_id: order.id,
+            product_id: cart.product_id,
+          },
+          { transaction: t }
+        );
+
+        orderDetailsArray.push(order_details);
+      }
+
+      await t.commit();
+
+      res.status(200).send({
+        isError: false,
+        message: "Order created successfully",
+        data: order,
+        order_status,
+        orderDetailsArray,
+      });
+    } catch (error) {
+      console.log(error.message);
+      await t.rollback();
+      res.status(500).send({
+        isError: true,
+        message: "An error occurred while processing your request",
+        data: null,
       });
     }
   },

@@ -28,11 +28,13 @@ const { userRouter, courierRouter } = require("./router");
 const { productRouter } = require("./router");
 const { adminRouter } = require("./router");
 const { cartRouter } = require("./router");
+const { orderRouter } = require("./router");
 app.use("/cart", cartRouter);
 app.use("/user", userRouter);
 app.use("/product", productRouter);
 app.use("/admin", adminRouter);
 app.use("/courier", courierRouter);
+app.use("/order", orderRouter);
 
 // app.get("/api", (req, res) => {
 //   res.send(`Hello, this is my API`);

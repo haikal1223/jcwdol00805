@@ -16,6 +16,7 @@ import {
   Text,
   Image,
   Box,
+  calc,
 } from "@chakra-ui/react";
 import { Label, Spinner } from "flowbite-react";
 import React, { useEffect, useState } from "react";
@@ -30,18 +31,17 @@ export default function CheckOut(props) {
     main_address: false,
   });
 
+  const [getWHid, setgetWHid] = useState([]);
+  const [useraddressid, setuseraddressid] = useState([]);
+  const [data, setData] = useState([]);
   const [cost, setCost] = useState(0);
   const [origin, setorigin] = useState(0);
   const [shippingMethod, setShippingMethod] = useState("");
   const [shippingCost, setShippingCost] = useState(0);
   const [destination, setdestination] = useState(0);
-  const [JNE, setJNE] = useState();
-  const [POS, setPOS] = useState();
-  const [TIKI, setTIKI] = useState();
   const [disable, setdisable] = useState(false);
   const [weight, setweight] = useState(0);
   const [address, setAddress] = useState("");
-  const [addresses, setAddresses] = useState([]);
   const [province, setProvince] = useState([]);
   const [city, setCity] = useState([]);
   const [cart, setCart] = useState([]);
@@ -101,7 +101,7 @@ export default function CheckOut(props) {
         `http://localhost:8000/cart/rajaongkir-city?province_id=${province_id}`,
         {
           headers: {
-            key: "96dc80599e54e6d84bbd8f3b948da258",
+            key: "38cc0e5fdc569640ad614c40fcf5432c",
           },
         }
       );
@@ -117,7 +117,7 @@ export default function CheckOut(props) {
         `http://localhost:8000/cart/rajaongkir-province`,
         {
           headers: {
-            key: "96dc80599e54e6d84bbd8f3b948da258",
+            key: "38cc0e5fdc569640ad614c40fcf5432c",
           },
         }
       );
@@ -143,6 +143,7 @@ export default function CheckOut(props) {
         setMainAddress(main[0]);
       }
       setdestination(main[0].city.split(".")[0]);
+      setuseraddressid(main[0].id);
     } catch (error) {
       console.log(error);
     }
@@ -213,6 +214,7 @@ export default function CheckOut(props) {
           "."
         )[0]
       );
+      setgetWHid(response.data.data[0].product.product_stocks[0].warehouse_id);
     } catch (error) {
       console.log(error);
     }
@@ -238,11 +240,10 @@ export default function CheckOut(props) {
         {
           headers: {
             token: token,
-            key: "96dc80599e54e6d84bbd8f3b948da258",
+            key: "38cc0e5fdc569640ad614c40fcf5432c",
           },
         }
       );
-      console.log(cost.data.data[0].costs);
       setCost(cost.data.data[0].costs);
       setTimeout(() => {
         setdisable(false);
@@ -258,7 +259,6 @@ export default function CheckOut(props) {
 
   const calculateShippingCost = async () => {
     let token = localStorage.getItem("myToken");
-    console.log("cv", shippingMethod);
     try {
       let response = await axios.post(
         `http://localhost:8000/courier/cost`,
@@ -280,8 +280,40 @@ export default function CheckOut(props) {
     }
   };
 
-  const selectedAddress = async (value) => {
-    console.log("x", value);
+  const sendDataToOrder = async (data) => {
+    setShow({ ...show, loading: true });
+    let token = localStorage.getItem("myToken");
+    try {
+      if (window.confirm("Are you sure you want to proceed to order?")) {
+        let response = await axios.post(
+          `http://localhost:8000/cart/postToOrder`,
+          {
+            paid_amount: getTotalPrice(),
+            shipping_cost: shippingCost,
+            user_address_id: useraddressid,
+            payment_proof: "Pending",
+            warehouse_id: getWHid,
+            order_status_id: data,
+          },
+          { headers: { token: token } }
+        );
+        setData(response);
+        toast.success("Proceed to Order");
+        setTimeout(() => {
+          Navigate("/order");
+        }, 2000);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    // calculate shipping cost
+    await calculateShippingCost();
+
+    // pass shippingCost to sendDataToOrder function
+    sendDataToOrder(data, shippingCost, useraddressid, getWHid);
   };
 
   useEffect(() => {
@@ -289,7 +321,7 @@ export default function CheckOut(props) {
     rakirProvince();
     getAddress();
     getUserCart();
-    selectedAddress();
+    // sendDataToOrder();
   }, []);
 
   useEffect(() => {
@@ -322,7 +354,7 @@ export default function CheckOut(props) {
                   border="1px solid gray"
                 />
                 <Box>
-                  <Text className=" font-ibmReg">{item.product.name}</Text>
+                  <Text className=" font-ibmMed">{item.product.name}</Text>
                   <Text className=" font-ibmReg" align="left">
                     Price:{" "}
                     {new Intl.NumberFormat("id-ID", {
@@ -331,13 +363,6 @@ export default function CheckOut(props) {
                     }).format(item.price)}{" "}
                     * {item.quantity}
                   </Text>
-                  {/* <Text className=" font-ibmReg" align="left">
-                    Total Price:{" "}
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                    }).format(item.price * item.quantity)}
-                  </Text> */}
                 </Box>
               </Box>
             ))}
@@ -763,6 +788,7 @@ export default function CheckOut(props) {
           mt="5"
           type="button"
           disabled={disable}
+          onClick={() => sendDataToOrder()}
         >
           <Text className=" font-ibmFontRegular">Pay</Text>
         </Button>
