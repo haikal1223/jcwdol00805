@@ -20,7 +20,7 @@ module.exports = {
         } = req.body;
 
         try {
-            const { id } = await db.user.findOne({ where: { uid } });
+            const { id } = await db.user.findOne({ where: { id } });
             if (main_address) {
                 await db.user_address.update(
                     { main_address: false },
