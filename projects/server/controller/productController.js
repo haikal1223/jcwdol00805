@@ -144,49 +144,78 @@ module.exports = {
 
   fetchProduct: async (req, res) => {
     try {
-      let { offset, row, name } = req.query;
-      // , sort, sortMode
-      // let column = "id";
-      // switch (sort) {
-      //   case "sortId":
-      //     column = "id";
-      //     break;
-      //   case "sortEmail":
-      //     column = "email";
-      //     break;
-      //   case "sortFirstName":
-      //     column = "first_name";
-      //     break;
-      //   case "sortLastName":
-      //     column = "last_name";
-      //     break;
-      //   case "sortRole":
-      //     column = "role";
-      //     break;
-      // }
+      let { offset, row, name, category_id, sort, sortMode } = req.query;
+
+      let column = "id";
+      switch (sort) {
+        case "sortId":
+          column = "id";
+          break;
+        case "sortProductName":
+          column = "name";
+          break;
+        case "sortPrice":
+          column = "price";
+          break;
+      }
 
       let findProduct = await db.product.findAll({
-        // include: [
-        //   {
-        //     model: db.wh_admin,
-        //     include: [{ model: db.warehouse }],
-        //   },
-        // ],
+        include: [
+          {
+            model: db.product_category,
+          },
+        ],
 
         where: {
-          name: { [db.Sequelize.Op.like]: `%${name}%` } 
-          
+          name: { [db.Sequelize.Op.like]: `%${name}%` },
         },
-        // order: [[column, sortMode]],
+        order: [[column, sortMode]],
         limit: parseInt(row),
         offset: parseInt(offset),
       });
 
       let findProductAll = await db.product.findAll({
+        include: [
+          {
+            model: db.product_category,
+          },
+        ],
+
         where: {
-            name: { [db.Sequelize.Op.like]: `%${name}%` } 
+          name: { [db.Sequelize.Op.like]: `%${name}%` },
         },
       });
+
+      if (category_id) {
+        findProduct = await db.product.findAll({
+          include: [
+            {
+              model: db.product_category,
+            },
+          ],
+
+          where: {
+            name: { [db.Sequelize.Op.like]: `%${name}%` },
+            product_category_id: category_id,
+          },
+          order: [[column, sortMode]],
+          limit: parseInt(row),
+          offset: parseInt(offset),
+        });
+
+        findProductAll = await db.product.findAll({
+          include: [
+            {
+              model: db.product_category,
+            },
+          ],
+
+          where: {
+            name: { [db.Sequelize.Op.like]: `%${name}%` },
+            product_category_id: category_id,
+          },
+        });
+      }
 
       res.status(200).send({
         isError: false,
@@ -198,6 +227,144 @@ module.exports = {
         isError: true,
         message: error.message,
         data: true,
+      });
+    }
+  },
+
+  fetchProductCategory: async (req, res) => {
+    try {
+      let findCategory = await db.product_category.findAll({});
+
+      res.status(200).send({
+        isError: false,
+        message: "Get Product Category Data Success",
+        data: findCategory,
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: true,
+      });
+    }
+  },
+
+  deleteProductData: async (req, res) => {
+    try {
+      let { id } = req.query;
+
+      let findProduct = await db.product.findOne({
+        where: {
+          id,
+        },
+      });
+
+      let deleteProductData = await db.product.destroy({
+        where: {
+          id,
+        },
+      });
+
+      res.status(201).send({
+        isError: false,
+        message: "Delete Product Success",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Delete Product Failed",
+        data: error,
+      });
+    }
+  },
+
+  addProduct: async (req, res) => {
+    try {
+      let { name, price, product_category_id, image_url } = req.body;
+
+      if (!name || !price || !product_category_id || !image_url)
+        return res.status(404).send({
+          isError: true,
+          message: "Please Complete Product Data",
+          data: null,
+        });
+
+      let findProduct = await db.product.findOne({
+        where: {
+          name,
+        },
+      });
+
+      if (findProduct)
+        return res.status(404).send({
+          isError: true,
+          message: "Product already exist",
+          data: null,
+        });
+
+      let dataToSend = await db.product.create({
+        name,
+        price,
+        product_category_id,
+        image_url,
+      });
+
+      res.status(201).send({
+        isError: false,
+        message: "Add Product Success",
+        data: null,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Add Product Failed",
+        data: error,
+      });
+    }
+  },
+
+  editProduct: async (req, res) => {
+    try {
+      let { id, name, price, product_category_id, image_url } = req.body;
+
+      if (!name || !price || !product_category_id || !image_url)
+        return res.status(404).send({
+          isError: true,
+          message: "Please Complete Product Data",
+          data: null,
+        });
+
+      let findProduct = await db.product.findOne({
+        where: {
+          id,
+        },
+      });
+
+      let dataToSend = await db.product.update(
+        {
+          name,
+          price,
+          product_category_id,
+          image_url,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      res.status(201).send({
+        isError: false,
+        message: "Edit Product Success",
+        data: req.body,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Edit Product Failed",
+        data: error,
       });
     }
   },

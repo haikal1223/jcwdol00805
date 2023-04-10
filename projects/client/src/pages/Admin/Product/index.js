@@ -28,6 +28,7 @@ import {
   Icon,
   Select,
   IconButton,
+  Image,
 } from "@chakra-ui/react";
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/sidebar";
@@ -49,27 +50,33 @@ const AdminUser = () => {
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
   const [selectedValue, setSelectedValue] = useState({});
-  const [editEmail, setEditEmail] = useState("");
-  const [editFirstName, setEditFirstName] = useState("");
-  const [editLastName, setEditLastName] = useState("");
-  const [editRole, setEditRole] = useState("");
+  const [editProductName, setEditProductName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editProductCategory, setEditProductCategory] = useState("");
+  const [editProductCategoryId, setEditProductCategoryId] = useState("");
+  const [editProductImageUrl, setEditProductImageUrl] = useState("");
+  const [editId, setEditId] = useState("");
   const [editWarehouse, setEditWarehouse] = useState("");
   const [page, setPage] = useState(1);
   const [maxPage, setMaxPage] = useState(0);
   const [pageUser, setPageUser] = useState(1);
   const [maxPageUser, setMaxPageUser] = useState(0);
   const rowPerPage = 10;
-  const [adminWarehouse, setAdminWarehouse] = useState(false);
-  const [editAdminWarehouse, setEditAdminWarehouse] = useState(false);
+  const [categoryName, setCategoryName] = useState([]);
   const [whList, setWhList] = useState([]);
+  const [productImageName, setProductImageName] = useState("");
+  const [productImageUrl, setProductImageUrl] = useState("");
 
   const [filter, setFilter] = useState({
     searchProductName: "",
+    selectCategoryName: "",
   });
   const [sort, setSort] = useState({
     sortBy: "",
   });
   const [sortMode, setSortMode] = useState("ASC");
+
+  const adminRoleLogged = localStorage.getItem("role");
 
   const {
     isOpen: isOpenAdd,
@@ -87,12 +94,10 @@ const AdminUser = () => {
     onClose: onCloseDelete,
   } = useDisclosure();
 
-  const email = useRef();
-  const firstName = useRef();
-  const lastName = useRef();
-  const role = useRef();
-  const warehouseName = useRef();
-  const password = useRef();
+  const productName = useRef();
+  const price = useRef();
+  const productCategory = useRef();
+  const imageUrl = useRef();
 
   // let getWarehouse = async () => {
   //   try {
@@ -113,10 +118,8 @@ const AdminUser = () => {
     const offset = (page - 1) * rowPerPage;
     try {
       let getProductData = await axios.get(
-        `http://localhost:8000/product/fetchProduct?offset=${offset}&row=${rowPerPage}&name=${filter.searchProductName}`
+        `http://localhost:8000/product/fetchProduct?offset=${offset}&row=${rowPerPage}&name=${filter.searchProductName}&category_id=${filter.selectCategoryName}&sort=${sort.sortBy}&sortMode=${sortMode}`
       );
-      // &name=${filter.searchUserName}&sort=${sort.sortBy}&sortMode=${sortMode}
-      console.log(getProductData);
       setProductData(getProductData.data.data.findProduct);
       setMaxPage(
         Math.ceil(getProductData.data.data.findProductAll.length / rowPerPage)
@@ -126,20 +129,30 @@ const AdminUser = () => {
     }
   };
 
+  let getProductCategory = async () => {
+    try {
+      let getProductCategory = await axios.get(
+        `http://localhost:8000/product/productCategory`
+      );
+      setCategoryName(getProductCategory.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getProductData();
+    getProductCategory();
     renderPageButton();
   }, [page, maxPage, filter, sort, sortMode]);
 
   let handleEdit = (val) => {
-    setEditEmail(val.email);
-    setEditFirstName(val.first_name);
-    setEditLastName(val.last_name);
-    setEditRole(val.role);
-    if (val?.wh_admins[0]?.warehouse?.name) {
-      setEditWarehouse(val?.wh_admins[0]?.warehouse?.name);
-      setEditAdminWarehouse(true);
-    }
+    setEditProductName(val.name);
+    setEditPrice(val.price);
+    setEditProductCategory(val?.product_category?.category_name);
+    setEditProductCategoryId(val.product_category_id);
+    setEditProductImageUrl(val.image_url);
+    setEditId(val.id);
     onOpenEdit();
   };
 
@@ -150,9 +163,9 @@ const AdminUser = () => {
     } catch (error) {}
   };
 
-  let deleteAdminData = async () => {
-    let deleteAdminData = await axios.delete(
-      `http://localhost:8000/admin/deleteAdminData?email=${selectedValue.email}`
+  let deleteProductData = async () => {
+    let deleteProductData = await axios.delete(
+      `http://localhost:8000/product/deleteProductData?id=${selectedValue.id}`
     );
 
     window.location.reload();
@@ -164,9 +177,12 @@ const AdminUser = () => {
         <>
           <Tr>
             <Td>{val.id}</Td>
-            <Td>{val.name}</Td>
-            <Td>{val.price}</Td>
-            <Td>{val.product_category_id}</Td>
+            <Td whiteSpace={"normal"}>{val.name}</Td>
+            <Td>{val.price.toLocaleString("id-ID")}</Td>
+            <Td>{val.product_category.category_name}</Td>
+            <Td>
+              <Image h={"100px"} src={val.image_url} alt={val.name} />
+            </Td>
             <Td>{val.image_url}</Td>
             <Td>
               {new Date(val.createdAt).toLocaleDateString("en-GB", {
@@ -179,31 +195,28 @@ const AdminUser = () => {
                 timeZoneName: "short",
               })}
             </Td>
-            <Td className="flex justify-center w-[350px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
-              <Button
-                colorScheme="green"
-                size="md"
-                onClick={() => handleEdit(val)}
-              >
-                View Product
-              </Button>
-              <Button
-                colorScheme="green"
-                size="md"
-                ml="10px"
-                onClick={() => handleEdit(val)}
-              >
-                Edit Product
-              </Button>
-              <Button
-                colorScheme="red"
-                size="md"
-                ml="10px"
-                onClick={() => openDeleteModal(val)}
-              >
-                Delete
-              </Button>
-            </Td>
+            {adminRoleLogged === "admin" ? (
+              <Td className="flex items-center w-[250px] h-[150px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
+                <Button
+                  colorScheme="green"
+                  size="md"
+                  ml="10px"
+                  onClick={() => handleEdit(val)}
+                >
+                  Edit Product
+                </Button>
+                <Button
+                  colorScheme="red"
+                  size="md"
+                  ml="10px"
+                  onClick={() => openDeleteModal(val)}
+                >
+                  Delete
+                </Button>
+              </Td>
+            ) : (
+              <></>
+            )}
           </Tr>
         </>
       );
@@ -285,6 +298,15 @@ const AdminUser = () => {
     console.log(filter);
   };
 
+  const filterCategoryHandler = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    setFilter({
+      ...filter,
+      [name]: value,
+    });
+  };
+
   const sortHandler = (e) => {
     const name = e.target.name;
     const value = e.target.value;
@@ -292,7 +314,6 @@ const AdminUser = () => {
       ...sort,
       [name]: value,
     });
-    console.log(sort);
   };
 
   const changeSort = () => {
@@ -303,24 +324,22 @@ const AdminUser = () => {
     }
   };
 
-  let addAdmin = async () => {
+  let addProduct = async () => {
     try {
-      let addAdmin = await axios.post("http://localhost:8000/admin/addAdmin", {
-        email: email.current.value,
-        first_name: firstName.current.value,
-        last_name: lastName.current.value,
-        role: role.current.value,
-        warehouse_name: warehouseName?.current?.value,
-        password: password.current.value,
-      });
-      toast.success(addAdmin.data.message);
-      email.current.value = "";
-      firstName.current.value = "";
-      lastName.current.value = "";
-      password.current.value = "";
-      if (warehouseName?.current?.value) {
-        warehouseName.current.value = "";
-      }
+      let addProduct = await axios.post(
+        "http://localhost:8000/product/addProduct",
+        {
+          name: productName.current.value,
+          price: price.current.value,
+          product_category_id: productCategory.current.value,
+          image_url: imageUrl.current.value,
+        }
+      );
+      toast.success(addProduct.data.message);
+      productName.current.value = "";
+      price.current.value = "";
+      productCategory.current.value = "";
+      imageUrl.current.value = "";
       window.location.reload();
     } catch (error) {
       console.log(error);
@@ -328,38 +347,22 @@ const AdminUser = () => {
     }
   };
 
-  let handleRole = (val) => {
-    if (val === "wh_admin") {
-      setAdminWarehouse(true);
-    } else {
-      setAdminWarehouse(false);
-    }
-  };
-  let handleEditRole = (val) => {
-    if (val === "wh_admin") {
-      setEditAdminWarehouse(true);
-    } else {
-      setEditAdminWarehouse(false);
-      setEditWarehouse("");
-    }
-  };
-
   const whOptions = [...new Set(whList.map((val) => val.name))];
 
-  let editAdmin = async () => {
+  let editProduct = async () => {
     try {
-      let editAdmin = await axios.patch(
-        "http://localhost:8000/admin/editAdmin",
+      let editProduct = await axios.patch(
+        "http://localhost:8000/product/editProduct",
         {
-          email: editEmail,
-          first_name: editFirstName,
-          last_name: editLastName,
-          role: editRole,
-          warehouseName: editWarehouse,
+          id: editId,
+          name: editProductName,
+          price: editPrice,
+          product_category_id: editProductCategoryId,
+          image_url: editProductImageUrl,
         }
       );
-      console.log(editAdmin);
-      toast.success(editAdmin.data.message);
+      console.log(editProduct);
+      toast.success(editProduct.data.message);
       window.location.reload();
     } catch (error) {
       console.log(error);
@@ -386,20 +389,23 @@ const AdminUser = () => {
                   <span> List</span>
                 </Text>
               </Text>
-              <Button
-                colorScheme="purple"
-                size="md"
-                variant="outline"
-                mt="10px"
-                onClick={onOpenAdd}
-              >
-                <Text>Add Product Data</Text>
-              </Button>
+              {adminRoleLogged === "admin" ? (
+                <Button
+                  colorScheme="purple"
+                  size="md"
+                  variant="outline"
+                  mt="10px"
+                  onClick={onOpenAdd}
+                >
+                  <Text>Add Product Data</Text>
+                </Button>
+              ) : (
+                <></>
+              )}
               <Modal
                 isOpen={isOpenAdd}
                 onClose={(e) => {
                   onCloseAdd();
-                  setAdminWarehouse(false);
                 }}
               >
                 <ModalOverlay />
@@ -423,13 +429,28 @@ const AdminUser = () => {
                       </HStack>
                       <FormControl>
                         <FormLabel>
-                          <Text className="font-ibmMed">Email</Text>
+                          <Text className="font-ibmMed">Product Name</Text>
                         </FormLabel>
                         <Input
-                          ref={email}
+                          ref={productName}
                           rounded="lg"
                           variant="filled"
-                          placeholder="Admin Email"
+                          placeholder="Product Name"
+                          bg="#f5f5f5"
+                          border-1
+                          borderColor={"#D9D9D9"}
+                          onChange={(e) => setProductImageName(e.target.value)}
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>
+                          <Text className="font-ibmMed">Price</Text>
+                        </FormLabel>
+                        <Input
+                          ref={price}
+                          rounded="lg"
+                          variant="filled"
+                          placeholder="Price"
                           bg="#f5f5f5"
                           border-1
                           borderColor={"#D9D9D9"}
@@ -437,76 +458,54 @@ const AdminUser = () => {
                       </FormControl>
                       <FormControl>
                         <FormLabel>
-                          <Text className="font-ibmMed">First Name</Text>
-                        </FormLabel>
-                        <Input
-                          ref={firstName}
-                          rounded="lg"
-                          variant="filled"
-                          placeholder="Admin First Name"
-                          bg="#f5f5f5"
-                          border-1
-                          borderColor={"#D9D9D9"}
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>
-                          <Text className="font-ibmMed">Last Name</Text>
-                        </FormLabel>
-                        <Input
-                          ref={lastName}
-                          rounded="lg"
-                          variant="filled"
-                          placeholder="Admin Last Name"
-                          bg="#f5f5f5"
-                          border-1
-                          borderColor={"#D9D9D9"}
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>
-                          <Text className="font-ibmMed">Role</Text>
+                          <Text className="font-ibmMed">Product Category</Text>
                         </FormLabel>
                         <Select
-                          ref={role}
+                          ref={productCategory}
                           rounded="lg"
                           variant="filled"
-                          placeholder="Choose Admin Role"
+                          placeholder="Product Category"
                           bg="#f5f5f5"
                           border-1
                           borderColor={"#D9D9D9"}
-                          onChange={(e) => handleRole(role.current.value)}
                         >
-                          <option value="admin">Admin</option>
-                          <option value="wh_admin">Warehouse Admin</option>
+                          {categoryName.map((val, idx) => {
+                            return (
+                              <option value={val.id}>
+                                {val.category_name}
+                              </option>
+                            );
+                          })}
                         </Select>
                       </FormControl>
                       <FormControl>
                         <FormLabel>
-                          <Text className="font-ibmMed">Password</Text>
+                          <Text className="font-ibmMed">Image Url</Text>
                         </FormLabel>
-                        <InputGroup>
-                          <Input
-                            ref={password}
-                            rounded="lg"
-                            variant="filled"
-                            type={show ? "text" : "password"}
-                            placeholder="Admin Password"
-                            bg="#f5f5f5"
-                            border-1
-                            borderColor={"#D9D9D9"}
-                          />
-                          <InputRightElement width="4.5rem">
-                            <Button h="1.75rem" size="sm" onClick={handleClick}>
-                              {show ? (
-                                <Icon as={ViewIcon} />
-                              ) : (
-                                <Icon as={ViewOffIcon} />
-                              )}
-                            </Button>
-                          </InputRightElement>
-                        </InputGroup>
+                        <Input
+                          ref={imageUrl}
+                          rounded="lg"
+                          variant="filled"
+                          placeholder="Image URL"
+                          bg="#f5f5f5"
+                          border-1
+                          borderColor={"#D9D9D9"}
+                          onChange={(e) => setProductImageUrl(e.target.value)}
+                        />
                       </FormControl>
+                      {productImageUrl ? (
+                        <FormControl>
+                          <FormLabel>
+                            <Text className="font-ibmMed">Image Preview</Text>
+                          </FormLabel>
+                          <Image
+                            src={productImageUrl}
+                            alt={"Image is not found"}
+                          />
+                        </FormControl>
+                      ) : (
+                        <></>
+                      )}
 
                       <Button
                         rounded="lg"
@@ -514,7 +513,7 @@ const AdminUser = () => {
                         backgroundColor="#5D5FEF"
                         color="white"
                         className="font-ibmReg"
-                        onClick={addAdmin}
+                        onClick={addProduct}
                       >
                         Add Product
                       </Button>
@@ -526,7 +525,6 @@ const AdminUser = () => {
                 isOpen={isOpenEdit}
                 onClose={(e) => {
                   onCloseEdit();
-                  setEditAdminWarehouse(false);
                 }}
               >
                 <ModalOverlay />
@@ -550,85 +548,101 @@ const AdminUser = () => {
                       </HStack>
                       <FormControl>
                         <FormLabel>
-                          <Text className="font-ibmMed">Email</Text>
+                          <Text className="font-ibmMed">Product Name</Text>
                         </FormLabel>
                         <Input
-                          ref={email}
+                          ref={productName}
                           rounded="lg"
                           variant="filled"
-                          value={editEmail}
-                          isDisabled="true"
+                          value={editProductName}
                           bg="#f5f5f5"
                           border-1
                           borderColor={"#D9D9D9"}
-                          onChange={(event) => setEditEmail(event.target.value)}
+                          onChange={(event) =>
+                            setEditProductName(event.target.value)
+                          }
                         />
                       </FormControl>
                       <FormControl>
                         <FormLabel>
-                          <Text className="font-ibmMed">First Name</Text>
+                          <Text className="font-ibmMed">Price</Text>
                         </FormLabel>
                         <Input
-                          ref={firstName}
+                          ref={price}
                           rounded="lg"
                           variant="filled"
                           placeholder="Admin First Name"
-                          value={editFirstName}
+                          value={editPrice}
                           bg="#f5f5f5"
                           border-1
                           borderColor={"#D9D9D9"}
-                          onChange={(event) =>
-                            setEditFirstName(event.target.value)
-                          }
+                          onChange={(event) => setEditPrice(event.target.value)}
                         />
                       </FormControl>
                       <FormControl>
                         <FormLabel>
-                          <Text className="font-ibmMed">Last Name</Text>
+                          <Text className="font-ibmMed">Product Category</Text>
+                        </FormLabel>
+                        <Select
+                          ref={productCategory}
+                          rounded="lg"
+                          variant="filled"
+                          placeholder="Choose Product Category"
+                          value={editProductCategoryId}
+                          bg="#f5f5f5"
+                          border-1
+                          borderColor={"#D9D9D9"}
+                          onChange={(event) => {
+                            setEditProductCategoryId(event.target.value);
+                          }}
+                        >
+                          {categoryName.map((val, idx) => {
+                            return (
+                              <option value={val.id}>
+                                {val.category_name}
+                              </option>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>
+                          <Text className="font-ibmMed">Image Url</Text>
                         </FormLabel>
                         <Input
-                          ref={lastName}
+                          ref={imageUrl}
                           rounded="lg"
                           variant="filled"
                           placeholder="Admin Last Name"
-                          value={editLastName}
+                          value={editProductImageUrl}
                           onChange={(event) =>
-                            setEditLastName(event.target.value)
+                            setEditProductImageUrl(event.target.value)
                           }
                           bg="#f5f5f5"
                           border-1
                           borderColor={"#D9D9D9"}
                         />
                       </FormControl>
-                      <FormControl>
-                        <FormLabel>
-                          <Text className="font-ibmMed">Role</Text>
-                        </FormLabel>
-                        <Select
-                          ref={role}
-                          rounded="lg"
-                          variant="filled"
-                          placeholder="Choose Admin Role"
-                          bg="#f5f5f5"
-                          border-1
-                          borderColor={"#D9D9D9"}
-                          value={editRole}
-                          onChange={(event) => {
-                            handleEditRole(role.current.value);
-                            setEditRole(event.target.value);
-                          }}
-                        >
-                          <option value="admin">Admin</option>
-                          <option value="wh_admin">Warehouse Admin</option>
-                        </Select>
-                      </FormControl>
+                      {editProductImageUrl ? (
+                        <FormControl>
+                          <FormLabel>
+                            <Text className="font-ibmMed">Image Preview</Text>
+                          </FormLabel>
+                          <Image
+                            src={editProductImageUrl}
+                            alt={"Image is not found"}
+                          />
+                        </FormControl>
+                      ) : (
+                        <></>
+                      )}
                       <Button
                         rounded="lg"
                         alignSelf="center"
                         backgroundColor="#5D5FEF"
                         color="white"
                         className="font-ibmReg"
-                        onClick={editAdmin}
+                        onClick={editProduct}
                       >
                         Edit Product
                       </Button>
@@ -654,6 +668,20 @@ const AdminUser = () => {
                 </div>
                 <div className="mb-4 flex justify-between" w="450px">
                   <Select
+                    name="selectCategoryName"
+                    placeholder="Select Category"
+                    color="gray"
+                    w="200px"
+                    onChange={filterCategoryHandler}
+                  >
+                    {categoryName.map((val, idx) => {
+                      return (
+                        <option value={val.id}>{val.category_name}</option>
+                      );
+                    })}
+                  </Select>
+                  <Select
+                    ml="20px"
                     name="sortBy"
                     placeholder="Sort By"
                     color={"gray"}
@@ -661,10 +689,8 @@ const AdminUser = () => {
                     onChange={sortHandler}
                   >
                     <option value="sortId">ID</option>
-                    <option value="sortEmail">Email</option>
-                    <option value="sortFirstName">First Name</option>
-                    <option value="sortLastName">Last Name</option>
-                    <option value="sortRole">Role</option>
+                    <option value="sortProductName">Product Name</option>
+                    <option value="sortPrice">Price</option>
                   </Select>
                   <Button w="100px" ml="20px" onClick={changeSort}>
                     {sortMode === "ASC" ? "A to Z" : "Z to A"}
@@ -676,14 +702,25 @@ const AdminUser = () => {
                   <Thead>
                     <Tr className="font-bold bg-[#f1f1f1]">
                       <Th>ID</Th>
-                      <Th>Product Name</Th>
+                      <Th maxWidth="400px">Product Name</Th>
                       <Th>Price</Th>
-                      <Th>Product Category</Th>
+                      <Th>
+                        <p>Product</p>
+                        <p>Category</p>
+                      </Th>
+                      <Th>
+                        <p>Image</p>
+                        <p>Preview</p>
+                      </Th>
                       <Th>Image Url</Th>
                       <Th>Created At</Th>
-                      <Th className="flex justify-center w-[250px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
-                        Action
-                      </Th>
+                      {adminRoleLogged === "admin" ? (
+                        <Th className="flex justify-center w-[250px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
+                          Action
+                        </Th>
+                      ) : (
+                        <></>
+                      )}
                     </Tr>
                   </Thead>
                   <Tbody className="bg-white">{renderProductData()}</Tbody>
@@ -707,7 +744,7 @@ const AdminUser = () => {
                       >
                         <Heading>
                           <Text className="font-ibmReg">
-                            Do you want to delete this user?
+                            Do you want to delete this product?
                           </Text>
                         </Heading>
                         <ModalCloseButton />
@@ -719,7 +756,7 @@ const AdminUser = () => {
                         backgroundColor="#5D5FEF"
                         color="white"
                         className="font-ibmReg"
-                        onClick={deleteAdminData}
+                        onClick={deleteProductData}
                         size="lg"
                       >
                         Delete

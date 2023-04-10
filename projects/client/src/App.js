@@ -93,6 +93,7 @@ function App() {
 
   const AuthMainAdmin = ({ children }) => {
     const adminRoleLogged = localStorage.getItem("role");
+    console.log(adminLoggedIn)
 
     if (adminRoleLogged != "admin") {
       return (
@@ -180,9 +181,7 @@ function App() {
             path="/admin/product"
             element={
               <AuthAdmin>
-                <AuthMainAdmin>
                   <AdminProduct />
-                </AuthMainAdmin>
               </AuthAdmin>
             }
           />
