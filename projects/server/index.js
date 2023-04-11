@@ -28,10 +28,16 @@ const { userRouter } = require("./router");
 const { productRouter } = require('./router')
 const { adminRouter } = require('./router')
 const { cartRouter } = require('./router')
+const { addressRouter } = require('./router')
+
+
+
 app.use('/cart', cartRouter)
 app.use("/user", userRouter);
 app.use('/product', productRouter)
 app.use('/admin', adminRouter)
+app.use('/address', addressRouter)
+
 
 
 // app.get("/api", (req, res) => {
