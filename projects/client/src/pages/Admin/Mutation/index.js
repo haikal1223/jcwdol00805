@@ -3,6 +3,12 @@ import Sidebar from "../components/sidebar";
 import axios from "axios";
 import {TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight} from 'react-icons/tb'
 import { 
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogOverlay,
     Box
     , Button
     , HStack
@@ -15,16 +21,21 @@ import {
     , ModalContent
     , Select
     , Text
+    , Textarea
     , Table
     , Thead
     , Tbody
     , Tr
     , Td
     , TableContainer
+    , Tooltip
+    , useDisclosure
+    , VStack
 } from "@chakra-ui/react";
 import { Search2Icon, AddIcon } from '@chakra-ui/icons'
 import {toast, Toaster} from 'react-hot-toast'
 import Cookies from "js-cookie";
+import ModalRequest from "./components/modalRequest";
 
 const AdminMutation = () => {
     const [uid, setUid] = useState('')
@@ -42,7 +53,15 @@ const AdminMutation = () => {
     const [page, setPage] = useState(1)
     const [maxPage, setMaxPage] = useState(0)
     const rowPerPage = 10
+    const [render, setRender] = useState(false)
+    const [rejectId, setRejectId] = useState(0)
+    const [approveId, setApproveId] = useState({})
+    const [rejectReason, setRejectReason] = useState('')
 
+    const { isOpen: isApproveOpen, onOpen: onApproveOpen, onClose: onApproveClose } = useDisclosure()
+    const { isOpen: isRejectOpen, onOpen: onRejectOpen, onClose: onRejectClose } = useDisclosure()
+    const { isOpen: isRequestOpen, onOpen: onRequestOpen, onClose: onRequestClose } = useDisclosure()
+    const cancelRef = React.useRef()
 
     const getUid = async () => {
         try {
@@ -135,46 +154,111 @@ const AdminMutation = () => {
                     <Td>{val.target_wh_name}</Td>
                     <Td>{val.product_id}</Td>
                     <Td>{val.quantity}</Td>
-                    <Td>{val.current_origin_stock}</Td>
                     <Td>{val.order_id}</Td>
                     <Td>{formattedCreateDate}</Td>
                     <Td>{formattedUpdateDate}</Td>
                     <Td>{val.reviewer}</Td>
-                    <Td>{val.status}</Td>
-                    <Td className="flex justify-center w-[250px] sticky right-0 z-50 bg-white shadow-[-10px_0px_30px_0px_#efefef]">action</Td>
+                    <Td>
+                        {
+                            val.status === 'Rejected'?
+                            <>
+                                <Tooltip label={val.rejection_reason}>
+                                    {val.status}
+                                </Tooltip>
+                            </>
+                            :
+                            val.status
+                        }
+                    </Td>
+                    <Td className="grid grid-cols-3 w-[250px] sticky right-0 z-50 bg-white shadow-[-10px_0px_30px_0px_#efefef]">
+                        <Button 
+                        isDisabled={val.status != 'Pending Review' || val.origin_wh_id != whid}
+                        _disabled={{color: '#D9D9D9'}}
+                        onClick={() => {approveHandler(val.id, val.origin_wh_id, val.target_wh_id, val.quantity, val.product_id); onApproveOpen()}}
+                        color={'#4EE476'} variant={'link'}>
+                            approve
+                        </Button>
+                        <Button 
+                        isDisabled={val.status != 'Pending Review' || val.origin_wh_id != whid}
+                        _disabled={{color: '#D9D9D9'}}
+                        onClick={() => {rejectHandler(val.id); onRejectOpen()}}
+                        color={'red'} variant={'link'}>
+                            reject
+                        </Button>
+                        <Button 
+                        isDisabled={val.status != 'Pending Review' || val.requester_id != uid}
+                        _disabled={{color: '#D9D9D9'}}
+                        onClick={() => cancelRequest(val.id)}
+                        color={'#5D5FEF'} variant={'link'}>
+                            cancel
+                        </Button>
+                    </Td>
                 </Tr>
             )
         })
     }
 
     // crud
-    const addRequest = async() => {
+    const approveRequest = async(detail) => {
+        const {id, originWh, targetWh, qty, productId} = detail
         try {
+            let response = await axios.get(`http://localhost:8000/admin-mutation/verify-available-stock?originWh=${originWh}&productId=${productId}`)
+            if(response.data.data < qty) {
+                toast.error('Stock from origin warehouse is not sufficient')
+            } else {
+                await axios.patch(`http://localhost:8000/admin-mutation/approve-mutation/${id}`,{
+                    originWh,
+                    targetWh,
+                    qty,
+                    productId,
+                    uid: uid
+                })
+                setRender(!render)
+                toast.success('Request approved')
+            }
             
         } catch (error) {
             console.log(error.message)
         }
     }
-    const approveRequest = async() => {
+    const approveHandler = (id, originWh, targetWh, qty, productId) => {
+        setApproveId({
+            ...approveId,
+            id,
+            originWh,
+            targetWh,
+            qty,
+            productId
+        })
+    }
+    const cancelRequest = async(id) => {
         try {
-            
+            await axios.patch(`http://localhost:8000/admin-mutation/cancel-mutation/${id}`)
+            setRender(!render)
+            toast.success('Request cancelled')
         } catch (error) {
             console.log(error.message)
         }
     }
-    const cancelRequest = async() => {
+    const rejectRequest = async(id) => {
         try {
-            
+            await axios.patch(`http://localhost:8000/admin-mutation/reject-mutation/${id}`,{
+                uid: uid,
+                rejectReason: rejectReason
+            })
+            setRender(!render)
+            setRejectId(0)
+            toast.success('Request rejected')
         } catch (error) {
             console.log(error.message)
         }
     }
-    const rejectRequest = async() => {
-        try {
-            
-        } catch (error) {
-            console.log(error.message)
-        }
+    const rejectHandler = (id) => {
+        setRejectId(id)
+    }
+    const rejectReasonHandler = (e) => {
+        const value = e.target.value
+        setRejectReason(value)
     }
 
     // pagination
@@ -227,8 +311,8 @@ const AdminMutation = () => {
     },[uid])
     useEffect(() => {
         fetchMutation()
-    },[whid, page, search, sort, filter.filterWarehouse, filter.filterStatus])
-
+    },[whid, page, search, sort, filter.filterWarehouse, filter.filterStatus, render])
+    
   return (
     <div className="w-[100%] flex flex-1 justify-between">
       <Sidebar />
@@ -244,6 +328,7 @@ const AdminMutation = () => {
                         bg='#5D5FEF' 
                         leftIcon={<AddIcon/>} 
                         _hover={{bg:'white', color:'#5D5FEF', border:'1px', borderColor:'#5D5FEF'}}
+                        onClick={onRequestOpen}
                     >request</Button>
                 </HStack>
                 <hr className="my-4 border-[2px]"/>
@@ -286,7 +371,6 @@ const AdminMutation = () => {
                             <Td>target WH</Td>
                             <Td>pID</Td>
                             <Td>requested</Td>
-                            <Td>available</Td>
                             <Td>order id</Td>
                             <Td>created at</Td>
                             <Td>last modified</Td>
@@ -307,6 +391,68 @@ const AdminMutation = () => {
                                 )
                             }
                         </Tbody>
+                        <AlertDialog
+                            isOpen={isApproveOpen}
+                            leastDestructiveRef={cancelRef}
+                            onClose={onApproveClose}
+                        >
+                            <AlertDialogOverlay>
+                            <AlertDialogContent>
+                                <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                                Approve Request
+                                </AlertDialogHeader>
+
+                                <AlertDialogBody>
+                                Are you sure you want to approve this mutation request?
+                                </AlertDialogBody>
+
+                                <AlertDialogFooter>
+                                <Button ref={cancelRef} onClick={onApproveClose}>
+                                    Cancel
+                                </Button>
+                                <Button colorScheme='teal' onClick={() => {approveRequest(approveId);onApproveClose()}} ml={3}>
+                                    Approve
+                                </Button>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                            </AlertDialogOverlay>
+                        </AlertDialog>
+                        <AlertDialog
+                            isOpen={isRejectOpen}
+                            leastDestructiveRef={cancelRef}
+                            onClose={onRejectClose}
+                        >
+                            <AlertDialogOverlay>
+                            <AlertDialogContent>
+                                <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                                Reject Request
+                                </AlertDialogHeader>
+
+                                <AlertDialogBody>
+                                    <VStack alignItems={'start'}>
+                                        <Text className="mb-3">Are you sure you want to reject this mutation request?</Text> 
+                                        <Text className="font-ibmMed">Input reason below:</Text>
+                                        <Textarea onChange={rejectReasonHandler}/>
+                                    </VStack>
+                                </AlertDialogBody>
+
+                                <AlertDialogFooter>
+                                <Button ref={cancelRef} onClick={onRejectClose}>
+                                    Cancel
+                                </Button>
+                                <Button colorScheme='red' onClick={() => {rejectRequest(rejectId);onRejectClose()}} ml={3}>
+                                    Reject
+                                </Button>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                            </AlertDialogOverlay>
+                        </AlertDialog>
+                        <Modal isOpen={isRequestOpen} onClose={onRequestClose} scrollBehavior={'inside'} size={'lg'}>
+                            <ModalOverlay />
+                            <ModalContent>
+                                <ModalRequest whList={whList} whid={whid} uid={uid} close={() => {setRender(!render) ;onRequestClose()}}/>
+                            </ModalContent>
+                        </Modal >
                     </Table>
                 </TableContainer>
                 

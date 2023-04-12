@@ -141,7 +141,43 @@ module.exports = {
 
     addMutation: async(req, res) =>{
         try {
-            
+            // get value
+            let { originWh, targetWh, qty, uid, productId } = req.body
+
+            // verify available stock
+            let avail = await db.product_stock.findOne({
+                attributes : ['stock'],
+                where: {
+                    product_id: productId,
+                    warehouse_id: originWh
+                }
+            })
+
+            if(qty > avail.stock) {
+                res.status(400).send({
+                    isError: true,
+                    message: 'origin stock is not sufficient',
+                    data: avail
+                })
+            } else {
+                // run query
+                var request = await db.stock_mutation.create({
+                    origin_wh_id: originWh,
+                    target_wh_id: targetWh,
+                    quantity: qty,
+                    mutation_status_id: 1,
+                    product_id: productId,
+                    requester_id: uid
+                })
+            }
+
+            // response
+            res.status(201).send({
+                isError: false,
+                message: 'request successfully created',
+                data: request
+            })
+
         } catch (error) {
             res.status(404).send({
                 isError: true,
@@ -151,9 +187,186 @@ module.exports = {
         }
     },
 
-    approveMutation: async(req, res) =>{
+    verifyProductExist: async(req, res) => {
         try {
+            // get value
+            let { productId } = req.params
+
+            // run query
+            let response = await db.product.findOne({
+                where: {
+                    id: productId
+                }
+            }) 
+
+            // response
+            res.status(201).send({
+                isError: false,
+                message: 'product validity checked',
+                data: response
+            })
+
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: error.message,
+                data: null
+            })
+        }
+    },
+
+    verifyOriginWarehouseExist: async(req, res) => {
+        try {
+            // get value
+            let { productId, originWh } = req.query
+
+            // run query
+            let response = await db.product_stock.findOne({
+                where: {
+                    product_id: parseInt(productId),
+                    warehouse_id: parseInt(originWh)
+                }
+            }) 
+
+            // response
+            res.status(201).send({
+                isError: false,
+                message: 'warehouse availability checked',
+                data: response
+            })
+
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: error.message,
+                data: null
+            })
+        }
+    },
+
+    verifyAvailStock: async(req, res) => {
+        try {
+            // get value
+            let { originWh, productId } = req.query
+
+            // run query
+            let avail = await db.product_stock.findOne({
+                attributes : ['stock'],
+                where: {
+                    product_id: parseInt(productId),
+                    warehouse_id: parseInt(originWh)
+                }
+            })
+
+            res.status(200).send({
+                isError: false,
+                message: 'available stock fetched',
+                data: avail.stock
+            })
+
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: error.message,
+                data: null
+            })
+        }
+    },
+
+    approveMutation: async(req, res) => {
+        try {
+            // get value
+            let { id } = req.params
+            let { originWh, targetWh, qty, productId, uid  } = req.body
+
+            // verify available stock
+            let avail = await db.product_stock.findOne({
+                attributes : ['stock'],
+                where: {
+                    product_id: productId,
+                    warehouse_id: originWh
+                }
+            })
+
+            if(qty > avail.stock) {
+                res.status(400).send({
+                    isError: true,
+                    message: 'origin stock is not sufficient',
+                    data: avail
+                })
+            } else {
+                // validate warehouse existence
+                let whExist = db.product_stock.findOne({
+                    where: {
+                        product_id: productId,
+                        warehouse_id: targetWh
+                    }
+                })
+                
+                // run query
+                if (Object.keys(whExist).length === 0) {
+                    await db.product_stock.create({
+                        stock: qty,
+                        product_id: productId,
+                        warehouse_id: targetWh
+                    })
+                } else {
+                    await db.product_stock.update({stock: (whExist.stock + qty)}, {
+                        where: {
+                            product_id: productId,
+                            warehouse_id: targetWh
+                        }
+                    })
+                }
+
+                await db.product_stock.update({stock: (avail.stock - qty)}, {
+                    where: {
+                        product_id: productId,
+                        warehouse_id: originWh
+                    }
+                })
+
+                await db.stock_mutation.update(
+                    {
+                        mutation_status_id: 2,
+                        reviewer_id: uid
+                    }, {
+                    where : {
+                        id: id
+                    }
+                })
+
+                var logOrigin = await db.stock_log.create({
+                    mutation_id: id,
+                    old_stock: avail.stock,
+                    new_stock: (avail.stock - qty),
+                    operation: 'request',
+                    product_id: productId,
+                    user_id: uid,
+                    warehouse_id: originWh
+                })
+
+                var logTarget = await db.stock_log.create({
+                    mutation_id: id,
+                    old_stock: Object.keys(whExist).length === 0? 0 :whExist.stock,
+                    new_stock: (Object.keys(whExist).length === 0? 0 :whExist.stock) + qty,
+                    operation: 'request',
+                    product_id: productId,
+                    user_id: uid,
+                    warehouse_id: targetWh
+                })
+            }
             
+
+            // response
+            res.status(201).send({
+                isError: false,
+                message: 'mutation request approved',
+                data: {
+                    logOrigin, logTarget
+                }
+            })
+
         } catch (error) {
             res.status(404).send({
                 isError: true,
@@ -165,7 +378,23 @@ module.exports = {
 
     cancelMutation: async(req, res) =>{
         try {
-            
+            // get value
+            let { id } = req.params
+
+            // run query
+            await db.stock_mutation.update({mutation_status_id: 3}, {
+                where : {
+                    id: id
+                }
+            })
+
+            // response
+            res.status(201).send({
+                isError: false,
+                message: 'mutation request cancelled',
+                data: true
+            })
+
         } catch (error) {
             res.status(404).send({
                 isError: true,
@@ -177,7 +406,29 @@ module.exports = {
 
     rejectMutation: async(req, res) =>{
         try {
-            
+            // get value
+            let { id } = req.params
+            let { uid, rejectReason } = req.body
+
+            // run query
+            await db.stock_mutation.update(
+                {
+                    mutation_status_id: 4,
+                    reviewer_id: uid,
+                    rejection_reason: rejectReason
+                }, {
+                where : {
+                    id: id
+                }
+            })
+
+            // response
+            res.status(201).send({
+                isError: false,
+                message: 'mutation request rejected',
+                data: true
+            })
+
         } catch (error) {
             res.status(404).send({
                 isError: true,
