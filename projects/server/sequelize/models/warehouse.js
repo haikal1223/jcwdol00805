@@ -14,6 +14,9 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.product_stock, {
         foreignKey: 'warehouse_id'
       })
+      this.hasMany(models.wh_admin, {
+        foreignKey: 'warehouse_id'
+      })
     }
   }
   warehouse.init({
