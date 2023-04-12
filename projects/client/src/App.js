@@ -14,6 +14,7 @@ import RegisterUser from './pages/Register';
 import ForgotPassword from './pages/forgotPassword';
 import UpdatePassword from './pages/newPassword';
 import EditProfile from "./pages/editProfile";
+import CheckOut from "./pages/CheckOut";
 
 //Admin Components
 import AdminHome from "./pages/Admin/Home";
@@ -139,11 +140,13 @@ function App() {
           <Navbar login={isLoggedIn} />
         )}{" "}
         <Routes>
+
           <Route path="/" element={<Home login={isLoggedIn} />} />
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/product/:id" element={<Product login={isLoggedIn} />} />
+          <Route path="/checkout" element={<CheckOut />} />
           <Route
             path="/cart"
             element={
@@ -162,9 +165,8 @@ function App() {
           />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
-
-          {/* Admin Routing */}
-          <Route path="/admin" element={<AdminHome />} />
+                  {/* Admin Routing */}
+                  <Route path="/admin" element={<AdminHome />} />
           <Route
             path="/admin/user"
             element={
@@ -175,6 +177,7 @@ function App() {
               </AuthAdmin>
             }
           />
+
         </Routes>
         {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />
