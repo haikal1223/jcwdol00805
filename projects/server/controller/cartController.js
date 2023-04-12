@@ -29,10 +29,10 @@ const bcrypt = require("bcrypt");
 module.exports = {
   getCartFilterProduct: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       const findCart = await db.cart.findAll({
         where: {
-          user_uid,
+          user_id,
           product_id,
         },
       });
@@ -48,12 +48,15 @@ module.exports = {
 
   getUserCart: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       const findUserCart = await db.cart.findAll({
         where: {
-          user_uid,
+          user_id,
         },
       });
+
+      console.log(findUserCart)
+
       return res.status(200).send({
         isError: false,
         message: "Ok",
@@ -66,12 +69,11 @@ module.exports = {
 
   addCartProduct: async (req, res) => {
     try {
-      let { quantity, price, user_uid, product_id } = req.body;
-
+      let { quantity, price, user_id, product_id } = req.body;
       let dataToSend = await db.cart.create({
         quantity,
         price,
-        user_uid,
+        user_id,
         product_id,
       });
 
@@ -80,12 +82,18 @@ module.exports = {
         message: "Your product is add to cart",
         data: null,
       });
-    } catch (error) {}
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Something Error",
+        data: error,
+      });
+    }
   },
 
   updateCartProduct: async (req, res) => {
     try {
-      let { user_uid, product_id } = req.query;
+      let { user_id, product_id } = req.query;
       let { quantity, price } = req.body;
       let dataToSend = await db.cart.update(
         {
@@ -94,7 +102,7 @@ module.exports = {
         },
         {
           where: {
-            user_uid,
+            user_id,
             product_id,
           },
         }
@@ -293,29 +301,6 @@ module.exports = {
     }
   },
 
-  getCart: async (req, res) => {
-    const { uid } = req.uid;
-    try {
-      const { id } = await db.user.findOne({
-        where: { uid: uid },
-      });
-
-      const cart = await db.cart.findAll({
-        where: { user_id: id },
-      });
-
-      console.log(cart);
-      res.send({ cart });
-    } catch (error) {
-      res.status(404).send({
-        isError: true,
-        message: error.message,
-        data: error,
-      });
-    }
-  },
-
-
   delCart: async (req, res) => {
     try {
       let { id } = req.query;
@@ -350,6 +335,5 @@ module.exports = {
         data: null,
       });
     } catch (error) {}
-
   },
 };

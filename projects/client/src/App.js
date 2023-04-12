@@ -5,6 +5,7 @@ import { toast, Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Order from "./pages/Order";
+import OrderDetail from "./pages/Order/OrderDetail";
 import Product from "./pages/Product";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
@@ -140,6 +141,14 @@ function App() {
             element={
               <RequireAuth>
                 <Order login={isLoggedIn} />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/order/detail/:orderId"
+            element={
+              <RequireAuth>
+                <OrderDetail login={isLoggedIn} />
               </RequireAuth>
             }
           />

@@ -287,7 +287,7 @@ module.exports = {
           });
 
         let token = createToken({
-          uid: findEmail.dataValues.uid,
+          id: findEmail.dataValues.id,
         });
 
         res.status(200).send({
