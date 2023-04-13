@@ -26,7 +26,6 @@ export default function AdminLogin() {
             toast.error(error?.response?.data.message)
         }
     }
-  };
 
   return (
     <Tag>
