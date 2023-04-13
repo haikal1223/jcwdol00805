@@ -203,6 +203,7 @@ const AdminProductDetail = () => {
     handleExistWh();
   }, [stockDetail, uid, whAdmin]);
 
+
   return (
     <div className="w-[100%] flex flex-1 justify-between">
       <Sidebar />

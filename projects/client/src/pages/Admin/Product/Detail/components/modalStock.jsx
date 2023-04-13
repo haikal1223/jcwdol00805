@@ -45,7 +45,7 @@ const ModalStock = (props) => {
             console.log(error.message)
         }
     }
-
+    
   return (
     <>
         <ModalCloseButton/>
