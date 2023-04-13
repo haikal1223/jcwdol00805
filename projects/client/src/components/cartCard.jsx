@@ -50,7 +50,7 @@ export default function CartCard(props) {
               {products[props.cartData.product_id - 1]?.name}
             </Text>
             <Text fontSize={16} fontWeight={700} className="font-ibmFont">
-              Rp{props.cartData.price.toLocaleString()}.00
+              Rp{props.cartData.price.toLocaleString('id-ID')}
             </Text>
             <HStack>
               <Button onClick={props.deleteFunction}>

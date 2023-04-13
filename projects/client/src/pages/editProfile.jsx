@@ -40,20 +40,10 @@ export default function EditProfile() {
 
   const [allAddress, setAllAddress] = useState([]);
 
-
-
-
-
   const modalAddress = useDisclosure();
   const modalSwitch = useDisclosure();
   const [mainAddress, setMainAddress] = useState({});
 
-
-
-<<<<<<< GP5-8-Fix
-=======
-export default function EditProfile() {
->>>>>>> main
   const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
   const [show, setShow] = useState(false);
@@ -151,7 +141,7 @@ export default function EditProfile() {
         setProfilePicture(
           `http://localhost:8000/images/${profilePictureSplit}`
         );
-        console.log(profilePicture);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);
