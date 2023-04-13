@@ -202,7 +202,6 @@ const AdminOrder = () => {
     useEffect(() => {
         fetchOrder()
     },[whid, page, search, sort])
-    
 
   return (
     <div className="w-[100%] flex flex-1 justify-between">

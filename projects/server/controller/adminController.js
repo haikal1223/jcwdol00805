@@ -7,7 +7,7 @@ const db = require("../sequelize/models/index");
 const { matchPassword, hashPassword } = require("../lib/hash");
 
 // Import jwt
-const { createToken } = require("../lib/jwt");
+const { createToken, validateToken } = require("../lib/jwt");
 const { Sequelize } = require("../sequelize/models/index");
 const warehouse = require("../sequelize/models/warehouse");
 
@@ -56,7 +56,7 @@ module.exports = {
           isError: false,
           message: "Login Success",
           data: {
-            token: createToken({ uid: findEmail.dataValues.uid }),
+            token: createToken({ id: findEmail.dataValues.id }),
             email: findEmail.dataValues.email,
             role: findEmail.dataValues.role,
           },

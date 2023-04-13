@@ -23,12 +23,6 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.order_detail,{
         foreignKey: 'order_id'
       })
-      this.hasMany(models.stock_mutation,{
-        foreignKey: 'order_id'
-      })
-      this.hasMany(models.stock_log,{
-        foreignKey: 'order_id'
-      })
     }
   }
   order.init({
