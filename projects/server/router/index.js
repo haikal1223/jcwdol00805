@@ -4,6 +4,7 @@ const userRouter = require('./userRouter')
 const addressRouter = require('./addressRouter')
 const adminRouter = require('./adminRouter')
 const adminOrderRouter = require('./adminOrderRouter')
+const adminProductRouter = require('./adminProductRouter')
 
 
 module.exports = {
@@ -12,6 +13,7 @@ module.exports = {
     userRouter,
     adminRouter,
     adminOrderRouter,
+    adminProductRouter,
     addressRouter
 }
 

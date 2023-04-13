@@ -21,6 +21,8 @@ import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
 import AdminOrder from "./pages/Admin/Order";
+import AdminProduct from "./pages/Admin/Product/Home";
+import AdminProductDetail from "./pages/Admin/Product/Detail";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -188,8 +190,23 @@ function App() {
                 <AdminOrder />
               </AuthAdmin>
             }
-          /> 
-
+          />
+          <Route 
+            path='/admin/product' 
+            element={
+              <AuthAdmin>
+                <AdminProduct />
+              </AuthAdmin>
+            }
+          />  
+          <Route 
+            path='/admin/product/:product_id' 
+            element={
+              <AuthAdmin>
+                <AdminProductDetail />
+              </AuthAdmin>
+            }
+          />      
         </Routes>
         {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />

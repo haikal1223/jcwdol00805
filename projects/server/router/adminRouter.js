@@ -1,8 +1,8 @@
-const express = require('express')
-const Router = express.Router()
+const express = require("express");
+const Router = express.Router();
 
 //Import All Controller
-const { adminController } = require('../controller')
+const { adminController } = require("../controller");
 
 Router.get('/login', adminController.login)
 Router.get('/verify-token', adminController.verifyToken)
@@ -15,4 +15,4 @@ Router.delete('/deleteAdminData', adminController.deleteAdminData)
 Router.get('/adminWarehouse', adminController.adminWarehouse)
 
 
-module.exports = Router
+module.exports = Router;
