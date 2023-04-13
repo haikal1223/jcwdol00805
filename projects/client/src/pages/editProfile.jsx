@@ -40,15 +40,9 @@ export default function EditProfile() {
 
   const [allAddress, setAllAddress] = useState([]);
 
-
-
-
-
   const modalAddress = useDisclosure();
   const modalSwitch = useDisclosure();
   const [mainAddress, setMainAddress] = useState({});
-
-
 
   const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
@@ -147,7 +141,7 @@ export default function EditProfile() {
         setProfilePicture(
           `http://localhost:8000/images/${profilePictureSplit}`
         );
-        console.log(profilePicture);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);

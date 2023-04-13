@@ -33,7 +33,7 @@ export default function Home(props) {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const itemLimit = 15;
 
-  const [uid, setUid] = useState("");
+  const [id, setId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [userCart, setUserCart] = useState([]);
@@ -46,10 +46,10 @@ export default function Home(props) {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setUid(response.data.data.uid);
-      if (uid) {
+      setId(response.data.data.id);
+      if (id) {
         let getUserCart = await axios.get(
-          `http://localhost:8000/cart/getUserCart?user_uid=${uid}`
+          `http://localhost:8000/cart/getUserCart?user_id=${id}`
         );
         setUserCart(getUserCart.data.data);
         for (let i = 0; i < getUserCart.data.data.length; i++) {
@@ -60,7 +60,7 @@ export default function Home(props) {
   };
   useEffect(() => {
     getUserCart();
-  }, [uid]);
+  }, [id]);
 
   const fetchProduct = async () => {
     const offset = (page - 1) * itemLimit
@@ -80,20 +80,20 @@ export default function Home(props) {
     fetchProduct();
   }, [search, page, filter.searchCategory, sort]);
 
-  let getUid = async () => {
+  let getId = async () => {
     try {
       let token = localStorage.getItem("myToken");
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setUid(response?.data?.data?.uid);
+      setId(response?.data?.data?.id);
     } catch (error) {
       console.log(error.response.data);
     }
   };
 
   useEffect(() => {
-    getUid();
+    getId();
   }, []);
 
   const renderProduct = () => {
@@ -212,13 +212,13 @@ export default function Home(props) {
           userCart.map(async (valCart, idx) => {
             if (valCart.product_id === valProduct.id) {
               foundInCart = true;
-              if (valCart.quantity+1 > sumStock) {
+              if (valCart.quantity > sumStock - 1) {
                 toast.error("Your cart has maximum stock of the product", {
                   duration: 3000,
                 });
               } else {
                 let updateCart = await axios.patch(
-                  `http://localhost:8000/cart/updateCart?user_uid=${uid}&product_id=${valCart.product_id}`,
+                  `http://localhost:8000/cart/updateCart?user_id=${id}&product_id=${valCart.product_id}`,
                   {
                     quantity: valCart.quantity + 1,
                     price: valCart.price,
@@ -237,7 +237,7 @@ export default function Home(props) {
               {
                 quantity: 1,
                 price: valProduct.price,
-                user_uid: uid,
+                user_id: id,
                 product_id: valProduct.id,
               }
             );

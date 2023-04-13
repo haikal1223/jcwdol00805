@@ -28,6 +28,10 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.stock_log, {
         foreignKey: 'user_id'
       })
+      this.hasMany(models.wh_admin, {
+        foreignKey: 'user_id'
+      })
+
     }
   }
   user.init(

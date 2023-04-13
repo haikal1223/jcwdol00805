@@ -26,11 +26,10 @@ import AdminProduct from "./pages/Admin/Product/Home";
 import AdminProductDetail from "./pages/Admin/Product/Detail";
 import AdminMutation from "./pages/Admin/Mutation";
 
-
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [adminLoggedIn, setAdminLoggedIn] = useState(false)
-  const navigate = useNavigate()
+  const [adminLoggedIn, setAdminLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   const keepLoggedIn = () => {
     try {
@@ -49,63 +48,75 @@ function App() {
     try {
       const token = Cookies.get('adminToken')
       if (token) {
-        setAdminLoggedIn(true)
+        setAdminLoggedIn(true);
       } else {
-        setAdminLoggedIn(false)
+        setAdminLoggedIn(false);
       }
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
-  }
+  };
 
   useEffect(() => {
-
-    keepLoggedIn()
-    keepAdminLoggedIn()
-  }, [])
-
+    keepLoggedIn();
+    keepAdminLoggedIn();
+  }, []);
 
   const RequireAuth = ({ children }) => {
     const userIsLogged = localStorage.getItem("myToken");
 
     if (!userIsLogged) {
-
       return (
         <>
-          <Navigate to='/' />
-          {toast.error('Please log in first.', {
-            id: 'login',
+          <Navigate to="/" />
+          {toast.error("Please log in first.", {
+            id: "login",
             duration: 2000,
           })}
         </>
-      )
-
+      );
     }
     return children;
   };
 
   const AuthAdmin = ({children}) => {
     const adminIsLogged = Cookies.get('adminToken')
-
     if (!adminIsLogged) {
       return (
         <>
-          <Navigate to='/admin' />
-          {toast.error('Please log in first.', {
-            id: 'adminlogin',
-            duration: 2000
+          <Navigate to="/admin" />
+          {toast.error("Please log in first.", {
+            id: "adminlogin",
+            duration: 2000,
           })}
         </>
-      )
+      );
     }
-    return children
-    
-  }
+    return children;
+  };
+
+  const AuthMainAdmin = ({ children }) => {
+    const adminRoleLogged = localStorage.getItem("role");
+
+    if (adminRoleLogged != "admin") {
+      return (
+        <>
+          <Navigate to="/admin" />
+          {toast.error("You don't have access to this page", {
+            id: "adminlogin",
+            duration: 2000,
+          })}
+        </>
+      );
+    }
+    return children;
+  };
 
   const adminLogout = () => {
     return (
         <>
             {Cookies.remove('adminToken')}
+            {Cookies.remove('role')}
             {setTimeout(() => {
               window.location.href ='/admin'
             }, 200)}
@@ -113,18 +124,16 @@ function App() {
                 id: 'logout',
                 duration: 3000
             })}
-        </>
-    )
-}
+      </>
+    );
+  };
 
   return (
     <div className="flex justify-center">
 
-
       <div className={window.location.pathname.includes('/admin')?"w-[1440px] z-0":"w-[480px] z-0"}>
         {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={adminLogout}/>:<Navbar login={isLoggedIn} />}
         <Routes>
-
           <Route path="/" element={<Home login={isLoggedIn} />} />
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
@@ -150,15 +159,17 @@ function App() {
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
                   {/* Admin Routing */}
-            <Route path='/admin' element={<AdminHome />}/>
-            <Route 
-              path='/admin/user' 
-              element={
-                <AuthAdmin>
+                  <Route path="/admin" element={<AdminHome />} />
+          <Route
+            path="/admin/user"
+            element={
+              <AuthAdmin>
+                <AuthMainAdmin>
                   <AdminUser />
-                </AuthAdmin>
-              }
-            />
+                </AuthMainAdmin>
+              </AuthAdmin>
+            }
+          />
             <Route 
               path='/admin/order' 
               element={
@@ -190,10 +201,10 @@ function App() {
                   <AdminMutation />
                 </AuthAdmin>
               }
-            />   
+            />  
 
         </Routes>
-        {window.location.pathname.includes('/admin')?<></>:<Footer />}
+        {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />
       </div>
     </div>
