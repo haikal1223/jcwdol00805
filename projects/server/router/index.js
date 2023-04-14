@@ -5,6 +5,7 @@ const addressRouter = require('./addressRouter')
 const adminRouter = require('./adminRouter')
 const adminOrderRouter = require('./adminOrderRouter')
 const adminProductRouter = require('./adminProductRouter')
+const adminMutationRouter = require('./adminMutationRouter')
 
 
 module.exports = {
@@ -14,6 +15,7 @@ module.exports = {
     adminRouter,
     adminOrderRouter,
     adminProductRouter,
+    adminMutationRouter,
     addressRouter
 }
 

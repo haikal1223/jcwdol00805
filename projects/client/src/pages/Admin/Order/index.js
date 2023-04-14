@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/sidebar";
 import axios from "axios";
+import Cookies from 'js-cookie';
 import {TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight} from 'react-icons/tb'
 import { 
     Box
@@ -29,7 +30,6 @@ import OrderDetail from "./components/orderDetail";
 const AdminOrder = () => {
     const [uid, setUid] = useState('')
     const [whid, setWhid] = useState('')
-    const [orderList, setOrderList] = useState([])
     const [filter, setFilter] = useState({
         searchOrderId: '',
         filterWarehouse: '' 
@@ -47,7 +47,7 @@ const AdminOrder = () => {
 
     const getUid = async () => {
         try {
-          let token = localStorage.getItem("adminToken");
+          let token = Cookies.get('adminToken');
           let response = await axios.get(
             `http://localhost:8000/admin/verify-token?token=${token}`
           );
@@ -77,7 +77,6 @@ const AdminOrder = () => {
                 let response = await axios.get(
                     `http://localhost:8000/admin-order/view/${whid}?id=${filter.searchOrderId}&wh=${filter.filterWarehouse}&sort=${sort}&offset=${offset}&row=${rowPerPage}`
                 )
-                setOrderList(response.data.data.orders[0])
                 setFilteredOrder(response.data.data.orders[0])
                 setMaxPage(Math.ceil(parseInt(response.data.data.countOrders[0][0].num_order) / rowPerPage))
                 setWhList(response.data.data.wh_list[0])
