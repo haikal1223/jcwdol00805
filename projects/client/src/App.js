@@ -2,6 +2,7 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
+import Cookies from 'js-cookie';
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Order from "./pages/Order";
@@ -23,6 +24,7 @@ import AdminNavbar from "./pages/Admin/components/navbar";
 import AdminOrder from "./pages/Admin/Order";
 import AdminProduct from "./pages/Admin/Product/Home";
 import AdminProductDetail from "./pages/Admin/Product/Detail";
+import AdminMutation from "./pages/Admin/Mutation";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -44,7 +46,7 @@ function App() {
 
   const keepAdminLoggedIn = () => {
     try {
-      const token = localStorage.getItem("adminToken");
+      const token = Cookies.get('adminToken')
       if (token) {
         setAdminLoggedIn(true);
       } else {
@@ -77,9 +79,8 @@ function App() {
     return children;
   };
 
-  const AuthAdmin = ({ children }) => {
-    const adminIsLogged = localStorage.getItem("adminToken");
-
+  const AuthAdmin = ({children}) => {
+    const adminIsLogged = Cookies.get('adminToken')
     if (!adminIsLogged) {
       return (
         <>
@@ -111,39 +112,28 @@ function App() {
     return children;
   };
 
-  const onLogout = () => {
+  const adminLogout = () => {
     return (
-      <>
-        {localStorage.removeItem("adminToken")}
-        {localStorage.removeItem("role")}
-        {navigate("/admin")}
-        {setTimeout(() => {
-          window.location.reload();
-        }, 200)}
-        {toast.success("You have been logged out", {
-          id: "logout",
-          duration: 3000,
-        })}
+        <>
+            {Cookies.remove('adminToken')}
+            {Cookies.remove('role')}
+            {setTimeout(() => {
+              window.location.href ='/admin'
+            }, 200)}
+            {toast.success('You have been logged out', {
+                id: 'logout',
+                duration: 3000
+            })}
       </>
     );
   };
 
   return (
     <div className="flex justify-center">
-      <div
-        className={
-          window.location.pathname.includes("/admin")
-            ? "w-[1440px] z-0"
-            : "w-[480px] z-0"
-        }
-      >
-        {window.location.pathname.includes("/admin") ? (
-          <AdminNavbar login={adminLoggedIn} func={onLogout} />
-        ) : (
-          <Navbar login={isLoggedIn} />
-        )}{" "}
-        <Routes>
 
+      <div className={window.location.pathname.includes('/admin')?"w-[1440px] z-0":"w-[480px] z-0"}>
+        {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={adminLogout}/>:<Navbar login={isLoggedIn} />}
+        <Routes>
           <Route path="/" element={<Home login={isLoggedIn} />} />
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
@@ -180,30 +170,39 @@ function App() {
               </AuthAdmin>
             }
           />
-          <Route 
-            path='/admin/order' 
-            element={
-              <AuthAdmin>
-                <AdminOrder />
-              </AuthAdmin>
-            }
-          />
-          <Route 
-            path='/admin/product' 
-            element={
-              <AuthAdmin>
-                <AdminProduct />
-              </AuthAdmin>
-            }
-          />  
-          <Route 
-            path='/admin/product/:product_id' 
-            element={
-              <AuthAdmin>
-                <AdminProductDetail />
-              </AuthAdmin>
-            }
-          />      
+            <Route 
+              path='/admin/order' 
+              element={
+                <AuthAdmin>
+                  <AdminOrder />
+                </AuthAdmin>
+              }
+            />
+            <Route 
+              path='/admin/product' 
+              element={
+                <AuthAdmin>
+                  <AdminProduct />
+                </AuthAdmin>
+              }
+            />  
+            <Route 
+              path='/admin/product/:product_id' 
+              element={
+                <AuthAdmin>
+                  <AdminProductDetail />
+                </AuthAdmin>
+              }
+            />
+            <Route 
+              path='/admin/mutation' 
+              element={
+                <AuthAdmin>
+                  <AdminMutation />
+                </AuthAdmin>
+              }
+            />  
+
         </Routes>
         {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />

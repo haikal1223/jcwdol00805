@@ -20,7 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'user_id'
       })
       this.hasMany(models.stock_mutation, {
-        foreignKey: 'user_id'
+        foreignKey: 'requester_id'
+      })
+      this.hasMany(models.stock_mutation, {
+        foreignKey: 'reviewer_id'
       })
       this.hasMany(models.stock_log, {
         foreignKey: 'user_id'

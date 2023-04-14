@@ -26,17 +26,19 @@ app.use(express.static('public'));
 
 const { userRouter } = require("./router");
 const { productRouter } = require('./router')
+const { addressRouter } = require('./router')
+const { cartRouter } = require('./router')
 const { adminRouter } = require('./router')
 const { adminOrderRouter } = require('./router')
-const { cartRouter } = require('./router')
 const { adminProductRouter } = require('./router')
-const { addressRouter } = require('./router')
+const { adminMutationRouter } = require('./router')
+app.use('/admin-mutation', adminMutationRouter)
 app.use('/admin-product', adminProductRouter)
-app.use("/user", userRouter);
-app.use('/product', productRouter)
-app.use('/cart', cartRouter)
 app.use('/admin', adminRouter)
 app.use('/admin-order', adminOrderRouter)
+app.use('/cart', cartRouter)
+app.use("/user", userRouter);
+app.use('/product', productRouter)
 app.use('/address', addressRouter)
 
 
