@@ -8,11 +8,11 @@ import Order from "./pages/Order";
 import Product from "./pages/Product";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
-import Pages from './components/pages';
-import Activation from './pages/activation'
-import RegisterUser from './pages/Register';
-import ForgotPassword from './pages/forgotPassword';
-import UpdatePassword from './pages/newPassword';
+import Pages from "./components/pages";
+import Activation from "./pages/activation";
+import RegisterUser from "./pages/Register";
+import ForgotPassword from "./pages/forgotPassword";
+import UpdatePassword from "./pages/newPassword";
 import EditProfile from "./pages/editProfile";
 import CheckOut from "./pages/CheckOut";
 
@@ -20,12 +20,12 @@ import CheckOut from "./pages/CheckOut";
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
-
+import OrderAdminPage from "./pages/Order";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [adminLoggedIn, setAdminLoggedIn] = useState(false)
-  const navigate = useNavigate()
+  const [adminLoggedIn, setAdminLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   const keepLoggedIn = () => {
     try {
@@ -42,85 +42,87 @@ function App() {
 
   const keepAdminLoggedIn = () => {
     try {
-      const token = localStorage.getItem('adminToken')
+      const token = localStorage.getItem("adminToken");
       if (token) {
-        setAdminLoggedIn(true)
+        setAdminLoggedIn(true);
       } else {
-        setAdminLoggedIn(false)
+        setAdminLoggedIn(false);
       }
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
-  }
+  };
 
   useEffect(() => {
-
-    keepLoggedIn()
-    keepAdminLoggedIn()
-  }, [])
-
+    keepLoggedIn();
+    keepAdminLoggedIn();
+  }, []);
 
   const RequireAuth = ({ children }) => {
     const userIsLogged = localStorage.getItem("myToken");
 
     if (!userIsLogged) {
-
       return (
         <>
-          <Navigate to='/' />
-          {toast.error('Please log in first.', {
-            id: 'login',
+          <Navigate to="/" />
+          {toast.error("Please log in first.", {
+            id: "login",
             duration: 2000,
           })}
         </>
-      )
-
+      );
     }
     return children;
   };
 
-  const AuthAdmin = ({children}) => {
-    const adminIsLogged = localStorage.getItem('adminToken')
+  const AuthAdmin = ({ children }) => {
+    const adminIsLogged = localStorage.getItem("adminToken");
 
     if (!adminIsLogged) {
       return (
         <>
-          <Navigate to='/admin' />
-          {toast.error('Please log in first.', {
-            id: 'adminlogin',
-            duration: 2000
+          <Navigate to="/admin" />
+          {toast.error("Please log in first.", {
+            id: "adminlogin",
+            duration: 2000,
           })}
         </>
-      )
+      );
     }
-    return children
-    
-  }
+    return children;
+  };
 
   const onLogout = () => {
     return (
-        <>
-            {localStorage.removeItem('adminToken')}
-            {navigate('/admin')}
-            {setTimeout(() => {
-              window.location.reload()
-            }, 200)}
-            {toast.success('You have been logged out', {
-                id: 'logout',
-                duration: 3000
-            })}
-        </>
-    )
-}
+      <>
+        {localStorage.removeItem("adminToken")}
+        {navigate("/admin")}
+        {setTimeout(() => {
+          window.location.reload();
+        }, 200)}
+        {toast.success("You have been logged out", {
+          id: "logout",
+          duration: 3000,
+        })}
+      </>
+    );
+  };
 
   return (
     <div className="flex justify-center">
-
-
-      <div className={window.location.pathname.includes('/admin')?"w-[1440px] z-0":"w-[480px] z-0"}>
-        {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={onLogout}/>:<Navbar login={isLoggedIn} />}
+      <div
+        className={
+          window.location.pathname.includes("/admin")
+            ? "w-[1440px] z-0"
+            : "w-[480px] z-0"
+        }
+      >
+        {window.location.pathname.includes("/admin") ? (
+          <AdminNavbar login={adminLoggedIn} func={onLogout} />
+        ) : (
+          <Navbar login={isLoggedIn} />
+        )}
         <Routes>
-
           <Route path="/" element={<Home login={isLoggedIn} />} />
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
@@ -145,19 +147,26 @@ function App() {
           />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
-                  {/* Admin Routing */}
-            <Route path='/admin' element={<AdminHome />}/>
-            <Route 
-              path='/admin/user' 
-              element={
-                <AuthAdmin>
-                  <AdminUser />
-                </AuthAdmin>
-              }
-            />
-
+          {/* Admin Routing */}
+          <Route path="/admin" element={<AdminHome />} />
+          <Route
+            path="/admin/user"
+            element={
+              <AuthAdmin>
+                <AdminUser />
+              </AuthAdmin>
+            }
+          />
+          <Route
+            path="/admin/orders"
+            element={
+              <AuthAdmin>
+                <OrderAdminPage />
+              </AuthAdmin>
+            }
+          />
         </Routes>
-        {window.location.pathname.includes('/admin')?<></>:<Footer />}
+        {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />
       </div>
     </div>

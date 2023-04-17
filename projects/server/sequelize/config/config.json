@@ -4,7 +4,7 @@
 
     "password": "ot3ra1han12",
 
-    "database": "db_warehouse",
+    "database": "db_warehouse_dummy1",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
