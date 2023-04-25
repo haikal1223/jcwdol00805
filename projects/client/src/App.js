@@ -9,11 +9,11 @@ import Order from "./pages/Order";
 import Product from "./pages/Product";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
-import Pages from './components/pages';
-import Activation from './pages/activation'
-import RegisterUser from './pages/Register';
-import ForgotPassword from './pages/forgotPassword';
-import UpdatePassword from './pages/newPassword';
+import Pages from "./components/pages";
+import Activation from "./pages/activation";
+import RegisterUser from "./pages/Register";
+import ForgotPassword from "./pages/forgotPassword";
+import UpdatePassword from "./pages/newPassword";
 import EditProfile from "./pages/editProfile";
 import CheckOut from "./pages/CheckOut";
 
@@ -158,8 +158,8 @@ function App() {
           />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
-                  {/* Admin Routing */}
-                  <Route path="/admin" element={<AdminHome />} />
+          {/* Admin Routing */}
+          <Route path="/admin" element={<AdminHome />} />
           <Route
             path="/admin/user"
             element={
