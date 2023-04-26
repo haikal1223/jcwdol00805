@@ -65,8 +65,8 @@ module.exports = {
               GROUP BY 1,2,3,4,5,6,7 ${sort}`
             )
             
-            let products = [...productWithStock[0], ...productWithoutStock[0]].slice(offset, offset + row)
-
+            let products = [...productWithStock[0], ...productWithoutStock[0]].slice(parseInt(offset), parseInt(offset) + parseInt(row))
+              
             let numItem = await sequelize.query(
               `SELECT COUNT(id) as num_item
               FROM product

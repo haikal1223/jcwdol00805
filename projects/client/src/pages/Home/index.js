@@ -119,7 +119,7 @@ export default function Home(props) {
             setPage(page - 1);
         }
     }
-  };
+  
   const firstPageHandler = () => {
     if(page > 1) {
         setPage(1)
@@ -149,6 +149,7 @@ export default function Home(props) {
       ...filter,
       searchCategory: catId
     })
+    setPage(1)
   }
   const sortHandler = (e) => {
     const value = e.target.value
