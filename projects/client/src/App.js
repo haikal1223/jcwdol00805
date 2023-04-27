@@ -21,6 +21,7 @@ import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
 import OrderAdminPage from "./pages/Order";
+import Dashboard from "./pages/Admin/Dashboard";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -165,7 +166,16 @@ function App() {
               </AuthAdmin>
             }
           />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AuthAdmin>
+                <Dashboard />
+              </AuthAdmin>
+            }
+          />
         </Routes>
+
         {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />
       </div>
