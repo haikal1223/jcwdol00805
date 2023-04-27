@@ -94,18 +94,20 @@ module.exports = {
         },
       });
       if (!order) {
-        return res.status(404).send({
-          isError: true,
-          message: "No order found with pending payment proof",
-          data: null,
-        });
-      }
-      await order.destroy();
-      return res.status(200).send({
-        isError: false,
-        message: "Order cancelled successfully",
-        data: null,
-      });
+  return res.status(404).send({
+    isError: true,
+    message: "No order found with pending payment proof",
+    data: null,
+  });
+}
+
+await order.update({ order_status_id: 6 });
+
+return res.status(200).send({
+  isError: false,
+  message: "Order cancelled successfully",
+  data: null,
+});
     } catch (error) {
       console.error(error);
       return res.status(500).send({
