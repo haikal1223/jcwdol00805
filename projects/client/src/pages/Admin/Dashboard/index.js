@@ -534,7 +534,6 @@ const AdminUser = () => {
       ...filter,
       [name]: value,
     });
-    console.log(filter);
   };
 
   const sortHandler = (e) => {
