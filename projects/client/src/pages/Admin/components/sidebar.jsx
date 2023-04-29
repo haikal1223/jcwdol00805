@@ -1,4 +1,4 @@
-import SideItem from "./SideItem"
+import SideItem from "./sideItem"
 import {FiHome, FiUsers, FiShoppingBag, FiTag, FiTruck, FiShoppingCart, FiShuffle, FiBarChart} from "react-icons/fi"
 import { useState, useEffect } from "react"
 import { Toaster } from "react-hot-toast"

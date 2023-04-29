@@ -24,25 +24,25 @@ const handlebars = require("handlebars");
 const { kStringMaxLength } = require("buffer");
 
 const bcrypt = require("bcrypt");
+const { Sequelize } = require("../sequelize/models/index");
 
 module.exports = {
+  viewProduct: async (req, res) => {
+    try {
+      // get value
+      let { sort, search, category, row, offset } = req.query;
+      let searchClause = "";
+      let categoryClause = "";
+      if (search !== "") {
+        searchClause = `AND LOWER(name) LIKE '%${search}%'`;
+      }
+      if (category !== "") {
+        categoryClause = `AND product_category_id = ${parseInt(category)}`;
+      }
 
-    viewProduct: async (req, res) => {
-        try {
-            // get value
-            let { sort, search, category, row, offset } = req.query
-            let searchClause = ''
-            let categoryClause = ''
-            if(search !== '') {
-              searchClause = `AND LOWER(name) LIKE '%${search}%'`
-            }
-            if(category !== '') {
-              categoryClause = `AND product_category_id = ${parseInt(category)}`
-            }
-
-            // run query
-            let productWithStock = await sequelize.query(
-              `SELECT a.*
+      // run query
+      let productWithStock = await sequelize.query(
+        `SELECT a.*
               , CAST(COALESCE(sum(b.stock),0) AS UNSIGNED) total_stock 
               FROM product a 
               LEFT JOIN product_stock b
@@ -51,10 +51,10 @@ module.exports = {
               ${searchClause}
               ${categoryClause}
               GROUP BY 1,2,3,4,5,6,7 ${sort}`
-            )
-            
-            let productWithoutStock = await sequelize.query(
-              `SELECT a.*
+      );
+
+      let productWithoutStock = await sequelize.query(
+        `SELECT a.*
               , CAST(COALESCE(sum(b.stock),0) AS UNSIGNED) total_stock 
               FROM product a 
               LEFT JOIN product_stock b
@@ -63,34 +63,36 @@ module.exports = {
               ${searchClause}
               ${categoryClause}
               GROUP BY 1,2,3,4,5,6,7 ${sort}`
-            )
-            
-            let products = [...productWithStock[0], ...productWithoutStock[0]].slice(offset, offset + row)
+      );
 
-            let numItem = await sequelize.query(
-              `SELECT COUNT(id) as num_item
+      let products = [...productWithStock[0], ...productWithoutStock[0]].slice(
+        offset,
+        offset + row
+      );
+
+      let numItem = await sequelize.query(
+        `SELECT COUNT(id) as num_item
               FROM product
               WHERE id IS NOT NULL
               ${searchClause}
               ${categoryClause}`
-            )
-            // response
-            res.status(201).send({
-                isError: false,
-                message: 'Product list returned',
-                data: {
-                  products,
-                  numItem
-                }
-            })
-            
-        } catch (error) {
-            res.status(404).send({
-                isError: true,
-                message: error.message,
-                data: null
-            })
-        }
+      );
+      // response
+      res.status(201).send({
+        isError: false,
+        message: "Product list returned",
+        data: {
+          products,
+          numItem,
+        },
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
   },
 
   viewProductData: async (req, res) => {
@@ -98,9 +100,7 @@ module.exports = {
       // get value
 
       // run query
-      let products = await sequelize.query(
-        `SELECT * FROM product`
-      );
+      let products = await sequelize.query(`SELECT * FROM product`);
 
       // response
       res.status(201).send({
@@ -165,14 +165,54 @@ module.exports = {
           message: "Data is found",
           data: findProductStock,
         });
-
     } catch (error) {
       res.status(404).send({
         isError: true,
         message: error.message,
         data: null,
       });
+    }
+  },
 
+  viewProductCategory: async (req, res) => {
+    try {
+      let findCategory = await db.product_category.findAll({});
+      res.status(200).send({
+        isError: false,
+        message: "Get Product Category Data Success",
+        data: findCategory,
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: true,
+      });
+    }
+  },
+
+  viewProductList: async (req, res) => {
+    try {
+      let { id, sortMode, name } = req.query;
+      let findProduct = await db.product.findAll({
+        where: {
+          product_category_id: id,
+          name: { [Sequelize.Op.like]: `%${name}%` },
+        },
+        order: [["name", sortMode]],
+      });
+
+      res.status(200).send({
+        isError: false,
+        message: "Get Product List Success",
+        data: findProduct,
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: true,
+      });
     }
   },
 };

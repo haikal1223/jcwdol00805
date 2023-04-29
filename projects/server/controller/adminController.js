@@ -70,43 +70,42 @@ module.exports = {
       });
     }
   },
-  
+
   verifyToken: async (req, res) => {
-        try {
-          let { token } = req.query;
-    
-          if (!token) {
-            return res.status(401).send({
-              isError: true,
-              message: "Token not found",
-              data: null,
-            });
-          }
-    
-          const validateTokenResult = validateToken(token);
-          return res.status(200).send({
-            isError: false,
-            message: 'Token is found',
-            data: validateTokenResult
-          })
+    try {
+      let { token } = req.query;
 
-        } catch (error) {
-          res.status(401).send({
-            isError: true,
-            message: "Invalid Token",
-            data: null,
-          });
-        }
-    },
+      if (!token) {
+        return res.status(401).send({
+          isError: true,
+          message: "Token not found",
+          data: null,
+        });
+      }
 
-    fetchWarehouse : async(req, res) => {
-        try {
-            // get value
-            let { id } = req.query
+      const validateTokenResult = validateToken(token);
+      return res.status(200).send({
+        isError: false,
+        message: "Token is found",
+        data: validateTokenResult,
+      });
+    } catch (error) {
+      res.status(401).send({
+        isError: true,
+        message: "Invalid Token",
+        data: null,
+      });
+    }
+  },
 
-            // fetch wh_id
-            let get_whid = await sequelize.query(
-                `SELECT CASE 
+  fetchWarehouse: async (req, res) => {
+    try {
+      // get value
+      let { id } = req.query;
+
+      // fetch wh_id
+      let get_whid = await sequelize.query(
+        `SELECT CASE 
                 WHEN a.role='admin' THEN 'all'
                 WHEN a.role='wh_admin' THEN warehouse_id
                 END AS wh_id
@@ -114,23 +113,22 @@ module.exports = {
                 RIGHT JOIN users a
                 ON a.id = wh_admin.user_id
                 WHERE a.id='${id}'`
-            )
+      );
 
-            // send response
-            res.status(200).send({
-                isError: false,
-                message: 'wh_id admin fetched',
-                data: get_whid
-            })
-
-        } catch (error) {
-            res.status(404).send({
-                isError: true,
-                message: error.message,
-                data: null
-            })
-        }
-    },
+      // send response
+      res.status(200).send({
+        isError: false,
+        message: "wh_id admin fetched",
+        data: get_whid,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
 
   adminData: async (req, res) => {
     try {
@@ -218,7 +216,7 @@ module.exports = {
   userData: async (req, res) => {
     try {
       let { offset, row, name, sort, sortMode } = req.query;
-      console.log(offset)
+      console.log(offset);
       let column = "id";
       switch (sort) {
         case "sortId":
@@ -477,6 +475,204 @@ module.exports = {
         isError: true,
         message: "Delete Profile Failed",
         data: error,
+      });
+    }
+  },
+
+  adminAllStats: async (req, res) => {
+    try {
+      let { dateNow, dateLastMonth, dateLastTwoMonth, warehouseId } = req.query;
+
+      dateNow = new Date(dateNow);
+      dateNow = dateNow.toISOString().slice(0, 10);
+
+      dateLastMonth = new Date(dateLastMonth);
+      dateLastMonth = dateLastMonth.toISOString().slice(0, 10);
+
+      dateLastTwoMonth = new Date(dateLastTwoMonth);
+      dateLastTwoMonth = dateLastTwoMonth.toISOString().slice(0, 10);
+
+      if (warehouseId === "") {
+        let findOrderThisMonth = await db.order.findAll({
+          where: {
+            createdAt: {
+              [Sequelize.Op.between]: [dateLastMonth, dateNow],
+            },
+          },
+        });
+
+        let findOrderLastMonth = await db.order.findAll({
+          where: {
+            createdAt: {
+              [Sequelize.Op.between]: [dateLastTwoMonth, dateLastMonth],
+            },
+          },
+        });
+
+        let findOrderDetailThisMonth = await db.order_detail.findAll({
+          include: [
+            {
+              model: db.product,
+            },
+          ],
+          where: {
+            createdAt: {
+              [Sequelize.Op.between]: [dateLastMonth, dateNow],
+            },
+          },
+        });
+
+        let findOrderDetailLastMonth = await db.order_detail.findAll({
+          include: [
+            {
+              model: db.product,
+            },
+          ],
+          where: {
+            createdAt: {
+              [Sequelize.Op.between]: [dateLastTwoMonth, dateLastMonth],
+            },
+          },
+        });
+
+        res.status(201).send({
+          isError: false,
+          message: "Get Order",
+          data: {
+            findOrderThisMonth,
+            findOrderLastMonth,
+            findOrderDetailThisMonth,
+            findOrderDetailLastMonth,
+          },
+        });
+      } else {
+        let findOrderThisMonth = await db.order.findAll({
+          where: {
+            createdAt: {
+              [Sequelize.Op.between]: [dateLastMonth, dateNow],
+            },
+            warehouse_id: warehouseId,
+          },
+        });
+
+        let findOrderLastMonth = await db.order.findAll({
+          where: {
+            createdAt: {
+              [Sequelize.Op.between]: [dateLastTwoMonth, dateLastMonth],
+            },
+            warehouse_id: warehouseId,
+          },
+        });
+
+        let findOrderDetailThisMonth = await db.order_detail.findAll({
+          include: [
+            {
+              model: db.product,
+            },
+            {
+              model: db.order,
+              where: {
+                warehouse_id: warehouseId,
+              },
+            },
+          ],
+          where: {
+            createdAt: {
+              [Sequelize.Op.between]: [dateLastMonth, dateNow],
+            },
+          },
+        });
+
+        let findOrderDetailLastMonth = await db.order_detail.findAll({
+          include: [
+            {
+              model: db.product,
+            },
+            {
+              model: db.order,
+              where: {
+                warehouse_id: warehouseId,
+              },
+            },
+          ],
+          where: {
+            createdAt: {
+              [Sequelize.Op.between]: [dateLastTwoMonth, dateLastMonth],
+            },
+          },
+        });
+
+        res.status(201).send({
+          isError: false,
+          message: "Get Order",
+          data: {
+            findOrderThisMonth,
+            findOrderLastMonth,
+            findOrderDetailThisMonth,
+            findOrderDetailLastMonth,
+          },
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
+
+  adminType: async (req, res) => {
+    try {
+      let { token } = req.query;
+
+      const validateTokenResult = validateToken(token);
+      let adminData = await db.user.findOne({
+        where: { id: validateTokenResult.id },
+      });
+
+      res.status(200).send({
+        isError: false,
+        message: "Get Admin Type",
+        data: {
+          adminData,
+        },
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
+
+  localAdmin: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let localAdmin = await db.wh_admin.findOne({
+        include: [
+          {
+            model: db.warehouse,
+          },
+        ],
+        where: {
+          user_id: id,
+        },
+      });
+
+      res.status(200).send({
+        isError: false,
+        message: "Get Admin Type",
+        data: {
+          localAdmin,
+        },
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: null,
       });
     }
   },
