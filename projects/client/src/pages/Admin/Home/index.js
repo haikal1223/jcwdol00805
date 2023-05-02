@@ -3,7 +3,6 @@ import Sidebar from '../components/sidebar'
 import { Toaster } from 'react-hot-toast'
 
 const AdminHome = () => {
-  
   return (
       <div className="w-[100%] flex flex-1 justify-between">
         <Sidebar />

@@ -27,7 +27,7 @@ import "../../App.css";
 import CartCard from "../../components/cartCard";
 
 export default function Cart() {
-  const [uid, setUid] = useState("");
+  const [id, setId] = useState("");
   const [userCart, setUserCart] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [stock, setStock] = useState(0);
@@ -38,11 +38,11 @@ export default function Cart() {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setUid(response.data.data.uid);
+      setId(response.data.data.id);
       let price = 0;
-      if (uid) {
+      if (id) {
         let getUserCart = await axios.get(
-          `http://localhost:8000/cart/getUserCart?user_uid=${uid}`
+          `http://localhost:8000/cart/getUserCart?user_id=${id}`
         );
         setUserCart(getUserCart.data.data);
         for (let i = 0; i < getUserCart.data.data.length; i++) {
@@ -64,7 +64,7 @@ export default function Cart() {
   };
   useEffect(() => {
     getUserCart();
-  }, [uid]);
+  }, [id]);
 
   let addCart = async (val) => {
     try {
@@ -76,7 +76,7 @@ export default function Cart() {
       for (let i = 0; i < getProductStock.data.data.length; i++) {
         sumStock += getProductStock.data.data[i].stock;
       }
-      setStock(sumStock)
+      setStock(sumStock);
       if (val.quantity < sumStock) {
         let addCart = await axios.patch(
           `http://localhost:8000/cart/updateNumberCart?id=${val.id}`,
@@ -114,7 +114,7 @@ export default function Cart() {
           productIdx={idx}
           deleteFunction={(e) => deleteCart(val)}
           addFunction={(e) => addCart(val)}
-          minFunction={(e) => minCart(val)}
+          dminFunction={(e) => minCart(val)}
         />
       );
     });
@@ -150,7 +150,7 @@ export default function Cart() {
           >
             Total Price:{" "}
             <Text fontSize={24} fontWeight={700}>
-              Rp{totalPrice.toLocaleString()}.00
+              Rp{totalPrice.toLocaleString('id-ID')}
             </Text>
           </Text>
         </>

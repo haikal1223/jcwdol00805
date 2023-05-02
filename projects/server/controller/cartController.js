@@ -115,7 +115,6 @@ module.exports = {
   addCartProduct: async (req, res) => {
     try {
       let { quantity, price, user_id, product_id } = req.body;
-
       let dataToSend = await db.cart.create({
         quantity,
         price,
@@ -128,7 +127,13 @@ module.exports = {
         message: "Your product is add to cart",
         data: null,
       });
-    } catch (error) {}
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Something Error",
+        data: error,
+      });
+    }
   },
 
   updateCartProduct: async (req, res) => {

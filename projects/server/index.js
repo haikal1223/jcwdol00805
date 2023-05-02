@@ -24,14 +24,23 @@ app.use(express.static("public"));
 // ===========================
 // NOTE : Add your routes here
 
+
 const { userRouter, courierRouter } = require("./router");
-const { productRouter } = require("./router");
-const { adminRouter } = require("./router");
-const { cartRouter } = require("./router");
-app.use("/cart", cartRouter);
+const { productRouter } = require('./router')
+const { addressRouter } = require('./router')
+const { cartRouter } = require('./router')
+const { adminRouter } = require('./router')
+const { adminOrderRouter } = require('./router')
+const { adminProductRouter } = require('./router')
+const { adminMutationRouter } = require('./router')
+app.use('/admin-mutation', adminMutationRouter)
+app.use('/admin-product', adminProductRouter)
+app.use('/admin', adminRouter)
+app.use('/admin-order', adminOrderRouter)
+app.use('/cart', cartRouter)
 app.use("/user", userRouter);
-app.use("/product", productRouter);
-app.use("/admin", adminRouter);
+app.use('/product', productRouter)
+app.use('/address', addressRouter)
 app.use("/courier", courierRouter);
 
 // app.get("/api", (req, res) => {
