@@ -1,4 +1,7 @@
+
 import {
+ButtonGroup,
+IconButton,
   Box,
   Card,
   FormControl,
@@ -12,7 +15,10 @@ import {
   Image,
   useToast,
 } from "@chakra-ui/react";
+import { AddIcon, MinusIcon } from '@chakra-ui/icons';
+
 import axios from "axios";
+import { useParams } from 'react-router-dom'
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
@@ -22,21 +28,18 @@ export default function Product(props) {
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [stock, setStock] = useState(0);
-
-  const location = useLocation();
-
-  const Navigate = useNavigate();
-
-  const { id } = useParams();
+  let [productData, setProductData] = useState([])
+   const [quantity, setQuantity] = useState(1);
 
   let getProductDetail = async () => {
     try {
       let getProductDetail = await axios.get(
-        `http://localhost:8000/product/detail?id=${id}`
+        `http://localhost:8000/product/detail/${id}`
       );
-      setPrice(getProductDetail.data.data[0].price);
-    } catch (error) {}
+      setProductData(getProductDetail.data.data[0])
+    } catch (error) { }
   };
+
 
   let getCartFilterProduct = async () => {
     try {
@@ -58,20 +61,15 @@ export default function Product(props) {
     } catch (error) {}
   };
 
-  let getProductStock = async () => {
-    try {
-      setStock(0);
-      let sumStock = 0;
-      let getProductStock = await axios.get(
-        `http://localhost:8000/product/productStock?product_id=${id}`
-      );
-      for (let i = 0; i < getProductStock.data.data.length; i++) {
-        sumStock += getProductStock.data.data[i].stock;
-      }
-      setStock(sumStock);
-    } catch (error) {}
-  };
 
+
+
+
+  const handleQuantityChange = (type) => {
+    if (type === 'increase') {
+      setQuantity(quantity + 1);
+    } else if (type === 'decrease' && quantity > 1) {
+      setQuantity(quantity - 1);
   useEffect(() => {
     getProductDetail();
     getProductStock();
@@ -121,19 +119,57 @@ export default function Product(props) {
       }
     } catch (error) {
       console.log(error)
+
     }
   };
 
+  useEffect(() => {
+    getProductDetail()
+  }, [])
+
+  const { id } = useParams()
   return (
-    <>
-      <div> This is product page {id}</div>
-      <div> Stock: {stock}</div>
-      {stock > 0 ? (
-        <Button onClick={handleAddOrder}> This is product page {id}</Button>
-      ) : (
-        <Button isDisabled="true"> This is product page {id}</Button>
-      )}
-      <Toaster />
-    </>
-  );
+    <div>
+      <Card w='full'>
+        <Box borderWidth='1px' borderRadius='lg' overflow='hidden'>
+
+          <Image h='200px' w='full' p='2'
+            objectFit='contain' src={productData.image_url} />
+
+          <Text align='center'>
+            {productData.name}
+          </Text>
+          <Text align='center'>
+            {productData.price?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
+          </Text>
+
+          <Box p='5'>
+            <Box w='full' as='button' mt={10}>
+              <ButtonGroup spacing='2'>
+                <IconButton
+                  aria-label='decrease quantity'
+                  icon={<MinusIcon />}
+                  onClick={() => handleQuantityChange('decrease')}
+                  size='sm'
+                  variant='outline'
+                  isDisabled={quantity === 1}
+                />
+                <Button w='full' bg={"#5D5FEF"} color='white' _hover={{ color: 'blue.500', bg: "white", border: '1px solid skyblue' }} >ADD TO CART ({quantity})</Button>
+                <IconButton
+                  aria-label='increase quantity'
+                  icon={<AddIcon />}
+                  onClick={() => handleQuantityChange('increase')}
+                  size='sm'
+                  variant='outline'
+                />
+              </ButtonGroup>
+            </Box>
+
+          </Box>
+        </Box>
+      </Card>
+    </div>
+  )
 }
+
+export default Product
