@@ -2,14 +2,14 @@ const mysql = require("mysql2");
 
 // create connection
 const db = mysql.createConnection({
-
   host: "localhost",
   user: "root",
-  password: "ddd1234",
-  database: "db_warehouse",
+
+  password: "ot3ra1han12",
+  database: "db_warehouse_dummy",
+
   port: 8000,
 });
-
 
 db.connect((err) => {
   if (err) return console.log("Error " + err.message);
