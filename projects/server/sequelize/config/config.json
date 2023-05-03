@@ -1,8 +1,10 @@
 {
   "development": {
     "username": "root",
+
     "password": "ddd1234",
-    "database": "db_warehouse",
+
+    "database": "db_warehouse_dummy",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },

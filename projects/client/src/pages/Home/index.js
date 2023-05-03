@@ -3,6 +3,7 @@ import {
   Input,
   IconButton,
   SimpleGrid,
+  Select,
   useRadioGroup,
 } from "@chakra-ui/react";
 import {
@@ -10,6 +11,7 @@ import {
   TbDots,
   TbArrowNarrowLeft,
   TbArrowNarrowRight,
+  TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight
 } from "react-icons/tb";
 import ProductCard from "../../components/productCard";
 import CategoryRadio from "./components/category";
@@ -20,17 +22,18 @@ import Pages from "../../components/pages";
 import { toast, Toaster } from "react-hot-toast";
 
 export default function Home(props) {
-  const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [maxPage, setMaxPage] = useState(0);
   const [filter, setFilter] = useState({
     searchProductName: "",
     searchCategory: "",
   });
+  const [sort, setSort] = useState('ORDER BY RAND()')
+  const [search, setSearch] = useState(false)
   const [filteredProducts, setFilteredProducts] = useState([]);
   const itemLimit = 15;
 
-  const [uid, setUid] = useState("");
+  const [id, setId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [userCart, setUserCart] = useState([]);
@@ -43,10 +46,10 @@ export default function Home(props) {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setUid(response.data.data.uid);
-      if (uid) {
+      setId(response.data.data.id);
+      if (id) {
         let getUserCart = await axios.get(
-          `http://localhost:8000/cart/getUserCart?user_uid=${uid}`
+          `http://localhost:8000/cart/getUserCart?user_id=${id}`
         );
         setUserCart(getUserCart.data.data);
         for (let i = 0; i < getUserCart.data.data.length; i++) {
@@ -57,44 +60,44 @@ export default function Home(props) {
   };
   useEffect(() => {
     getUserCart();
-  }, [uid]);
+  }, [id]);
 
   const fetchProduct = async () => {
+    const offset = (page - 1) * itemLimit
+    const {searchProductName, searchCategory} = filter
     try {
-      let response = await axios.get(`http://localhost:8000/product/view`);
-      setProducts(response.data.data[0]);
-      setMaxPage(Math.ceil(response.data.data[0].length / itemLimit));
-      setFilteredProducts(response.data.data[0]);
-    } catch (error) {}
+      let response = await axios.get(`http://localhost:8000/product/view?sort=${sort}&search=${searchProductName}&category=${searchCategory}&row=${itemLimit}&offset=${offset}`);
+      setMaxPage(Math.ceil(response.data.data.numItem[0][0].num_item / itemLimit));
+      setFilteredProducts(response.data.data.products);
+    } catch (error) {
+      console.log(error.message)
+    }
   };
   useEffect(() => {
     fetchProduct();
   }, []);
+  useEffect(() => {
+    fetchProduct();
+  }, [search, page, filter.searchCategory, sort]);
 
-  let getUid = async () => {
+  let getId = async () => {
     try {
       let token = localStorage.getItem("myToken");
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setUid(response?.data?.data?.uid);
+      setId(response?.data?.data?.id);
     } catch (error) {
       console.log(error.response.data);
     }
   };
 
   useEffect(() => {
-    getUid();
+    getId();
   }, []);
 
   const renderProduct = () => {
-    const startIndex = (page - 1) * itemLimit;
-    const productPerPage = filteredProducts.slice(
-      startIndex,
-      startIndex + itemLimit
-    );
-
-    return productPerPage.map((val, idx) => {
+    return filteredProducts.map((val, idx) => {
       return (
         <ProductCard
           productData={val}
@@ -111,12 +114,21 @@ export default function Home(props) {
       setPage(page + 1);
     }
   };
-
   const prevPageHandler = () => {
     if (page > 1) {
       setPage(page - 1);
     }
   };
+  const firstPageHandler = () => {
+    if(page > 1) {
+        setPage(1)
+    }
+  }
+  const maxPageHandler = () => {
+      if(page < maxPage) {
+          setPage(maxPage)
+      }
+  }
 
   // search & filter
   const searchInputHandler = (e) => {
@@ -127,27 +139,29 @@ export default function Home(props) {
       [name]: value,
     });
   };
-
   const searchButtonHandler = () => {
-    const filterResult = products.filter((val) => {
-      return val.name
-        .toLowerCase()
-        .includes(filter.searchProductName.toLowerCase());
-    });
-
-    setFilteredProducts(filterResult);
     setPage(1);
-    setMaxPage(Math.ceil(filterResult.length / itemLimit));
+    setSearch(!search)
   };
+  const catFilter = (catId) => {
+    setFilter({
+      ...filter,
+      searchCategory: catId
+    })
+  }
+  const sortHandler = (e) => {
+    const value = e.target.value
+    setSort(value)
+  }
 
   // category as Radio
   const categories = [
-    { name: "All", icon: "GiPerson" },
-    { name: "Dress", icon: "GiLargeDress" },
-    { name: "Sandal", icon: "GiSlippers" },
-    { name: "Topwear", icon: "GiPoloShirt" },
-    { name: "Bottom", icon: "GiUnderwearShorts" },
-    { name: "Shoes", icon: "GiConverseShoe" },
+    { name: "All", icon: "GiPerson", value: '' },
+    { name: "Dress", icon: "GiLargeDress", value:4 },
+    { name: "Sandal", icon: "GiSlippers", value:5 },
+    { name: "Topwear", icon: "GiPoloShirt", value:1 },
+    { name: "Bottom", icon: "GiUnderwearShorts", value:2 },
+    { name: "Shoes", icon: "GiConverseShoe", value:3 },
   ];
 
   const renderCategory = () => {
@@ -158,7 +172,7 @@ export default function Home(props) {
             return (
               <CategoryRadio
                 key={val.name}
-                func={searchInputHandler}
+                func={() => catFilter(val.value)}
                 icon={val.icon}
                 name="searchCategory"
                 {...getRadioProps({ value: val.name })}
@@ -198,13 +212,13 @@ export default function Home(props) {
           userCart.map(async (valCart, idx) => {
             if (valCart.product_id === valProduct.id) {
               foundInCart = true;
-              if (valCart.quantity+1 > sumStock) {
+              if (valCart.quantity > sumStock - 1) {
                 toast.error("Your cart has maximum stock of the product", {
                   duration: 3000,
                 });
               } else {
                 let updateCart = await axios.patch(
-                  `http://localhost:8000/cart/updateCart?user_uid=${uid}&product_id=${valCart.product_id}`,
+                  `http://localhost:8000/cart/updateCart?user_id=${id}&product_id=${valCart.product_id}`,
                   {
                     quantity: valCart.quantity + 1,
                     price: valCart.price,
@@ -223,7 +237,7 @@ export default function Home(props) {
               {
                 quantity: 1,
                 price: valProduct.price,
-                user_uid: uid,
+                user_id: id,
                 product_id: valProduct.id,
               }
             );
@@ -264,32 +278,29 @@ export default function Home(props) {
           {renderCategory()}
         </div>
         <div className="w-[100%] px-[10px] mt-10 flex flex-col items-center gap-5">
-          <div className="w-[100%] font-ibmBold text-[20px] text-left">
-            Daily Discover
+          <div className="w-[100%] flex justify-between items-center">
+            <div className="w-[100%] font-ibmBold text-[20px] text-left">
+              Daily Discover
+            </div>
+            <Select w={'220px'} color={'gray'} placeholder="sort by" onChange={sortHandler}>
+              <option value="ORDER BY a.createdAt DESC, a.id DESC">latest item</option>
+              <option value="ORDER BY a.price ASC, a.id DESC">lowest price</option>
+              <option value="ORDER BY a.price DESC, a.id ASC">highest price</option>
+            </Select>
           </div>
           <div className="w-[100%] flex justify-start flex-wrap gap-5">
-            {renderProduct()}
+            {
+              filteredProducts.length !=0?
+              <>{renderProduct()}</>
+              :<div className="font-ibmReg text-grey">No result found. Try another search</div>
+            }
           </div>
-          <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
-            <IconButton
-              isDisabled={page === 1}
-              onClick={prevPageHandler}
-              size={"sm"}
-              bg="#5D5FEF"
-              aria-label="previous page"
-              icon={<TbArrowNarrowLeft color="white" boxsize={"16px"} />}
-            />
-            <div className="font-ibmReg text-dgrey">
-              Page {page} / {maxPage}
-            </div>
-            <IconButton
-              isDisabled={page === maxPage}
-              onClick={nextPageHandler}
-              size={"sm"}
-              bg="#5D5FEF"
-              aria-label="next page"
-              icon={<TbArrowNarrowRight color="white" boxsize={"16px"} />}
-            />
+          <div className="w-[100%] mt-5 flex justify-center items-center gap-2">
+            <IconButton isDisabled={page === 1} onClick={firstPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbChevronsLeft color='white' boxsize={'16px'}/>}/>
+            <IconButton isDisabled={page === 1} onClick={prevPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbChevronLeft color='white' boxsize={'16px'}/>}/>
+                <div className='font-ibmReg text-dgrey'>Page {page} / {maxPage}</div>
+            <IconButton isDisabled={page === maxPage} onClick={nextPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbChevronRight color='white' boxsize={'16px'}/>}/>
+            <IconButton isDisabled={page === maxPage} onClick={maxPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbChevronsRight color='white' boxsize={'16px'}/>}/>
           </div>
         </div>
       </div>

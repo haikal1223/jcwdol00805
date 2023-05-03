@@ -1,15 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom'
-import { Box, Card, Button, ButtonGroup, Image, IconButton, Text } from '@chakra-ui/react'
 
-import axios from "axios"
+import {
+ButtonGroup,
+IconButton,
+  Box,
+  Card,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  Text,
+  VStack,
+  Button,
+  CardBody,
+  Image,
+  useToast,
+} from "@chakra-ui/react";
 import { AddIcon, MinusIcon } from '@chakra-ui/icons';
 
-const Product = () => {
+import axios from "axios";
+import { useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useRef, useState, useEffect } from "react";
+import { toast, Toaster } from "react-hot-toast";
+
+export default function Product(props) {
+  const [userId, setUserId] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [price, setPrice] = useState(0);
+  const [stock, setStock] = useState(0);
   let [productData, setProductData] = useState([])
-
-
-
+   const [quantity, setQuantity] = useState(1);
 
   let getProductDetail = async () => {
     try {
@@ -21,14 +41,85 @@ const Product = () => {
   };
 
 
+  let getCartFilterProduct = async () => {
+    try {
+      let token = localStorage.getItem("myToken");
+      let response = await axios.get(
+        `http://localhost:8000/user/verifytoken?token=${token}`
+      );
+      setUserId(response.data.data.id);
+      if (id) {
+        let getCartFilterProduct = await axios.get(
+          `http://localhost:8000/cart/getCartFilterProduct?user_id=${userId}&product_id=${id}`
+        );
+        if (getCartFilterProduct.data.data[0]) {
+          setQuantity(getCartFilterProduct.data.data[0].quantity + 1);
+        } else {
+          setQuantity(1);
+        }
+      }
+    } catch (error) {}
+  };
 
-  const [quantity, setQuantity] = useState(1);
+
+
+
 
   const handleQuantityChange = (type) => {
     if (type === 'increase') {
       setQuantity(quantity + 1);
     } else if (type === 'decrease' && quantity > 1) {
       setQuantity(quantity - 1);
+  useEffect(() => {
+    getProductDetail();
+    getProductStock();
+  }, []);
+  useEffect(() => {
+    getCartFilterProduct();
+  }, [userId]);
+
+  let handleAddOrder = async () => {
+    try {
+      if (!props.login) {
+        toast.error("Please log in first", {
+          duration: 3000,
+        });
+      } else {
+        if (quantity === 1) {
+          console.log(userId)
+          let addCart = await axios.post(`http://localhost:8000/cart/addCart`, {
+            quantity,
+            price,
+            user_id: userId,
+            product_id: id,
+          });
+
+          toast.success("Added to cart", {
+            duration: 3000,
+          });
+        } else {
+          if (quantity > stock) {
+            toast.error("Your cart has maximum stock of the product", {
+              duration: 3000,
+            });
+          } else {
+            let updateCart = await axios.patch(
+              `http://localhost:8000/cart/updateCart?user_id=${userId}&product_id=${id}`,
+              {
+                quantity,
+                price,
+              }
+            );
+            toast.success("Added to cart", {
+              duration: 3000,
+            });
+          }
+        }
+        getCartFilterProduct();
+      }
+    } catch (error) {
+      console.log(error)
+
     }
   };
 
