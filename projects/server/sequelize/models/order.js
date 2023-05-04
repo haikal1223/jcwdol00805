@@ -1,5 +1,7 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const {
+  Model
+} = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class order extends Model {
     /**
@@ -10,34 +12,38 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.order_status, {
-        foreignKey: "order_status_id",
-      });
+        foreignKey: 'order_status_id'
+      })
       this.belongsTo(models.user, {
-        foreignKey: "user_id",
-      });
+        foreignKey: 'user_id'
+      })
       this.belongsTo(models.warehouse, {
-        foreignKey: "warehouse_id",
-      });
-      this.hasMany(models.order_detail, {
-        foreignKey: "order_id",
-      });
+        foreignKey: 'warehouse_id'
+      })
+      this.hasMany(models.order_detail,{
+        foreignKey: 'order_id'
+      })
+      this.hasMany(models.stock_mutation,{
+        foreignKey: 'order_id'
+      })
+      this.hasMany(models.stock_log,{
+        foreignKey: 'order_id'
+      })
       this.belongsTo(models.user_address, {
-        foreignKey: "user_address_id",
+        foreignKey: 'user_address_id',
       });
+
     }
   }
-  order.init(
-    {
-      paid_amount: DataTypes.INTEGER,
-      user_address_id: DataTypes.INTEGER,
-      payment_proof: DataTypes.STRING,
-      shipping_cost: DataTypes.INTEGER,
-    },
-    {
-      sequelize,
-      modelName: "order",
-      freezeTableName: true,
-    }
-  );
+  order.init({
+    paid_amount: DataTypes.INTEGER,
+    user_address_id: DataTypes.INTEGER,
+    payment_proof: DataTypes.STRING,
+    shipping_cost: DataTypes.INTEGER
+  }, {
+    sequelize,
+    modelName: 'order',
+    freezeTableName: true
+  });
   return order;
 };

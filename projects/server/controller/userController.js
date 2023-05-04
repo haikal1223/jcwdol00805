@@ -323,6 +323,7 @@ module.exports = {
       }
 
       const validateTokenResult = validateToken(token);
+      console.log(validateTokenResult)
       return res.status(200).send({
         isError: true,
         message: "Token is found",

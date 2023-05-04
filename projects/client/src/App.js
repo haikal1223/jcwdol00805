@@ -2,6 +2,7 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
+import Cookies from 'js-cookie';
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Order from "./pages/Order";
@@ -21,12 +22,15 @@ import CheckOut from "./pages/CheckOut";
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
-
+import AdminOrder from "./pages/Admin/Order";
+import AdminProduct from "./pages/Admin/Product/Home";
+import AdminProductDetail from "./pages/Admin/Product/Detail";
+import AdminMutation from "./pages/Admin/Mutation";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [adminLoggedIn, setAdminLoggedIn] = useState(false)
-  const navigate = useNavigate()
+  const [adminLoggedIn, setAdminLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   const keepLoggedIn = () => {
     try {
@@ -43,85 +47,94 @@ function App() {
 
   const keepAdminLoggedIn = () => {
     try {
-      const token = localStorage.getItem('adminToken')
+      const token = Cookies.get('adminToken')
       if (token) {
-        setAdminLoggedIn(true)
+        setAdminLoggedIn(true);
       } else {
-        setAdminLoggedIn(false)
+        setAdminLoggedIn(false);
       }
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
-  }
+  };
 
   useEffect(() => {
-
-    keepLoggedIn()
-    keepAdminLoggedIn()
-  }, [])
-
+    keepLoggedIn();
+    keepAdminLoggedIn();
+  }, []);
 
   const RequireAuth = ({ children }) => {
     const userIsLogged = localStorage.getItem("myToken");
 
     if (!userIsLogged) {
-
       return (
         <>
-          <Navigate to='/' />
-          {toast.error('Please log in first.', {
-            id: 'login',
+          <Navigate to="/" />
+          {toast.error("Please log in first.", {
+            id: "login",
             duration: 2000,
           })}
         </>
-      )
-
+      );
     }
     return children;
   };
 
   const AuthAdmin = ({children}) => {
-    const adminIsLogged = localStorage.getItem('adminToken')
-
+    const adminIsLogged = Cookies.get('adminToken')
     if (!adminIsLogged) {
       return (
         <>
-          <Navigate to='/admin' />
-          {toast.error('Please log in first.', {
-            id: 'adminlogin',
-            duration: 2000
+          <Navigate to="/admin" />
+          {toast.error("Please log in first.", {
+            id: "adminlogin",
+            duration: 2000,
           })}
         </>
-      )
+      );
     }
-    return children
-    
-  }
+    return children;
+  };
 
-  const onLogout = () => {
+  const AuthMainAdmin = ({ children }) => {
+    const adminRoleLogged = localStorage.getItem("role");
+
+    if (adminRoleLogged != "admin") {
+      return (
+        <>
+          <Navigate to="/admin" />
+          {toast.error("You don't have access to this page", {
+            id: "adminlogin",
+            duration: 2000,
+          })}
+        </>
+      );
+    }
+    return children;
+  };
+
+  const adminLogout = () => {
     return (
         <>
-            {localStorage.removeItem('adminToken')}
-            {navigate('/admin')}
+            {Cookies.remove('adminToken')}
+            {Cookies.remove('role')}
             {setTimeout(() => {
-              window.location.reload()
+              window.location.href ='/admin'
             }, 200)}
             {toast.success('You have been logged out', {
                 id: 'logout',
                 duration: 3000
             })}
-        </>
-    )
-}
+      </>
+    );
+  };
 
   return (
     <div className="flex justify-center">
 
-
       <div className={window.location.pathname.includes('/admin')?"w-[1440px] z-0":"w-[480px] z-0"}>
-        {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={onLogout}/>:<Navbar login={isLoggedIn} />}
+        {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={adminLogout}/>:<Navbar login={isLoggedIn} />}
         <Routes>
-
           <Route path="/" element={<Home login={isLoggedIn} />} />
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
@@ -155,18 +168,52 @@ function App() {
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
                   {/* Admin Routing */}
-            <Route path='/admin' element={<AdminHome />}/>
+                  <Route path="/admin" element={<AdminHome />} />
+          <Route
+            path="/admin/user"
+            element={
+              <AuthAdmin>
+                <AuthMainAdmin>
+                  <AdminUser />
+                </AuthMainAdmin>
+              </AuthAdmin>
+            }
+          />
             <Route 
-              path='/admin/user' 
+              path='/admin/order' 
               element={
                 <AuthAdmin>
-                  <AdminUser />
+                  <AdminOrder />
                 </AuthAdmin>
               }
             />
+            <Route 
+              path='/admin/product' 
+              element={
+                <AuthAdmin>
+                  <AdminProduct />
+                </AuthAdmin>
+              }
+            />  
+            <Route 
+              path='/admin/product/:product_id' 
+              element={
+                <AuthAdmin>
+                  <AdminProductDetail />
+                </AuthAdmin>
+              }
+            />
+            <Route 
+              path='/admin/mutation' 
+              element={
+                <AuthAdmin>
+                  <AdminMutation />
+                </AuthAdmin>
+              }
+            />  
 
         </Routes>
-        {window.location.pathname.includes('/admin')?<></>:<Footer />}
+        {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />
       </div>
     </div>

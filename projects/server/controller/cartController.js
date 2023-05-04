@@ -48,22 +48,67 @@ module.exports = {
 
   getUserCart: async (req, res) => {
     try {
-      let { user_id, product_id } = req.query;
-      const findUserCart = await db.cart.findAll({
+      const { uid } = req.uid;
+
+      // Validate uid parameter
+      if (!uid) {
+        return res.status(400).send({
+          isError: true,
+          message: "Invalid user ID",
+          data: null,
+        });
+      }
+
+      const { id } = await db.user.findOne({
         where: {
-          user_id,
+          uid,
         },
       });
 
-      console.log(findUserCart)
+      const findUserCart = await db.cart.findAll({
+        where: {
+          user_id: id,
+          is_checked: 1,
+        },
+        include: [
+          {
+            model: db.product,
+            attributes: ["name", "price", "product_category_id", "image_url"],
+            include: [
+              {
+                model: db.product_stock,
+                include: [
+                  {
+                    model: db.warehouse,
+                    attributes: ["city"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      if (!findUserCart) {
+        return res.status(404).send({
+          isError: true,
+          message: "Cart is empty",
+          data: null,
+        });
+      }
 
       return res.status(200).send({
         isError: false,
-        message: "Ok",
+        message: "Cart items fetched successfully",
         data: findUserCart,
       });
     } catch (error) {
-      console.log(error);
+      // Send error response to the client
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
     }
   },
 
@@ -115,7 +160,6 @@ module.exports = {
       });
     } catch (error) {}
   },
-
   addAddress: async (req, res) => {
     const t = await sequelize.transaction();
     const { uid } = req.uid;
@@ -132,6 +176,7 @@ module.exports = {
 
     try {
       const { id } = await db.user.findOne({ where: { uid } });
+      console.log("id", id);
       if (main_address) {
         await db.user_address.update(
           { main_address: false },
@@ -232,7 +277,7 @@ module.exports = {
     try {
       const { data } = await axios.get(
         "https://api.rajaongkir.com/starter/province",
-        { headers: { key: "98114927956fc9abdce23deeef6cfb17" } }
+        { headers: { key: "96dc80599e54e6d84bbd8f3b948da258" } }
       );
       res.status(200).send({
         isError: false,
@@ -260,7 +305,7 @@ module.exports = {
       let response = await axios.get(
         `https://api.rajaongkir.com/starter/city?province=${province_id}`,
         {
-          headers: { key: "98114927956fc9abdce23deeef6cfb17" },
+          headers: { key: "96dc80599e54e6d84bbd8f3b948da258" },
         }
       );
 
@@ -335,5 +380,56 @@ module.exports = {
         data: null,
       });
     } catch (error) {}
+  },
+  getStockOrigin: async (req, res) => {
+    const { uid } = req.uid;
+    try {
+      const user = await db.user.findOne({
+        where: { uid: uid },
+        include: [
+          {
+            model: db.cart,
+            include: [
+              {
+                model: db.product,
+                include: [
+                  {
+                    model: db.product_stock,
+                    include: [
+                      {
+                        model: db.warehouse,
+                        attributes: ["city"],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      const cart = user.carts.map((cart) => {
+        return {
+          quantity: cart.quantity,
+          price: cart.price,
+          product: {
+            name: cart.product.name,
+            price: cart.product.price,
+            image_url: cart.product.image_url,
+            stock: cart.product.product_stocks[0].stock,
+            warehouse_city: cart.product.product_stocks[0].warehouse.city,
+          },
+        };
+      });
+
+      res.send({ cart });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: error,
+      });
+    }
   },
 };

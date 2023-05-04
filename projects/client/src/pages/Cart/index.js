@@ -114,7 +114,7 @@ export default function Cart() {
           productIdx={idx}
           deleteFunction={(e) => deleteCart(val)}
           addFunction={(e) => addCart(val)}
-          minFunction={(e) => minCart(val)}
+          dminFunction={(e) => minCart(val)}
         />
       );
     });

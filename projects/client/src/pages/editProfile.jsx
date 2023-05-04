@@ -139,7 +139,7 @@ export default function EditProfile() {
         setProfilePicture(
           `http://localhost:8000/images/${profilePictureSplit}`
         );
-        console.log(profilePicture);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);
