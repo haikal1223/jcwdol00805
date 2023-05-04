@@ -119,42 +119,42 @@ module.exports = {
 
   viewDetailProduct: async (req, res) => {
     try {
-      // get value
-      let { id } = req.query;
+        // get value
+        let { id } = req.params;
 
-      const findProduct = await db.product.findAll({
-        where: {
-          id,
-        },
-      });
-      if (findProduct)
-        return res.status(200).send({
-          isError: false,
-          message: "Data is found",
-          data: findProduct,
+        const findProduct = await db.product.findAll({
+            where: {
+                id,
+            },
         });
+        if (findProduct)
+            return res.status(200).send({
+                isError: false,
+                message: "Data is found",
+                data: findProduct,
+            });
 
-      // response
-      res.status(201).send({
-        isError: false,
-        message: "Product list returned",
-        data: products,
-      });
+        // response
+        res.status(201).send({
+            isError: false,
+            message: "Product list returned",
+            data: products,
+        });
     } catch (error) {
-      res.status(404).send({
-        isError: true,
-        message: error.message,
-        data: null,
-      });
+        res.status(404).send({
+            isError: true,
+            message: error.message,
+            data: null,
+        });
     }
-  },
+},
 
   viewProductStock: async (req, res) => {
     try {
       // get value
       let { product_id } = req.query;
 
-      const findProductStock = await db.product_stock.findAll({
+      const findProductStock = await db.product_stock.findOne({
         where: {
           product_id,
         },
