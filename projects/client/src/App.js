@@ -167,8 +167,8 @@ function App() {
           />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
-                  {/* Admin Routing */}
-                  <Route path="/admin" element={<AdminHome />} />
+          {/* Admin Routing */}
+          <Route path="/admin" element={<AdminHome />} />
           <Route
             path="/admin/user"
             element={
