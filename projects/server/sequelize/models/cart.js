@@ -24,10 +24,6 @@ module.exports = (sequelize, DataTypes) => {
     {
       quantity: DataTypes.INTEGER,
       price: DataTypes.INTEGER,
-      is_checked: {
-        allowNull: false,
-        type: DataTypes.INTEGER,
-      },
     },
     {
       sequelize,

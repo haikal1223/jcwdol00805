@@ -48,27 +48,11 @@ module.exports = {
 
   getUserCart: async (req, res) => {
     try {
-      const { uid } = req.uid;
-
-      // Validate uid parameter
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
-
-      const { id } = await db.user.findOne({
-        where: {
-          uid,
-        },
-      });
+      const { user_id } = req.query;
 
       const findUserCart = await db.cart.findAll({
         where: {
-          user_id: id,
-          is_checked: 1,
+          user_id,
         },
         include: [
           {
@@ -346,6 +330,41 @@ module.exports = {
     }
   },
 
+  delCart: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let deleteCart = await db.cart.destroy({
+        where: {
+          id,
+        },
+      });
+      res.status(200).send({
+        isError: false,
+        message: "The product is delete",
+        data: null,
+      });
+    } catch (error) {}
+  },
+
+  updateNumberProduct: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let { quantity } = req.body;
+      let updateCart = await db.cart.update(
+        {
+          quantity,
+        },
+        {
+          where: { id },
+        }
+      );
+      res.status(200).send({
+        isError: false,
+        message: "Update cart success",
+        data: null,
+      });
+    } catch (error) {}
+  },
   getStockOrigin: async (req, res) => {
     const { uid } = req.uid;
     try {

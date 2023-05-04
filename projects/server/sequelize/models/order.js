@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.stock_log,{
         foreignKey: 'order_id'
       })
+      this.belongsTo(models.user_address, {
+        foreignKey: 'user_address_id',
+      });
+
     }
   }
   order.init({
