@@ -25,7 +25,7 @@ import {
   ModalOverlay,
   ModalContent,
   ModalCloseButton,
-  Modal
+  Modal,
 } from "@chakra-ui/react";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
@@ -55,7 +55,7 @@ export default function EditProfile() {
   const handleClickChangePassword = () =>
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
-  const [uid, setUid] = useState('')
+  const [uid, setUid] = useState("");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -74,15 +74,14 @@ export default function EditProfile() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen, onOpen, onClose } = useDisclosure();
   let getUid = async () => {
     try {
       let token = localStorage.getItem("myToken");
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-
-    } catch (error) { }
+    } catch (error) {}
   };
   let validatePassword = (val) => {
     const regex =
@@ -133,7 +132,6 @@ export default function EditProfile() {
     }
   };
 
-
   let getImage = () => {
     axios
       .get(`http://localhost:8000/user/getphoto?uid=${uid}`)
@@ -167,12 +165,8 @@ export default function EditProfile() {
       if (response.data.data[0].birth_place) {
         setBirthPlace(response.data.data[0].birth_place);
       }
-    } catch (error) { }
+    } catch (error) {}
   };
-
-
-
-
 
   let handleImage = (e) => {
     if (e.target.files[0]) {
@@ -253,8 +247,6 @@ export default function EditProfile() {
     }
   };
 
-
-
   const getAddress = async () => {
     let token = localStorage.getItem("myToken");
     try {
@@ -271,7 +263,7 @@ export default function EditProfile() {
         const main = getAddress.data.data.filter(
           (e) => e.main_address === true
         );
-        console.log(main[0])
+        console.log(main[0]);
         if (!main) {
           setMainAddress("");
         } else {
@@ -290,9 +282,6 @@ export default function EditProfile() {
     getImage();
     getData();
   }, [uid]);
-
-
-
 
   const splitText = (text) => {
     if (text) {
@@ -327,8 +316,7 @@ export default function EditProfile() {
     let token = localStorage.getItem("myToken");
     try {
       let response = await axios.delete(
-        `http://localhost:8000/address/deleteAddress/${id}`,
-
+        `http://localhost:8000/address/deleteAddress/${id}`
       );
       toast.success("address deleted");
     } catch (error) {
@@ -339,15 +327,16 @@ export default function EditProfile() {
   };
 
   const renderAddress = () => {
-
     return allAddress.map((val, idx) => {
       return (
-        <AddressCard addressData={val} addressIdx={idx} handleDelete={(e) => deleteAddress(val.id)} />
-      )
-    }
-    )
-  }
-
+        <AddressCard
+          addressData={val}
+          addressIdx={idx}
+          handleDelete={(e) => deleteAddress(val.id)}
+        />
+      );
+    });
+  };
 
   return (
     <>
@@ -534,8 +523,8 @@ export default function EditProfile() {
                       {genderValue == 1
                         ? "Male"
                         : genderValue == 2
-                          ? "Female"
-                          : "-"}
+                        ? "Female"
+                        : "-"}
                     </Text>
                   </>
                 )}
@@ -696,11 +685,6 @@ export default function EditProfile() {
             </Button>
           )}
           <VStack align={["flex-start", "left"]} w="full">
-
-
-
-
-
             <Text
               mb={["50pt"]}
               fontSize={18}
@@ -712,8 +696,7 @@ export default function EditProfile() {
             </Text>
             {renderAddress()}
 
-            <>
-            </>
+            <></>
 
             <Address />
           </VStack>

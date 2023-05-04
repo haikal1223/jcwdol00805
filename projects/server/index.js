@@ -17,16 +17,18 @@ app.use(
 );
 
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 //#region API ROUTES
 
 // ===========================
 // NOTE : Add your routes here
 
-const { userRouter } = require("./router");
+
+const { userRouter, courierRouter } = require("./router");
 const { productRouter } = require('./router')
 const { addressRouter } = require('./router')
+const { orderRouter } = require('./router')
 const { cartRouter } = require('./router')
 const { adminRouter } = require('./router')
 const { adminOrderRouter } = require('./router')
@@ -40,7 +42,8 @@ app.use('/cart', cartRouter)
 app.use("/user", userRouter);
 app.use('/product', productRouter)
 app.use('/address', addressRouter)
-
+app.use('/order', orderRouter)
+app.use("/courier", courierRouter);
 
 // app.get("/api", (req, res) => {
 //   res.send(`Hello, this is my API`);

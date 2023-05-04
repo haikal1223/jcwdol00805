@@ -68,7 +68,6 @@ export default function Cart() {
 
   let addCart = async (val) => {
     try {
-      console.log(val);
       let sumStock = 0;
       let getProductStock = await axios.get(
         `http://localhost:8000/product/productStock?product_id=${val.product_id}`
@@ -91,6 +90,7 @@ export default function Cart() {
 
   let minCart = async (val) => {
     try {
+
       if (val.quantity === 1) {
         let delCart = await axios.delete(
           `http://localhost:8000/cart/delCart?id=${val.id}`
