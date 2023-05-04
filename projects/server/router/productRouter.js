@@ -10,8 +10,8 @@ const uploadImages = require('../middleware/upload') */
 
 // Router method
 Router.get('/view', productController.viewProduct)
+Router.get('/detail/:id', productController.viewDetailProduct)
 Router.get('/productData', productController.viewProductData)
-Router.get('/detail', productController.viewDetailProduct)
 Router.get('/productStock', productController.viewProductStock)
 Router.get('/fetchProduct', productController.fetchProduct)
 Router.get('/productCategory', productController.fetchProductCategory)

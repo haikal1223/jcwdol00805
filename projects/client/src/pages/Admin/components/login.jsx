@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import axios from "axios";
+import Cookies from "js-cookie";
 import {
   Tag,
-  Link,
   Box,
   VStack,
   Heading,
@@ -13,18 +13,14 @@ import {
   FormLabel,
   Input,
   HStack,
-  Checkbox,
   Button,
   Icon,
   InputGroup,
   InputRightElement,
-  useDisclosure,
 } from "@chakra-ui/react";
-
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
 export default function AdminLogin() {
-  const [profile, setProfile] = useState([]);
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
 
@@ -40,9 +36,14 @@ export default function AdminLogin() {
       );
 
       toast.success(response?.data?.message, { duration: 3000 });
-      setProfile(response?.data?.data);
-      localStorage.setItem("role", response.data.data.role);
-      localStorage.setItem("adminToken", response.data.data.token);
+      Cookies.set("adminToken", response.data.data.token, {
+        expires: 1 / 24,
+        path: "/",
+      });
+      Cookies.set("role", response.data.data.role, {
+        expires: 1 / 24,
+        path: "/",
+      });
       window.location.reload();
     } catch (error) {
       toast.error(error?.response?.data.message);
