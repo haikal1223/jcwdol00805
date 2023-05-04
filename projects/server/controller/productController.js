@@ -29,21 +29,20 @@ const { Sequelize } = require("../sequelize/models/index");
 module.exports = {
   viewProduct: async (req, res) => {
     try {
-      
-            // get value
-            let { sort, search, category, row, offset } = req.query
-            let searchClause = ''
-            let categoryClause = ''
-            if(search !== '') {
-              searchClause = `AND LOWER(name) LIKE '%${search}%'`
-            }
-            if(category !== '') {
-              categoryClause = `AND product_category_id = ${parseInt(category)}`
-            }
+      // get value
+      let { sort, search, category, row, offset } = req.query;
+      let searchClause = "";
+      let categoryClause = "";
+      if (search !== "") {
+        searchClause = `AND LOWER(name) LIKE '%${search}%'`;
+      }
+      if (category !== "") {
+        categoryClause = `AND product_category_id = ${parseInt(category)}`;
+      }
 
-            // run query
-            let productWithStock = await sequelize.query(
-              `SELECT a.*
+      // run query
+      let productWithStock = await sequelize.query(
+        `SELECT a.*
               , CAST(COALESCE(sum(b.stock),0) AS UNSIGNED) total_stock 
               FROM product a 
               LEFT JOIN product_stock b
@@ -120,35 +119,35 @@ module.exports = {
 
   viewDetailProduct: async (req, res) => {
     try {
-        // get value
-        let { id } = req.params;
+      // get value
+      let { id } = req.params;
 
-        const findProduct = await db.product.findAll({
-            where: {
-                id,
-            },
+      const findProduct = await db.product.findAll({
+        where: {
+          id,
+        },
+      });
+      if (findProduct)
+        return res.status(200).send({
+          isError: false,
+          message: "Data is found",
+          data: findProduct,
         });
-        if (findProduct)
-            return res.status(200).send({
-                isError: false,
-                message: "Data is found",
-                data: findProduct,
-            });
 
-        // response
-        res.status(201).send({
-            isError: false,
-            message: "Product list returned",
-            data: products,
-        });
+      // response
+      res.status(201).send({
+        isError: false,
+        message: "Product list returned",
+        data: products,
+      });
     } catch (error) {
-        res.status(404).send({
-            isError: true,
-            message: error.message,
-            data: null,
-        });
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
     }
-},
+  },
 
   viewProductStock: async (req, res) => {
     try {
@@ -302,7 +301,10 @@ module.exports = {
       res.status(500).send({
         isError: true,
         message: error.message,
-        data: true,})}},
+        data: true,
+      });
+    }
+  },
   deleteProductData: async (req, res) => {
     try {
       let { id } = req.query;

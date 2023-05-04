@@ -123,7 +123,7 @@ const AdminUser = () => {
   let getProductCategory = async () => {
     try {
       let getProductCategory = await axios.get(
-        `http://localhost:8000/product/product-category`
+        `http://localhost:8000/product/productCategory`
       );
       setCategoryList(getProductCategory.data.data);
     } catch (error) {}
