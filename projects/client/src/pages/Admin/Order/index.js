@@ -204,11 +204,7 @@ const AdminOrder = () => {
               </Button>
             )}
             <Button
-              isDisabled={
-                val.status === "Shipped" ||
-                val.status === "Delivered" ||
-                val.status === "Cancelled"
-              }
+              isDisabled={val.order_status_id > 3}
               _disabled={{ color: "#D9D9D9" }}
               color={"red"}
               variant={"link"}
@@ -286,7 +282,6 @@ const AdminOrder = () => {
       let response = await axios.get(
         `http://localhost:8000/admin-order/cancel-order/${selectedId}`
       );
-      console.log(response);
       window.location.reload();
     } catch (error) {
       console.log(error.message);
@@ -298,7 +293,6 @@ const AdminOrder = () => {
       <Sidebar />
       <div className="bg-[#f1f1f1] w-[1240px] h-auto z-0 shadow-inner flex flex-col py-[40px] px-[50px]">
         <div className="w-[1140px] min-h-screen flex justify-center items-start overflow-auto ">
-          {/*REPLACE BELOW FOR CONTENT*/}
           <Box className="bg-white w-full h-[1100px] drop-shadow-md p-9">
             <Text className="font-ibmMed text-4xl">Order List</Text>
             <hr className="my-4 border-[2px]" />
