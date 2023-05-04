@@ -17,7 +17,7 @@ export default function AdminLogin() {
             let inputPassword = password.current.value
 
             let response = await axios.get(`http://localhost:8000/admin/login?email=${inputEmail}&password=${inputPassword}`)
-            
+
             toast.success(response?.data?.message, {duration: 3000})
             Cookies.set('adminToken', response.data.data.token, { expires: 1/24, path: '/' })
             Cookies.set('role', response.data.data.role, { expires: 1/24, path: '/' })

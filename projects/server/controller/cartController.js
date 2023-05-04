@@ -48,27 +48,11 @@ module.exports = {
 
   getUserCart: async (req, res) => {
     try {
-      const { uid } = req.uid;
-
-      // Validate uid parameter
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
-
-      const { id } = await db.user.findOne({
-        where: {
-          uid,
-        },
-      });
+      const { user_id } = req.query;
 
       const findUserCart = await db.cart.findAll({
         where: {
-          user_id: id,
-          is_checked: 1,
+          user_id,
         },
         include: [
           {

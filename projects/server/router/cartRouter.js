@@ -11,7 +11,7 @@ Router.get("/getstockorigin", tokenVerify, cartController.getStockOrigin);
 Router.get("/getCartFilterProduct", cartController.getCartFilterProduct);
 Router.post("/addCart", cartController.addCartProduct);
 Router.patch("/updateCart", cartController.updateCartProduct);
-Router.get("/getUserCart", tokenVerify, cartController.getUserCart);
+Router.get("/getUserCart", cartController.getUserCart);
 Router.post("/new-address/", tokenVerify, cartController.addAddress);
 Router.patch("/main-address/:id", tokenVerify, cartController.defaultAddress);
 Router.get("/rajaongkir-province", cartController.getProvince);
