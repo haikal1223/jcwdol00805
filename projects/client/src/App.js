@@ -20,7 +20,6 @@ import CheckOut from "./pages/CheckOut";
 //Admin Components
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
-import AdminProduct from "./pages/Admin/Product";
 import AdminNavbar from "./pages/Admin/components/navbar";
 import AdminOrder from "./pages/Admin/Order";
 import AdminProduct from "./pages/Admin/Product/Home";
