@@ -7,7 +7,6 @@ const db = mysql.createConnection({
 
   password: "ot3ra1han12",
   database: "db_warehouse_dummy",
-
   port: 8000,
 });
 
