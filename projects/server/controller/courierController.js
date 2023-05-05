@@ -7,6 +7,7 @@ module.exports = {
     let { origin, destination, weight, courier } = req.body;
     let { uid } = req.uid;
     let key = "38cc0e5fdc569640ad614c40fcf5432c";
+
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({

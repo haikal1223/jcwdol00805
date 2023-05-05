@@ -19,6 +19,12 @@ Router.get("/rajaongkir-city", cartController.getCity);
 Router.get("/get-address", tokenVerify, cartController.getAddress);
 Router.delete("/delete-address/:id", tokenVerify, cartController.deleteAddress);
 Router.post("/postToOrder", tokenVerify, cartController.sendDataToOrder);
+Router.get('/getUserCartx', cartController.getUserCartx);
+Router.delete('/delCart', cartController.delCart);
+Router.patch('/updateNumberCart', cartController.updateNumberProduct);
 // Router.get("/getStockOrigin", tokenVerify, cartController.getStockOrigin);
 
 module.exports = Router;
+
+
+ 

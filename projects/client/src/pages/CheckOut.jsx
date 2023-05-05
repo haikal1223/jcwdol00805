@@ -39,6 +39,9 @@ export default function CheckOut(props) {
   const [shippingMethod, setShippingMethod] = useState("");
   const [shippingCost, setShippingCost] = useState(0);
   const [destination, setdestination] = useState(0);
+  const [JNE, setJNE] = useState();
+  const [POS, setPOS] = useState();
+  const [TIKI, setTIKI] = useState();
   const [disable, setdisable] = useState(false);
   const [weight, setweight] = useState(0);
   const [address, setAddress] = useState("");
@@ -118,6 +121,7 @@ export default function CheckOut(props) {
         {
           headers: {
             key: "38cc0e5fdc569640ad614c40fcf5432c",
+
           },
         }
       );
@@ -309,11 +313,13 @@ export default function CheckOut(props) {
   };
 
   const handlePlaceOrder = async () => {
-    // calculate shipping cost
+
     await calculateShippingCost();
 
-    // pass shippingCost to sendDataToOrder function
     sendDataToOrder(data, shippingCost, useraddressid, getWHid);
+    
+  const selectedAddress = async (value) => {
+    console.log("x", value);
   };
 
   useEffect(() => {
@@ -321,7 +327,7 @@ export default function CheckOut(props) {
     rakirProvince();
     getAddress();
     getUserCart();
-    // sendDataToOrder();
+    selectedAddress();
   }, []);
 
   useEffect(() => {
@@ -788,7 +794,9 @@ export default function CheckOut(props) {
           mt="5"
           type="button"
           disabled={disable}
+
           onClick={() => sendDataToOrder()}
+
         >
           <Text className=" font-ibmFontRegular">Pay</Text>
         </Button>

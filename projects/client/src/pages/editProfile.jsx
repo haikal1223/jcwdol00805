@@ -21,10 +21,31 @@ import {
   EditableTextarea,
   Select,
   useToast,
+  useDisclosure,
+  ModalOverlay,
+  ModalContent,
+  ModalCloseButton,
+  Modal,
 } from "@chakra-ui/react";
 import "../App.css";
+import { useNavigate } from "react-router-dom";
+import Address from "../components/address";
+import AddressCard from "../components/addressCard";
 
 export default function EditProfile() {
+  const Navigate = useNavigate();
+  const [rakir, setRakir] = useState({
+    main_address: false,
+  });
+
+  const [allAddress, setAllAddress] = useState([]);
+
+  const modalAddress = useDisclosure();
+  const modalSwitch = useDisclosure();
+  const [mainAddress, setMainAddress] = useState({});
+
+
+
   const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
   const [show, setShow] = useState(false);
@@ -34,7 +55,7 @@ export default function EditProfile() {
   const handleClickChangePassword = () =>
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
-  const [uid,setUid] = useState(0)
+  const [uid, setUid] = useState("");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -53,13 +74,13 @@ export default function EditProfile() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   let getUid = async () => {
     try {
       let token = localStorage.getItem("myToken");
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-        setUid(1)
     } catch (error) {}
   };
   let validatePassword = (val) => {
@@ -99,7 +120,7 @@ export default function EditProfile() {
   const handleEditProfile = () => {
     if (editMode) {
       setEditMode(!editMode);
-      axios.patch(`http://localhost:8000/user/updateprofile/${uid}`, {
+      axios.patch(`http://localhost:8000/address/getAddress/${uid}`, {
         first_name: firstName,
         last_name: lastName,
         gender: genderValue,
@@ -120,7 +141,7 @@ export default function EditProfile() {
         setProfilePicture(
           `http://localhost:8000/images/${profilePictureSplit}`
         );
-        console.log(profilePicture);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);
@@ -146,12 +167,6 @@ export default function EditProfile() {
       }
     } catch (error) {}
   };
-
-  useEffect(() => {
-    getImage();
-    getData();
-    getUid();
-  }, []);
 
   let handleImage = (e) => {
     if (e.target.files[0]) {
@@ -230,6 +245,97 @@ export default function EditProfile() {
         position: "top",
       });
     }
+  };
+
+  const getAddress = async () => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let token = localStorage.getItem("myToken");
+      let response = await axios.get(
+        `http://localhost:8000/user/verifytoken?token=${token}`
+      );
+      setUid(response.data.data.uid);
+      if (uid) {
+        let getAddress = await axios.get(
+          `http://localhost:8000/address/getAddress?uid=${uid}`
+        );
+        setAllAddress(getAddress.data.data);
+        const main = getAddress.data.data.filter(
+          (e) => e.main_address === true
+        );
+        console.log(main[0]);
+        if (!main) {
+          setMainAddress("");
+        } else {
+          setMainAddress(main[0]);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getAddress();
+  }, []);
+  useEffect(() => {
+    getAddress();
+    getImage();
+    getData();
+  }, [uid]);
+
+  const splitText = (text) => {
+    if (text) {
+      return text.split(".")[1];
+    } else {
+      return "";
+    }
+  };
+
+  const defaultAddress = async (id) => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let data = await axios.patch(
+        `http://localhost:8000/address/main-address/${id}`,
+        {},
+        {
+          headers: {
+            token: token,
+          },
+        }
+      );
+      setRakir({ ...rakir, main_address: true });
+      toast.success("Main Address Changed");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      Navigate(0);
+    }
+  };
+
+  const deleteAddress = async (id) => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let response = await axios.delete(
+        `http://localhost:8000/address/deleteAddress/${id}`
+      );
+      toast.success("address deleted");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      Navigate(0);
+    }
+  };
+
+  const renderAddress = () => {
+    return allAddress.map((val, idx) => {
+      return (
+        <AddressCard
+          addressData={val}
+          addressIdx={idx}
+          handleDelete={(e) => deleteAddress(val.id)}
+        />
+      );
+    });
   };
 
   return (
@@ -588,6 +694,11 @@ export default function EditProfile() {
             >
               Address
             </Text>
+            {renderAddress()}
+
+            <></>
+
+            <Address />
           </VStack>
         </VStack>
       </Box>

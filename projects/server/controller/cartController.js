@@ -49,27 +49,11 @@ module.exports = {
 
   getUserCart: async (req, res) => {
     try {
-      const { uid } = req.uid;
-
-      // Validate uid parameter
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
-
-      const { id } = await db.user.findOne({
-        where: {
-          uid,
-        },
-      });
+      const { user_id } = req.query;
 
       const findUserCart = await db.cart.findAll({
         where: {
-          user_id: id,
-          is_checked: 1,
+          user_id,
         },
         include: [
           {
@@ -112,11 +96,67 @@ module.exports = {
       });
     }
   },
+  
+   getUserCartx: async (req, res) => {
+    try {
+      const { uid } = req.uid;
+
+      // Validate uid parameter
+      if (!uid) {
+        return res.status(400).send({
+          isError: true,
+          message: "Invalid user ID",
+          data: null,
+        });
+      }
+
+      const { id } = await db.user.findOne({
+        where: {
+          uid,
+        },
+      });
+
+      const findUserCart = await db.cart.findAll({
+        where: {
+          user_id: id,
+        },
+        include: [
+          {
+            model: db.product,
+            attributes: ["name", "price", "product_category_id", "image_url"],
+            include: [
+              {
+                model: db.product_stock,
+                include: [
+                  {
+                    model: db.warehouse,
+                    attributes: ["city"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(200).send({
+        isError: false,
+        message: "Cart items fetched successfully",
+        data: findUserCart,
+      });
+    } catch (error) {
+      // Send error response to the client
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
+    }
+  },
 
   addCartProduct: async (req, res) => {
     try {
       let { quantity, price, user_id, product_id } = req.body;
-
       let dataToSend = await db.cart.create({
         quantity,
         price,
@@ -129,7 +169,13 @@ module.exports = {
         message: "Your product is add to cart",
         data: null,
       });
-    } catch (error) {}
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: "Something Error",
+        data: error,
+      });
+    }
   },
 
   updateCartProduct: async (req, res) => {
@@ -342,57 +388,6 @@ module.exports = {
     }
   },
 
-  getStockOrigin: async (req, res) => {
-    const { uid } = req.uid;
-    try {
-      const user = await db.user.findOne({
-        where: { uid: uid },
-        include: [
-          {
-            model: db.cart,
-            include: [
-              {
-                model: db.product,
-                include: [
-                  {
-                    model: db.product_stock,
-                    include: [
-                      {
-                        model: db.warehouse,
-                        attributes: ["city"],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      });
-
-      const cart = user.carts.map((cart) => {
-        return {
-          quantity: cart.quantity,
-          price: cart.price,
-          product: {
-            name: cart.product.name,
-            price: cart.product.price,
-            image_url: cart.product.image_url,
-            stock: cart.product.product_stocks[0].stock,
-            warehouse_city: cart.product.product_stocks[0].warehouse.city,
-          },
-        };
-      });
-
-      res.send({ cart });
-    } catch (error) {
-      res.status(404).send({
-        isError: true,
-        message: error.message,
-        data: error,
-      });
-    }
-  },
   sendDataToOrder: async (req, res) => {
     try {
       t = await sequelize.transaction();
@@ -488,6 +483,90 @@ module.exports = {
         isError: true,
         message: "An error occurred while processing your request",
         data: null,
+      });
+      
+ delCart: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let deleteCart = await db.cart.destroy({
+        where: {
+          id,
+        },
+      });
+      res.status(200).send({
+        isError: false,
+        message: "The product is delete",
+        data: null,
+      });
+    } catch (error) {}
+  },
+  
+  updateNumberProduct: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let { quantity } = req.body;
+      let updateCart = await db.cart.update(
+        {
+          quantity,
+        },
+        {
+          where: { id },
+        }
+      );
+      res.status(200).send({
+        isError: false,
+        message: "Update cart success",
+        data: null,
+      });
+    } catch (error) {}
+  },
+  
+  getStockOrigin: async (req, res) => {
+    const { uid } = req.uid;
+    try {
+      const user = await db.user.findOne({
+        where: { uid: uid },
+        include: [
+          {
+            model: db.cart,
+            include: [
+              {
+                model: db.product,
+                include: [
+                  {
+                    model: db.product_stock,
+                    include: [
+                      {
+                        model: db.warehouse,
+                        attributes: ["city"],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const cart = user.carts.map((cart) => {
+        return {
+          quantity: cart.quantity,
+          price: cart.price,
+          product: {
+            name: cart.product.name,
+            price: cart.product.price,
+            image_url: cart.product.image_url,
+            stock: cart.product.product_stocks[0].stock,
+            warehouse_city: cart.product.product_stocks[0].warehouse.city,
+          },
+        };
+      });
+      res.send({ cart });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: error,
       });
     }
   },

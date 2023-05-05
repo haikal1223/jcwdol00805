@@ -5,8 +5,11 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+import OrderCard from "../../components/orderCard";
+
 export default function CheckOut(props) {
   const Navigate = useNavigate();
+  const [orderList, setOrderList] = useState([]);
   const [cart, setCart] = useState([]);
   const [itemTotalPrice, setItemTotalPrice] = useState(0);
   const [shippingCost, setShippingCost] = useState(0);
@@ -28,6 +31,35 @@ export default function CheckOut(props) {
     }
   };
 
+
+
+  let getOrderList = async () => {
+    let token = localStorage.getItem("myToken");
+    try {
+      let response = await axios.get(
+        `http://localhost:8000/order/getOrderList`,
+        {
+          headers: { token: token },  
+        }
+      );
+      setOrderList(response.data.data)
+    } catch (error) {
+      console.log(error.response.data);
+    }
+  };
+
+  const renderOrderList = () => {
+    return orderList.map((val, idx) => {
+      return (
+        <OrderCard
+          orderData={val}
+          productIdx={idx}
+          cancel={(e) => cancel(val)}
+          orderDetail={(e) => orderDetail(val.id)}
+          uploadPayment={(e) => uploadPayment(val)}
+        />
+      );
+    });
   const getTotalPrice = () => {
     return shippingCost + itemTotalPrice;
   };
@@ -50,7 +82,16 @@ export default function CheckOut(props) {
     } catch (error) {}
   };
 
+  let uploadPayment = async(id)=>{
+    // code for upload payment
+  }
+
+  let orderDetail = async (id) => {
+    Navigate(`/order/detail/${id}`)
+  };
+
   useEffect(() => {
+    getOrderList();
     getOrderCart();
   }, []);
 
@@ -186,6 +227,37 @@ export default function CheckOut(props) {
           </Box>
         </Box>
       </div>
+     {/* <Text
+align={["left"]}
+w="full"
+pt="30px"
+px="30px"
+className="font-ibmFont"
+fontSize={24}
+fontWeight={700}
+>
+<Text borderBottom="2px" borderColor="gray">
+  Order
+</Text>
+</Text>
+{orderList.length > 0 ? (
+<>
+  {renderOrderList()}
+</>
+) : (
+<Text
+  align={["left"]}
+  w="full"
+  py="30px"
+  px="30px"
+  className="font-ibmFont"
+  fontSize={18}
+  fontWeight={500}
+>
+  Your order list is empty
+</Text>
+)} */}
+
     </>
   );
 }

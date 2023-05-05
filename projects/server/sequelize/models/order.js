@@ -1,3 +1,4 @@
+
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -13,28 +14,35 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "order_status_id",
       });
       this.belongsTo(models.user, {
-        foreignKey: "user_id",
-      });
+        foreignKey: 'user_id'
+      })
       this.belongsTo(models.warehouse, {
-        foreignKey: "warehouse_id",
+        foreignKey: 'warehouse_id'
+      })
+      this.hasMany(models.order_detail,{
+        foreignKey: 'order_id'
+      })
+      this.hasMany(models.stock_mutation,{
+        foreignKey: 'order_id'
+      })
+      this.hasMany(models.stock_log,{
+        foreignKey: 'order_id'
+      })
+      this.belongsTo(models.user_address, {
+        foreignKey: 'user_address_id',
       });
-      this.hasMany(models.order_detail, {
-        foreignKey: "order_id",
-      });
+
     }
   }
-  order.init(
-    {
-      paid_amount: DataTypes.INTEGER,
-      user_address_id: DataTypes.INTEGER,
-      payment_proof: DataTypes.STRING,
-      shipping_cost: DataTypes.INTEGER,
-    },
-    {
-      sequelize,
-      modelName: "order",
-      freezeTableName: true,
-    }
-  );
+  order.init({
+    paid_amount: DataTypes.INTEGER,
+    user_address_id: DataTypes.INTEGER,
+    payment_proof: DataTypes.STRING,
+    shipping_cost: DataTypes.INTEGER
+  }, {
+    sequelize,
+    modelName: 'order',
+    freezeTableName: true
+  });
   return order;
 };
