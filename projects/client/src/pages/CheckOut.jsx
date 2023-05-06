@@ -317,7 +317,7 @@ export default function CheckOut(props) {
     await calculateShippingCost();
 
     sendDataToOrder(data, shippingCost, useraddressid, getWHid);
-    
+  }  
   const selectedAddress = async (value) => {
     console.log("x", value);
   };
