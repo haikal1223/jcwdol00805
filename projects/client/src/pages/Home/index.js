@@ -11,7 +11,10 @@ import {
   TbDots,
   TbArrowNarrowLeft,
   TbArrowNarrowRight,
-  TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight
+  TbChevronLeft,
+  TbChevronRight,
+  TbChevronsLeft,
+  TbChevronsRight,
 } from "react-icons/tb";
 import ProductCard from "../../components/productCard";
 import CategoryRadio from "./components/category";
@@ -28,8 +31,8 @@ export default function Home(props) {
     searchProductName: "",
     searchCategory: "",
   });
-  const [sort, setSort] = useState('ORDER BY RAND()')
-  const [search, setSearch] = useState(false)
+  const [sort, setSort] = useState("ORDER BY RAND()");
+  const [search, setSearch] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const itemLimit = 15;
 
@@ -63,14 +66,18 @@ export default function Home(props) {
   }, [id]);
 
   const fetchProduct = async () => {
-    const offset = (page - 1) * itemLimit
-    const {searchProductName, searchCategory} = filter
+    const offset = (page - 1) * itemLimit;
+    const { searchProductName, searchCategory } = filter;
     try {
-      let response = await axios.get(`http://localhost:8000/product/view?sort=${sort}&search=${searchProductName}&category=${searchCategory}&row=${itemLimit}&offset=${offset}`);
-      setMaxPage(Math.ceil(response.data.data.numItem[0][0].num_item / itemLimit));
+      let response = await axios.get(
+        `http://localhost:8000/product/view?sort=${sort}&search=${searchProductName}&category=${searchCategory}&row=${itemLimit}&offset=${offset}`
+      );
+      setMaxPage(
+        Math.ceil(response.data.data.numItem[0][0].num_item / itemLimit)
+      );
       setFilteredProducts(response.data.data.products);
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
   };
   useEffect(() => {
@@ -118,18 +125,18 @@ export default function Home(props) {
         if (page > 1) {
             setPage(page - 1);
         }
-    }
-  
+  };
+
   const firstPageHandler = () => {
-    if(page > 1) {
-        setPage(1)
+    if (page > 1) {
+      setPage(1);
     }
-  }
+  };
   const maxPageHandler = () => {
-      if(page < maxPage) {
-          setPage(maxPage)
-      }
-  }
+    if (page < maxPage) {
+      setPage(maxPage);
+    }
+  };
 
   // search & filter
   const searchInputHandler = (e) => {
@@ -142,7 +149,7 @@ export default function Home(props) {
   };
   const searchButtonHandler = () => {
     setPage(1);
-    setSearch(!search)
+    setSearch(!search);
   };
   const catFilter = (catId) => {
     setFilter({
@@ -151,19 +158,20 @@ export default function Home(props) {
     })
     setPage(1)
   }
+
   const sortHandler = (e) => {
-    const value = e.target.value
-    setSort(value)
-  }
+    const value = e.target.value;
+    setSort(value);
+  };
 
   // category as Radio
   const categories = [
-    { name: "All", icon: "GiPerson", value: '' },
-    { name: "Dress", icon: "GiLargeDress", value:4 },
-    { name: "Sandal", icon: "GiSlippers", value:5 },
-    { name: "Topwear", icon: "GiPoloShirt", value:1 },
-    { name: "Bottom", icon: "GiUnderwearShorts", value:2 },
-    { name: "Shoes", icon: "GiConverseShoe", value:3 },
+    { name: "All", icon: "GiPerson", value: "" },
+    { name: "Dress", icon: "GiLargeDress", value: 4 },
+    { name: "Sandal", icon: "GiSlippers", value: 5 },
+    { name: "Topwear", icon: "GiPoloShirt", value: 1 },
+    { name: "Bottom", icon: "GiUnderwearShorts", value: 2 },
+    { name: "Shoes", icon: "GiConverseShoe", value: 3 },
   ];
 
   const renderCategory = () => {
@@ -284,25 +292,68 @@ export default function Home(props) {
             <div className="w-[100%] font-ibmBold text-[20px] text-left">
               Daily Discover
             </div>
-            <Select w={'220px'} color={'gray'} placeholder="sort by" onChange={sortHandler}>
-              <option value="ORDER BY a.createdAt DESC, a.id DESC">latest item</option>
-              <option value="ORDER BY a.price ASC, a.id DESC">lowest price</option>
-              <option value="ORDER BY a.price DESC, a.id ASC">highest price</option>
+            <Select
+              w={"220px"}
+              color={"gray"}
+              placeholder="sort by"
+              onChange={sortHandler}
+            >
+              <option value="ORDER BY a.createdAt DESC, a.id DESC">
+                latest item
+              </option>
+              <option value="ORDER BY a.price ASC, a.id DESC">
+                lowest price
+              </option>
+              <option value="ORDER BY a.price DESC, a.id ASC">
+                highest price
+              </option>
             </Select>
           </div>
           <div className="w-[100%] flex justify-start flex-wrap gap-5">
-            {
-              filteredProducts.length !=0?
+            {filteredProducts.length != 0 ? (
               <>{renderProduct()}</>
-              :<div className="font-ibmReg text-grey">No result found. Try another search</div>
-            }
+            ) : (
+              <div className="font-ibmReg text-grey">
+                No result found. Try another search
+              </div>
+            )}
           </div>
           <div className="w-[100%] mt-5 flex justify-center items-center gap-2">
-            <IconButton isDisabled={page === 1} onClick={firstPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbChevronsLeft color='white' boxsize={'16px'}/>}/>
-            <IconButton isDisabled={page === 1} onClick={prevPageHandler} size={'sm'} bg='#5D5FEF' aria-label='previous page' icon={<TbChevronLeft color='white' boxsize={'16px'}/>}/>
-                <div className='font-ibmReg text-dgrey'>Page {page} / {maxPage}</div>
-            <IconButton isDisabled={page === maxPage} onClick={nextPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbChevronRight color='white' boxsize={'16px'}/>}/>
-            <IconButton isDisabled={page === maxPage} onClick={maxPageHandler} size={'sm'} bg='#5D5FEF' aria-label='next page' icon={<TbChevronsRight color='white' boxsize={'16px'}/>}/>
+            <IconButton
+              isDisabled={page === 1}
+              onClick={firstPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="previous page"
+              icon={<TbChevronsLeft color="white" boxsize={"16px"} />}
+            />
+            <IconButton
+              isDisabled={page === 1}
+              onClick={prevPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="previous page"
+              icon={<TbChevronLeft color="white" boxsize={"16px"} />}
+            />
+            <div className="font-ibmReg text-dgrey">
+              Page {page} / {maxPage}
+            </div>
+            <IconButton
+              isDisabled={page === maxPage}
+              onClick={nextPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="next page"
+              icon={<TbChevronRight color="white" boxsize={"16px"} />}
+            />
+            <IconButton
+              isDisabled={page === maxPage}
+              onClick={maxPageHandler}
+              size={"sm"}
+              bg="#5D5FEF"
+              aria-label="next page"
+              icon={<TbChevronsRight color="white" boxsize={"16px"} />}
+            />
           </div>
         </div>
       </div>

@@ -13,5 +13,10 @@ Router.get('/view', productController.viewProduct)
 Router.get('/detail/:id', productController.viewDetailProduct)
 Router.get('/productData', productController.viewProductData)
 Router.get('/productStock', productController.viewProductStock)
+Router.get('/fetchProduct', productController.fetchProduct)
+Router.get('/productCategory', productController.fetchProductCategory)
+Router.delete('/deleteProductData', productController.deleteProductData)
+Router.post('/addProduct', productController.addProduct)
+Router.patch('/editProduct', productController.editProduct)
 
 module.exports = Router
