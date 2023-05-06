@@ -18,7 +18,7 @@ import UpdatePassword from "./pages/newPassword";
 import EditProfile from "./pages/editProfile";
 import CheckOut from "./pages/CheckOut";
 
-//Admin Components
+
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
@@ -80,8 +80,10 @@ function App() {
     return children;
   };
 
+
   const AuthAdmin = ({children}) => {
     const adminIsLogged = Cookies.get('adminToken')
+
     if (!adminIsLogged) {
       return (
         <>
@@ -134,13 +136,21 @@ function App() {
 
       <div className={window.location.pathname.includes('/admin')?"w-[1440px] z-0":"w-[480px] z-0"}>
         {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={adminLogout}/>:<Navbar login={isLoggedIn} />}
+
         <Routes>
           <Route path="/" element={<Home login={isLoggedIn} />} />
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/product/:id" element={<Product login={isLoggedIn} />} />
-          <Route path="/checkout" element={<CheckOut />} />
+          <Route
+            path="/checkout"
+            element={
+              <RequireAuth>
+                <CheckOut />
+              </RequireAuth>
+            }
+          />
           <Route
             path="/cart"
             element={
@@ -211,7 +221,6 @@ function App() {
                 </AuthAdmin>
               }
             />  
-
         </Routes>
         {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />
