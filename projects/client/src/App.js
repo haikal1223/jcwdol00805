@@ -59,9 +59,10 @@ function App() {
   };
 
   useEffect(() => {
-    keepLoggedIn();
-    keepAdminLoggedIn();
+    keepLoggedIn()
+    keepAdminLoggedIn()
   }, []);
+
 
   const RequireAuth = ({ children }) => {
     const userIsLogged = localStorage.getItem("myToken");
@@ -75,7 +76,7 @@ function App() {
             duration: 2000,
           })}
         </>
-      );
+      )
     }
     return children;
   };
@@ -97,6 +98,7 @@ function App() {
     }
     return children;
   };
+
 
   const AuthMainAdmin = ({ children }) => {
     const adminRoleLogged = localStorage.getItem("role");
@@ -133,7 +135,6 @@ function App() {
 
   return (
     <div className="flex justify-center">
-
       <div className={window.location.pathname.includes('/admin')?"w-[1440px] z-0":"w-[480px] z-0"}>
         {window.location.pathname.includes('/admin')?<AdminNavbar login={adminLoggedIn} func={adminLogout}/>:<Navbar login={isLoggedIn} />}
 
@@ -177,6 +178,7 @@ function App() {
           />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
+
           {/* Admin Routing */}
           <Route path="/admin" element={<AdminHome />} />
           <Route

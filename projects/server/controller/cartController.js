@@ -484,7 +484,7 @@ module.exports = {
         message: "An error occurred while processing your request",
         data: null,
       });
-      
+    }},
  delCart: async (req, res) => {
     try {
       let { id } = req.query;

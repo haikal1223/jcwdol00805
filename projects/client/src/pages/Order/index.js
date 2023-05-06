@@ -59,7 +59,7 @@ export default function CheckOut(props) {
           uploadPayment={(e) => uploadPayment(val)}
         />
       );
-    });
+    });}
   const getTotalPrice = () => {
     return shippingCost + itemTotalPrice;
   };
