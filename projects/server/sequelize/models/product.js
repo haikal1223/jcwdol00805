@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.product_category, {
         foreignKey: "product_category_id",
       });
-
       this.hasMany(models.order_detail,{
         foreignKey: 'product_id'
       })
@@ -31,7 +30,6 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.stock_log, {
         foreignKey: 'product_id'
       })
-
     }
   }
   product.init(
