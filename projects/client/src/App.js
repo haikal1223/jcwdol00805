@@ -193,14 +193,7 @@ function App() {
               </AuthAdmin>
             }
           />
-          <Route
-            path="/admin/order"
-            element={
-              <AuthAdmin>
-                <AdminOrder />
-              </AuthAdmin>
-            }
-          />
+
           <Route
             path="/admin/order"
             element={

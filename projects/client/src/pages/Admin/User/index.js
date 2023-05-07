@@ -28,7 +28,8 @@ import {
   Td,
   useToast,
 } from "@chakra-ui/react";
-import React, { useEffect, useRef, useState, useNavigate } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import axios from "axios";
 import { ViewIcon, ViewOffIcon, Search2Icon } from "@chakra-ui/icons";
@@ -240,126 +241,10 @@ const AdminUser = () => {
     window.location.reload();
   };
 
-  let renderAdminData = () => {
+  const renderAdminData = () => {
     return adminData.map((val, idx) => {
       return (
         <>
-          <Box mt={8}>
-            <Heading mb={4}>Assign Warehouse Admin</Heading>
-            <form onSubmit={handleSubmit}>
-              <VStack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Warehouse ID</FormLabel>
-                  <Input
-                    type="text"
-                    width="120px"
-                    height="30px"
-                    value={warehouseId}
-                    onChange={(event) => setWarehouseId(event.target.value)}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel>Warehouse Admin ID</FormLabel>
-                  <Input
-                    type="text"
-                    width="120px"
-                    height="30px"
-                    value={warehouseAdminId}
-                    onChange={(event) =>
-                      setWarehouseAdminId(event.target.value)
-                    }
-                  />
-                </FormControl>
-
-                <Button
-                  type="submit"
-                  colorScheme="teal"
-                  isLoading={isLoading}
-                  alignSelf="flex-start"
-                >
-                  Assign
-                </Button>
-              </VStack>
-            </form>
-            <Box mt={8}>
-              <Heading mb={4}>User Data</Heading>
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>ID</Th>
-                    <Th>Username</Th>
-                    <Th>Email</Th>
-                    <Th>Role</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {userDatax.map((user) => (
-                    <Tr key={user.id}>
-                      <Td>{user.id}</Td>
-                      <Td>{user.first_name}</Td>
-                      <Td>{user.email}</Td>
-                      <Td>{user.role}</Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-              <Heading mb={4}>WH ADMIN</Heading>
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>ID</Th>
-                    <Th>USER ID</Th>
-                    <Th>WH ID</Th>
-                    <Th>USERNAME</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {whData.map((wh) => (
-                    <Tr key={wh.id}>
-                      <Td>{wh.id}</Td>
-                      <Td>{wh.user_id}</Td>
-                      <Td>{wh.warehouse_id}</Td>
-                      <Td>{wh.user.first_name}</Td>
-                      <Button
-                        colorScheme="red"
-                        size="sm"
-                        onClick={async () => {
-                          const token = localStorage.getItem("myToken");
-                          try {
-                            await axios.delete(
-                              `http://localhost:8000/admin/delete/${wh.id}`,
-                              { headers: { token } }
-                            );
-                            toast({
-                              title: "Success",
-                              description:
-                                "Warehouse admin deleted successfully",
-                              status: "success",
-                              duration: 5000,
-                              isClosable: true,
-                            });
-                            showAllUserData();
-                          } catch (error) {
-                            console.log(error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to delete warehouse admin",
-                              status: "error",
-                              duration: 5000,
-                              isClosable: true,
-                            });
-                          }
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </Box>
-          </Box>
           <Tr>
             <Td>{val.id}</Td>
             <Td>{val.email}</Td>
@@ -650,555 +535,679 @@ const AdminUser = () => {
   };
 
   return (
-    <div className="w-[100%]">
-      <div className="w-[100%] flex flex-1 justify-between">
-        <Sidebar />
-        <div className="bg-white w-[1240px] h-auto z-0 shadow-inner flex flex-col overflow-auto py-[40px] pl-[50px]">
-          <div className="w-[1140px] h-auto">
-            <Stack spacing={4} direction="row" align="center">
-              {adminDataMode ? (
-                <Button bg="#5D5FEF" color="white" size="lg">
-                  Admin Data
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={changeDataMode}
-                  color="#5D5FEF"
-                  borderColor="#5D5FEF"
-                >
-                  Admin Data
-                </Button>
-              )}
-              {userDataMode ? (
-                <Button bg="#5D5FEF" color="white" size="lg">
-                  User Data
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={changeDataMode}
-                  color="#5D5FEF"
-                  borderColor="#5D5FEF"
-                >
-                  User Data
-                </Button>
-              )}
-            </Stack>
-            <div className="w-full h-full mt-[20px]">
-              {adminDataMode ? (
-                <>
-                  <Text
-                    align={["left"]}
-                    w="full"
-                    className="font-ibmFont"
-                    fontSize={30}
-                    fontWeight={500}
-                  >
-                    <Text borderBottom="2px" borderColor="black">
-                      <span></span> <span className="text-purple">Admin</span>
-                      <span> Data List</span>
-                    </Text>
-                  </Text>
+    <>
+      <div className="w-[100%]">
+        <div className="w-[100%] flex flex-1 justify-between">
+          <Sidebar />
+          <div className="bg-white w-[1240px] h-auto z-0 shadow-inner flex flex-col overflow-auto py-[40px] pl-[50px]">
+            <div className="w-[1140px] h-auto">
+              <Stack spacing={4} direction="row" align="center">
+                {adminDataMode ? (
+                  <>
+                    <Button bg="#5D5FEF" color="white" size="lg">
+                      Admin Data
+                    </Button>
+                  </>
+                ) : (
                   <Button
-                    colorScheme="purple"
-                    size="md"
+                    size="lg"
                     variant="outline"
-                    mt="10px"
-                    onClick={onOpenAdd}
+                    onClick={changeDataMode}
+                    color="#5D5FEF"
+                    borderColor="#5D5FEF"
                   >
-                    <Text>Add Admin Data</Text>
+                    Admin Data
                   </Button>
-                  <Modal
-                    isOpen={isOpenAdd}
-                    onClose={(e) => {
-                      onCloseAdd();
-                      setAdminWarehouse(false);
-                    }}
+                )}
+                {userDataMode ? (
+                  <Button bg="#5D5FEF" color="white" size="lg">
+                    User Data
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={changeDataMode}
+                    color="#5D5FEF"
+                    borderColor="#5D5FEF"
                   >
-                    <ModalOverlay />
-                    <ModalContent>
-                      <Box
-                        w={["full", "md"]}
-                        p={[8, 20]}
-                        mt={[20, "1vh"]}
-                        mx="auto"
-                      >
-                        <VStack spacing={4} align="flex-start" w="full">
-                          <HStack
-                            spacing={1}
-                            align={["flex-start", "left"]}
-                            w="full"
-                          >
-                            <Heading>
-                              <Text className="font-ibmReg">
-                                Add Admin Data
-                              </Text>
-                            </Heading>
-                            <ModalCloseButton />
-                          </HStack>
-                          <FormControl>
-                            <FormLabel>
-                              <Text className="font-ibmMed">Email</Text>
-                            </FormLabel>
-                            <Input
-                              ref={email}
-                              rounded="lg"
-                              variant="filled"
-                              placeholder="Admin Email"
-                              bg="#f5f5f5"
-                              border-1
-                              borderColor={"#D9D9D9"}
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>
-                              <Text className="font-ibmMed">First Name</Text>
-                            </FormLabel>
-                            <Input
-                              ref={firstName}
-                              rounded="lg"
-                              variant="filled"
-                              placeholder="Admin First Name"
-                              bg="#f5f5f5"
-                              border-1
-                              borderColor={"#D9D9D9"}
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>
-                              <Text className="font-ibmMed">Last Name</Text>
-                            </FormLabel>
-                            <Input
-                              ref={lastName}
-                              rounded="lg"
-                              variant="filled"
-                              placeholder="Admin Last Name"
-                              bg="#f5f5f5"
-                              border-1
-                              borderColor={"#D9D9D9"}
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>
-                              <Text className="font-ibmMed">Role</Text>
-                            </FormLabel>
-                            <Select
-                              ref={role}
-                              rounded="lg"
-                              variant="filled"
-                              placeholder="Choose Admin Role"
-                              bg="#f5f5f5"
-                              border-1
-                              borderColor={"#D9D9D9"}
-                              onChange={(e) => handleRole(role.current.value)}
+                    User Data
+                  </Button>
+                )}
+              </Stack>
+              <div className="w-full h-full mt-[20px]">
+                {adminDataMode ? (
+                  <>
+                    <Text
+                      align={["left"]}
+                      w="full"
+                      className="font-ibmFont"
+                      fontSize={30}
+                      fontWeight={500}
+                    >
+                      <Text borderBottom="2px" borderColor="black">
+                        <span></span> <span className="text-purple">Admin</span>
+                        <span> Data List</span>
+                      </Text>
+                    </Text>
+                    <Button
+                      colorScheme="purple"
+                      size="md"
+                      variant="outline"
+                      mt="10px"
+                      onClick={onOpenAdd}
+                    >
+                      <Text>Add Admin Data</Text>
+                    </Button>
+                    <Modal
+                      isOpen={isOpenAdd}
+                      onClose={(e) => {
+                        onCloseAdd();
+                        setAdminWarehouse(false);
+                      }}
+                    >
+                      <ModalOverlay />
+                      <ModalContent>
+                        <Box
+                          w={["full", "md"]}
+                          p={[8, 20]}
+                          mt={[20, "1vh"]}
+                          mx="auto"
+                        >
+                          <VStack spacing={4} align="flex-start" w="full">
+                            <HStack
+                              spacing={1}
+                              align={["flex-start", "left"]}
+                              w="full"
                             >
-                              <option value="admin">Admin</option>
-                              <option value="wh_admin">Warehouse Admin</option>
-                            </Select>
-                          </FormControl>
-                          {adminWarehouse ? (
+                              <Heading>
+                                <Text className="font-ibmReg">
+                                  Add Admin Data
+                                </Text>
+                              </Heading>
+                              <ModalCloseButton />
+                            </HStack>
                             <FormControl>
                               <FormLabel>
-                                <Text className="font-ibmMed">
-                                  Warehouse Name
-                                </Text>
+                                <Text className="font-ibmMed">Email</Text>
                               </FormLabel>
-                              <Select
-                                ref={warehouseName}
-                                rounded="lg"
-                                variant="filled"
-                                placeholder="Choose Warehouse"
-                                bg="#f5f5f5"
-                                border-1
-                                borderColor={"#D9D9D9"}
-                              >
-                                {whOptions.map((val, idx) => {
-                                  return <option value={val}>{val}</option>;
-                                })}
-                              </Select>
-                            </FormControl>
-                          ) : (
-                            <></>
-                          )}
-                          <FormControl>
-                            <FormLabel>
-                              <Text className="font-ibmMed">Password</Text>
-                            </FormLabel>
-                            <InputGroup>
                               <Input
-                                ref={password}
+                                ref={email}
                                 rounded="lg"
                                 variant="filled"
-                                type={show ? "text" : "password"}
-                                placeholder="Admin Password"
+                                placeholder="Admin Email"
                                 bg="#f5f5f5"
                                 border-1
                                 borderColor={"#D9D9D9"}
                               />
-                              <InputRightElement width="4.5rem">
-                                <Button
-                                  h="1.75rem"
-                                  size="sm"
-                                  onClick={handleClick}
-                                >
-                                  {show ? (
-                                    <Icon as={ViewIcon} />
-                                  ) : (
-                                    <Icon as={ViewOffIcon} />
-                                  )}
-                                </Button>
-                              </InputRightElement>
-                            </InputGroup>
-                          </FormControl>
-
-                          <Button
-                            rounded="lg"
-                            alignSelf="center"
-                            backgroundColor="#5D5FEF"
-                            color="white"
-                            className="font-ibmReg"
-                            onClick={addAdmin}
-                          >
-                            Add Admin
-                          </Button>
-                        </VStack>
-                      </Box>
-                    </ModalContent>
-                  </Modal>
-                  <Modal
-                    isOpen={isOpenEdit}
-                    onClose={(e) => {
-                      onCloseEdit();
-                      setEditAdminWarehouse(false);
-                    }}
-                  >
-                    <ModalOverlay />
-                    <ModalContent>
-                      <Box
-                        w={["full", "md"]}
-                        p={[8, 20]}
-                        mt={[20, "1vh"]}
-                        mx="auto"
-                      >
-                        <VStack spacing={4} align="flex-start" w="full">
-                          <HStack
-                            spacing={1}
-                            align={["flex-start", "left"]}
-                            w="full"
-                          >
-                            <Heading>
-                              <Text className="font-ibmReg">
-                                Edit Admin Data
-                              </Text>
-                            </Heading>
-                            <ModalCloseButton />
-                          </HStack>
-                          <FormControl>
-                            <FormLabel>
-                              <Text className="font-ibmMed">Email</Text>
-                            </FormLabel>
-                            <Input
-                              ref={email}
-                              rounded="lg"
-                              variant="filled"
-                              value={editEmail}
-                              isDisabled="true"
-                              bg="#f5f5f5"
-                              border-1
-                              borderColor={"#D9D9D9"}
-                              onChange={(event) =>
-                                setEditEmail(event.target.value)
-                              }
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>
-                              <Text className="font-ibmMed">First Name</Text>
-                            </FormLabel>
-                            <Input
-                              ref={firstName}
-                              rounded="lg"
-                              variant="filled"
-                              placeholder="Admin First Name"
-                              value={editFirstName}
-                              bg="#f5f5f5"
-                              border-1
-                              borderColor={"#D9D9D9"}
-                              onChange={(event) =>
-                                setEditFirstName(event.target.value)
-                              }
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>
-                              <Text className="font-ibmMed">Last Name</Text>
-                            </FormLabel>
-                            <Input
-                              ref={lastName}
-                              rounded="lg"
-                              variant="filled"
-                              placeholder="Admin Last Name"
-                              value={editLastName}
-                              onChange={(event) =>
-                                setEditLastName(event.target.value)
-                              }
-                              bg="#f5f5f5"
-                              border-1
-                              borderColor={"#D9D9D9"}
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>
-                              <Text className="font-ibmMed">Role</Text>
-                            </FormLabel>
-                            <Select
-                              ref={role}
-                              rounded="lg"
-                              variant="filled"
-                              placeholder="Choose Admin Role"
-                              bg="#f5f5f5"
-                              border-1
-                              borderColor={"#D9D9D9"}
-                              value={editRole}
-                              onChange={(event) => {
-                                handleEditRole(role.current.value);
-                                setEditRole(event.target.value);
-                              }}
-                            >
-                              <option value="admin">Admin</option>
-                              <option value="wh_admin">Warehouse Admin</option>
-                            </Select>
-                          </FormControl>
-                          {editAdminWarehouse ? (
+                            </FormControl>
                             <FormControl>
                               <FormLabel>
-                                <Text className="font-ibmMed">
-                                  Warehouse Name
-                                </Text>
+                                <Text className="font-ibmMed">First Name</Text>
                               </FormLabel>
-                              <Select
-                                ref={warehouseName}
+                              <Input
+                                ref={firstName}
                                 rounded="lg"
                                 variant="filled"
-                                placeholder="Choose Warehouse"
+                                placeholder="Admin First Name"
                                 bg="#f5f5f5"
                                 border-1
                                 borderColor={"#D9D9D9"}
-                                value={editWarehouse}
-                                onChange={(event) => {
-                                  setEditWarehouse(event?.target?.value);
-                                }}
+                              />
+                            </FormControl>
+                            <FormControl>
+                              <FormLabel>
+                                <Text className="font-ibmMed">Last Name</Text>
+                              </FormLabel>
+                              <Input
+                                ref={lastName}
+                                rounded="lg"
+                                variant="filled"
+                                placeholder="Admin Last Name"
+                                bg="#f5f5f5"
+                                border-1
+                                borderColor={"#D9D9D9"}
+                              />
+                            </FormControl>
+                            <FormControl>
+                              <FormLabel>
+                                <Text className="font-ibmMed">Role</Text>
+                              </FormLabel>
+                              <Select
+                                ref={role}
+                                rounded="lg"
+                                variant="filled"
+                                placeholder="Choose Admin Role"
+                                bg="#f5f5f5"
+                                border-1
+                                borderColor={"#D9D9D9"}
+                                onChange={(e) => handleRole(role.current.value)}
                               >
-                                {whOptions.map((val, idx) => {
-                                  return <option value={val}>{val}</option>;
-                                })}
+                                <option value="admin">Admin</option>
+                                <option value="wh_admin">
+                                  Warehouse Admin
+                                </option>
                               </Select>
                             </FormControl>
-                          ) : (
-                            <></>
-                          )}
-                          <Button
-                            rounded="lg"
-                            alignSelf="center"
-                            backgroundColor="#5D5FEF"
-                            color="white"
-                            className="font-ibmReg"
-                            onClick={editAdmin}
-                          >
-                            Edit Profile
-                          </Button>
-                        </VStack>
-                      </Box>
-                    </ModalContent>
-                  </Modal>
-                  <div className="flex justify-between mt-4">
-                    <div className="mb-4">
-                      <InputGroup>
-                        <Input
-                          w="350px"
-                          name="searchUserName"
-                          placeholder="Search by First Name or Last Name"
-                          className="p-1"
-                          onChange={searchInputHandler}
-                        />
-                        <InputRightElement
-                          pointerEvents="none"
-                          children={<Search2Icon />}
-                        />
-                      </InputGroup>
-                    </div>
-                    <div className="mb-4 flex justify-between" w="450px">
-                      <Select
-                        name="sortBy"
-                        placeholder="Sort By"
-                        color={"gray"}
-                        w="200px"
-                        onChange={sortHandler}
-                      >
-                        <option value="sortId">ID</option>
-                        <option value="sortEmail">Email</option>
-                        <option value="sortFirstName">First Name</option>
-                        <option value="sortLastName">Last Name</option>
-                        <option value="sortRole">Role</option>
-                      </Select>
-                      <Button w="100px" ml="20px" onClick={changeSort}>
-                        {sortMode === "ASC" ? "A to Z" : "Z to A"}
-                      </Button>
-                    </div>
-                  </div>
-                  <TableContainer mt="10px" w="1140px">
-                    <Table variant="simple" w="1000px">
-                      <Thead>
-                        <Tr className="font-bold bg-[#f1f1f1]">
-                          <Th>ID</Th>
-                          <Th>Email</Th>
-                          <Th>First Name</Th>
-                          <Th>Last Name</Th>
-                          <Th>Role</Th>
-                          <Th>Warehouse Name</Th>
-                          <Th>Created At</Th>
-                          <Th className="flex justify-center w-[250px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
-                            Action
-                          </Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody className="bg-white">{renderAdminData()}</Tbody>
-                    </Table>
-                  </TableContainer>
-                  {renderPageButton()}
-                  <Modal isOpen={isOpenDelete} onClose={onCloseDelete}>
-                    <ModalOverlay />
-                    <ModalContent>
-                      <Box
-                        w={["full", "md"]}
-                        p={[8, 20]}
-                        mt={[20, "1vh"]}
-                        mx="auto"
-                      >
-                        <VStack spacing={4} align="flex-start" w="full">
-                          <HStack
-                            spacing={1}
-                            align={["flex-start", "left"]}
-                            w="full"
-                          >
-                            <Heading>
-                              <Text className="font-ibmReg">
-                                Do you want to delete this user?
-                              </Text>
-                            </Heading>
-                            <ModalCloseButton />
-                          </HStack>
+                            {adminWarehouse ? (
+                              <FormControl>
+                                <FormLabel>
+                                  <Text className="font-ibmMed">
+                                    Warehouse Name
+                                  </Text>
+                                </FormLabel>
+                                <Select
+                                  ref={warehouseName}
+                                  rounded="lg"
+                                  variant="filled"
+                                  placeholder="Choose Warehouse"
+                                  bg="#f5f5f5"
+                                  border-1
+                                  borderColor={"#D9D9D9"}
+                                >
+                                  {whOptions.map((val, idx) => {
+                                    return <option value={val}>{val}</option>;
+                                  })}
+                                </Select>
+                              </FormControl>
+                            ) : (
+                              <></>
+                            )}
+                            <FormControl>
+                              <FormLabel>
+                                <Text className="font-ibmMed">Password</Text>
+                              </FormLabel>
+                              <InputGroup>
+                                <Input
+                                  ref={password}
+                                  rounded="lg"
+                                  variant="filled"
+                                  type={show ? "text" : "password"}
+                                  placeholder="Admin Password"
+                                  bg="#f5f5f5"
+                                  border-1
+                                  borderColor={"#D9D9D9"}
+                                />
+                                <InputRightElement width="4.5rem">
+                                  <Button
+                                    h="1.75rem"
+                                    size="sm"
+                                    onClick={handleClick}
+                                  >
+                                    {show ? (
+                                      <Icon as={ViewIcon} />
+                                    ) : (
+                                      <Icon as={ViewOffIcon} />
+                                    )}
+                                  </Button>
+                                </InputRightElement>
+                              </InputGroup>
+                            </FormControl>
 
-                          <Button
-                            rounded="lg"
-                            alignSelf="center"
-                            backgroundColor="#5D5FEF"
-                            color="white"
-                            className="font-ibmReg"
-                            onClick={deleteAdminData}
-                            size="lg"
-                          >
-                            Delete
-                          </Button>
-                          <Button
-                            rounded="lg"
-                            alignSelf="center"
-                            backgroundColor="white"
-                            color="#5D5FEF"
-                            className="font-ibmReg"
-                            variant="outline"
-                            onClick={onCloseDelete}
-                            size="lg"
-                          >
-                            Cancel
-                          </Button>
-                        </VStack>
-                      </Box>
-                    </ModalContent>
-                  </Modal>
-                </>
-              ) : userDataMode ? (
-                <>
-                  <Text
-                    align={["left"]}
-                    w="full"
-                    className="font-ibmFont"
-                    fontSize={30}
-                    fontWeight={500}
-                  >
-                    <Text borderBottom="2px" borderColor="black">
-                      <span></span> <span className="text-purple">User</span>
-                      <span> Data List</span>
+                            <Button
+                              rounded="lg"
+                              alignSelf="center"
+                              backgroundColor="#5D5FEF"
+                              color="white"
+                              className="font-ibmReg"
+                              onClick={addAdmin}
+                            >
+                              Add Admin
+                            </Button>
+                          </VStack>
+                        </Box>
+                      </ModalContent>
+                    </Modal>
+                    <Modal
+                      isOpen={isOpenEdit}
+                      onClose={(e) => {
+                        onCloseEdit();
+                        setEditAdminWarehouse(false);
+                      }}
+                    >
+                      <ModalOverlay />
+                      <ModalContent>
+                        <Box
+                          w={["full", "md"]}
+                          p={[8, 20]}
+                          mt={[20, "1vh"]}
+                          mx="auto"
+                        >
+                          <VStack spacing={4} align="flex-start" w="full">
+                            <HStack
+                              spacing={1}
+                              align={["flex-start", "left"]}
+                              w="full"
+                            >
+                              <Heading>
+                                <Text className="font-ibmReg">
+                                  Edit Admin Data
+                                </Text>
+                              </Heading>
+                              <ModalCloseButton />
+                            </HStack>
+                            <FormControl>
+                              <FormLabel>
+                                <Text className="font-ibmMed">Email</Text>
+                              </FormLabel>
+                              <Input
+                                ref={email}
+                                rounded="lg"
+                                variant="filled"
+                                value={editEmail}
+                                isDisabled="true"
+                                bg="#f5f5f5"
+                                border-1
+                                borderColor={"#D9D9D9"}
+                                onChange={(event) =>
+                                  setEditEmail(event.target.value)
+                                }
+                              />
+                            </FormControl>
+                            <FormControl>
+                              <FormLabel>
+                                <Text className="font-ibmMed">First Name</Text>
+                              </FormLabel>
+                              <Input
+                                ref={firstName}
+                                rounded="lg"
+                                variant="filled"
+                                placeholder="Admin First Name"
+                                value={editFirstName}
+                                bg="#f5f5f5"
+                                border-1
+                                borderColor={"#D9D9D9"}
+                                onChange={(event) =>
+                                  setEditFirstName(event.target.value)
+                                }
+                              />
+                            </FormControl>
+                            <FormControl>
+                              <FormLabel>
+                                <Text className="font-ibmMed">Last Name</Text>
+                              </FormLabel>
+                              <Input
+                                ref={lastName}
+                                rounded="lg"
+                                variant="filled"
+                                placeholder="Admin Last Name"
+                                value={editLastName}
+                                onChange={(event) =>
+                                  setEditLastName(event.target.value)
+                                }
+                                bg="#f5f5f5"
+                                border-1
+                                borderColor={"#D9D9D9"}
+                              />
+                            </FormControl>
+                            <FormControl>
+                              <FormLabel>
+                                <Text className="font-ibmMed">Role</Text>
+                              </FormLabel>
+                              <Select
+                                ref={role}
+                                rounded="lg"
+                                variant="filled"
+                                placeholder="Choose Admin Role"
+                                bg="#f5f5f5"
+                                border-1
+                                borderColor={"#D9D9D9"}
+                                value={editRole}
+                                onChange={(event) => {
+                                  handleEditRole(role.current.value);
+                                  setEditRole(event.target.value);
+                                }}
+                              >
+                                <option value="admin">Admin</option>
+                                <option value="wh_admin">
+                                  Warehouse Admin
+                                </option>
+                              </Select>
+                            </FormControl>
+                            {editAdminWarehouse ? (
+                              <FormControl>
+                                <FormLabel>
+                                  <Text className="font-ibmMed">
+                                    Warehouse Name
+                                  </Text>
+                                </FormLabel>
+                                <Select
+                                  ref={warehouseName}
+                                  rounded="lg"
+                                  variant="filled"
+                                  placeholder="Choose Warehouse"
+                                  bg="#f5f5f5"
+                                  border-1
+                                  borderColor={"#D9D9D9"}
+                                  value={editWarehouse}
+                                  onChange={(event) => {
+                                    setEditWarehouse(event?.target?.value);
+                                  }}
+                                >
+                                  {whOptions.map((val, idx) => {
+                                    return <option value={val}>{val}</option>;
+                                  })}
+                                </Select>
+                              </FormControl>
+                            ) : (
+                              <></>
+                            )}
+                            <Button
+                              rounded="lg"
+                              alignSelf="center"
+                              backgroundColor="#5D5FEF"
+                              color="white"
+                              className="font-ibmReg"
+                              onClick={editAdmin}
+                            >
+                              Edit Profile
+                            </Button>
+                          </VStack>
+                        </Box>
+                      </ModalContent>
+                    </Modal>
+                    <div className="flex justify-between mt-4">
+                      <div className="mb-4">
+                        <InputGroup>
+                          <Input
+                            w="350px"
+                            name="searchUserName"
+                            placeholder="Search by First Name or Last Name"
+                            className="p-1"
+                            onChange={searchInputHandler}
+                          />
+                          <InputRightElement
+                            pointerEvents="none"
+                            children={<Search2Icon />}
+                          />
+                        </InputGroup>
+                      </div>
+                      <div className="mb-4 flex justify-between" w="450px">
+                        <Select
+                          name="sortBy"
+                          placeholder="Sort By"
+                          color={"gray"}
+                          w="200px"
+                          onChange={sortHandler}
+                        >
+                          <option value="sortId">ID</option>
+                          <option value="sortEmail">Email</option>
+                          <option value="sortFirstName">First Name</option>
+                          <option value="sortLastName">Last Name</option>
+                          <option value="sortRole">Role</option>
+                        </Select>
+                        <Button w="100px" ml="20px" onClick={changeSort}>
+                          {sortMode === "ASC" ? "A to Z" : "Z to A"}
+                        </Button>
+                      </div>
+                    </div>
+                    <TableContainer mt="10px" w="1140px">
+                      <Table variant="simple" w="1000px">
+                        <Thead>
+                          <Tr className="font-bold bg-[#f1f1f1]">
+                            <Th>ID</Th>
+                            <Th>Email</Th>
+                            <Th>First Name</Th>
+                            <Th>Last Name</Th>
+                            <Th>Role</Th>
+                            <Th>Warehouse Name</Th>
+                            <Th>Created At</Th>
+                            <Th className="flex justify-center w-[250px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
+                              Action
+                            </Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody className="bg-white">{renderAdminData()}</Tbody>
+                      </Table>
+                    </TableContainer>
+                    {renderPageButton()}
+                    <Modal isOpen={isOpenDelete} onClose={onCloseDelete}>
+                      <ModalOverlay />
+                      <ModalContent>
+                        <Box
+                          w={["full", "md"]}
+                          p={[8, 20]}
+                          mt={[20, "1vh"]}
+                          mx="auto"
+                        >
+                          <VStack spacing={4} align="flex-start" w="full">
+                            <HStack
+                              spacing={1}
+                              align={["flex-start", "left"]}
+                              w="full"
+                            >
+                              <Heading>
+                                <Text className="font-ibmReg">
+                                  Do you want to delete this user?
+                                </Text>
+                              </Heading>
+                              <ModalCloseButton />
+                            </HStack>
+
+                            <Button
+                              rounded="lg"
+                              alignSelf="center"
+                              backgroundColor="#5D5FEF"
+                              color="white"
+                              className="font-ibmReg"
+                              onClick={deleteAdminData}
+                              size="lg"
+                            >
+                              Delete
+                            </Button>
+                            <Button
+                              rounded="lg"
+                              alignSelf="center"
+                              backgroundColor="white"
+                              color="#5D5FEF"
+                              className="font-ibmReg"
+                              variant="outline"
+                              onClick={onCloseDelete}
+                              size="lg"
+                            >
+                              Cancel
+                            </Button>
+                          </VStack>
+                        </Box>
+                      </ModalContent>
+                    </Modal>
+                  </>
+                ) : userDataMode ? (
+                  <>
+                    <Text
+                      align={["left"]}
+                      w="full"
+                      className="font-ibmFont"
+                      fontSize={30}
+                      fontWeight={500}
+                    >
+                      <Text borderBottom="2px" borderColor="black">
+                        <span></span> <span className="text-purple">User</span>
+                        <span> Data List</span>
+                      </Text>
                     </Text>
-                  </Text>
-                  <div className="flex justify-between mt-4">
-                    <div className="mb-4">
-                      <InputGroup>
-                        <Input
-                          w="350px"
-                          name="searchUserName"
-                          placeholder="Search by First Name or Last Name"
-                          className="p-1"
-                          onChange={searchInputHandler}
-                        />
-                        <InputRightElement
-                          pointerEvents="none"
-                          children={<Search2Icon />}
-                        />
-                      </InputGroup>
+                    <div className="flex justify-between mt-4">
+                      <div className="mb-4">
+                        <InputGroup>
+                          <Input
+                            w="350px"
+                            name="searchUserName"
+                            placeholder="Search by First Name or Last Name"
+                            className="p-1"
+                            onChange={searchInputHandler}
+                          />
+                          <InputRightElement
+                            pointerEvents="none"
+                            children={<Search2Icon />}
+                          />
+                        </InputGroup>
+                      </div>
+                      <div className="mb-4 flex justify-between" w="450px">
+                        <Select
+                          name="sortBy"
+                          placeholder="Sort By"
+                          color={"gray"}
+                          w="200px"
+                          onChange={sortHandler}
+                        >
+                          <option value="sortId">ID</option>
+                          <option value="sortEmail">Email</option>
+                          <option value="sortFirstName">First Name</option>
+                          <option value="sortLastName">Last Name</option>
+                          <option value="sortGender">Gender</option>
+                        </Select>
+                        <Button w="100px" ml="20px" onClick={changeSort}>
+                          {sortMode === "ASC" ? "A to Z" : "Z to A"}
+                        </Button>
+                      </div>
                     </div>
-                    <div className="mb-4 flex justify-between" w="450px">
-                      <Select
-                        name="sortBy"
-                        placeholder="Sort By"
-                        color={"gray"}
-                        w="200px"
-                        onChange={sortHandler}
-                      >
-                        <option value="sortId">ID</option>
-                        <option value="sortEmail">Email</option>
-                        <option value="sortFirstName">First Name</option>
-                        <option value="sortLastName">Last Name</option>
-                        <option value="sortGender">Gender</option>
-                      </Select>
-                      <Button w="100px" ml="20px" onClick={changeSort}>
-                        {sortMode === "ASC" ? "A to Z" : "Z to A"}
-                      </Button>
-                    </div>
-                  </div>
-                  <TableContainer mt="10px">
-                    <Table variant="simple" w="1000px">
-                      <Thead>
-                        <Tr className="font-bold bg-[#f1f1f1]">
-                          <Th>ID</Th>
-                          <Th>Email</Th>
-                          <Th>First Name</Th>
-                          <Th>Last Name</Th>
-                          <Th>Role</Th>
-                          <Th>Gender</Th>
-                          <Th>Birth Date</Th>
-                          <Th>Birth Place</Th>
-                          <Th>Verified Status</Th>
-                          <Th>Created At</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody className="bg-white">{renderUserData()}</Tbody>
-                    </Table>
-                  </TableContainer>
-                  {renderPageButton()}
-                </>
-              ) : (
-                <></>
-              )}
+                    <TableContainer mt="10px">
+                      <Table variant="simple" w="1000px">
+                        <Thead>
+                          <Tr className="font-bold bg-[#f1f1f1]">
+                            <Th>ID</Th>
+                            <Th>Email</Th>
+                            <Th>First Name</Th>
+                            <Th>Last Name</Th>
+                            <Th>Role</Th>
+                            <Th>Gender</Th>
+                            <Th>Birth Date</Th>
+                            <Th>Birth Place</Th>
+                            <Th>Verified Status</Th>
+                            <Th>Created At</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody className="bg-white">{renderUserData()}</Tbody>
+                      </Table>
+                    </TableContainer>
+                    {renderPageButton()}
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
             </div>
+            <Box mt={8}>
+              <Heading mb={4}>Assign Warehouse Admin</Heading>
+              <form onSubmit={handleSubmit}>
+                <VStack spacing={4}>
+                  <FormControl isRequired>
+                    <FormLabel>Warehouse ID</FormLabel>
+                    <Input
+                      type="text"
+                      width="120px"
+                      height="30px"
+                      value={warehouseId}
+                      onChange={(event) => setWarehouseId(event.target.value)}
+                    />
+                  </FormControl>
+
+                  <FormControl isRequired>
+                    <FormLabel>Warehouse Admin ID</FormLabel>
+                    <Input
+                      type="text"
+                      width="120px"
+                      height="30px"
+                      value={warehouseAdminId}
+                      onChange={(event) =>
+                        setWarehouseAdminId(event.target.value)
+                      }
+                    />
+                  </FormControl>
+
+                  <Button
+                    type="submit"
+                    colorScheme="teal"
+                    isLoading={isLoading}
+                    alignSelf="flex-start"
+                  >
+                    Assign
+                  </Button>
+                </VStack>
+              </form>
+              <Box mt={8}>
+                <Heading mb={4}>User Data</Heading>
+                <Table variant="simple">
+                  <Thead>
+                    <Tr>
+                      <Th>ID</Th>
+                      <Th>Username</Th>
+                      <Th>Email</Th>
+                      <Th>Role</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {userDatax.map((user) => (
+                      <Tr key={user.id}>
+                        <Td>{user.id}</Td>
+                        <Td>{user.first_name}</Td>
+                        <Td>{user.email}</Td>
+                        <Td>{user.role}</Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+                <Heading mb={4}>WH ADMIN</Heading>
+                <Table variant="simple">
+                  <Thead>
+                    <Tr>
+                      <Th>ID</Th>
+                      <Th>USER ID</Th>
+                      <Th>WH ID</Th>
+                      <Th>USERNAME</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {whData.map((wh) => (
+                      <Tr key={wh.id}>
+                        <Td>{wh.id}</Td>
+                        <Td>{wh.user_id}</Td>
+                        <Td>{wh.warehouse_id}</Td>
+                        <Td>{wh.user.first_name}</Td>
+                        <Button
+                          colorScheme="red"
+                          size="sm"
+                          onClick={async () => {
+                            const token = localStorage.getItem("myToken");
+                            try {
+                              await axios.delete(
+                                `http://localhost:8000/admin/delete/${wh.id}`,
+                                { headers: { token } }
+                              );
+                              toast({
+                                title: "Success",
+                                description:
+                                  "Warehouse admin deleted successfully",
+                                status: "success",
+                                duration: 5000,
+                                isClosable: true,
+                              });
+                              showAllUserData();
+                            } catch (error) {
+                              console.log(error);
+                              toast({
+                                title: "Error",
+                                description: "Failed to delete warehouse admin",
+                                status: "error",
+                                duration: 5000,
+                                isClosable: true,
+                              });
+                            }
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </Box>
+            </Box>
           </div>
         </div>
+        <Toaster />
       </div>
-      <Toaster />
-    </div>
+    </>
   );
 };
 
