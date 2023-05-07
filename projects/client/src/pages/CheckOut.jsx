@@ -210,7 +210,6 @@ export default function CheckOut(props) {
       });
       setweight(item_weight);
       setCart(response.data.data);
-
       setorigin(
         response.data.data[0].product.product_stocks[0].warehouse.city.split(
           "."
