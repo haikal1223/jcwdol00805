@@ -13,19 +13,20 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "warehouse_id",
       });
       this.hasMany(models.wh_admin, {
-        foreignKey: 'warehouse_id'
-      })
+        foreignKey: "warehouse_id",
+      });
       this.hasMany(models.order, {
-        foreignKey: 'warehouse_id'
-      })
+        foreignKey: "warehouse_id",
+      });
       this.hasMany(models.stock_log, {
-        foreignKey: 'warehouse_id'
-      })
+        foreignKey: "warehouse_id",
+      });
       this.hasMany(models.stock_mutation, {
-        foreignKey: 'origin_wh_id'
-      })
+        foreignKey: "origin_wh_id",
+      });
       this.hasMany(models.stock_mutation, {
-        foreignKey: 'target_wh_id'
+        foreignKey: "target_wh_id",
+      });
     }
   }
   warehouse.init(
