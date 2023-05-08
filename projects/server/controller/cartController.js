@@ -154,6 +154,64 @@ module.exports = {
     }
   },
 
+  getUserCartx: async (req, res) => {
+    try {
+      const { id } = req.uid;
+
+      // Validate uid parameter
+      // if (!uid) {
+      //   return res.status(400).send({
+      //     isError: true,
+      //     message: "Invalid user ID",
+      //     data: null,
+      //   });
+      // }
+      console.log("test", id);
+
+      // const { id } = await db.user.findOne({
+      //   where: {
+      //     uid,
+      //   },
+      // });
+
+      const findUserCart = await db.cart.findAll({
+        where: {
+          user_id: id,
+        },
+        include: [
+          {
+            model: db.product,
+            attributes: ["name", "price", "product_category_id", "image_url"],
+            include: [
+              {
+                model: db.product_stock,
+                include: [
+                  {
+                    model: db.warehouse,
+                    attributes: ["city"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(200).send({
+        isError: false,
+        message: "Cart items fetched successfully",
+        data: findUserCart,
+      });
+    } catch (error) {
+      // Send error response to the client
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
+    }
+  },
+
   addCartProduct: async (req, res) => {
     try {
       let { quantity, price, user_id, product_id } = req.body;
@@ -204,7 +262,7 @@ module.exports = {
   },
   addAddress: async (req, res) => {
     const t = await sequelize.transaction();
-    const { uid } = req.uid;
+    const { id } = req.uid;
     const {
       recipient_name,
       recipient_phone,
@@ -217,7 +275,7 @@ module.exports = {
     } = req.body;
 
     try {
-      const { id } = await db.user.findOne({ where: { uid } });
+      // const { id } = await db.user.findOne({ where: { uid } });
       console.log("id", id);
       if (main_address) {
         await db.user_address.update(
@@ -259,11 +317,12 @@ module.exports = {
   },
 
   getAddress: async (req, res) => {
-    const { uid } = req.uid;
+    const { id } = req.uid;
+
     try {
-      const { id } = await db.user.findOne({
-        where: { uid: uid },
-      });
+      // const { id } = await db.user.findOne({
+      //   where: { uid: uid },
+      // });
 
       const address = await db.user_address.findAll({
         where: { user_id: id },
@@ -522,10 +581,10 @@ module.exports = {
   },
   
   getStockOrigin: async (req, res) => {
-    const { uid } = req.uid;
+    const { id } = req.uid;
     try {
       const user = await db.user.findOne({
-        where: { uid: uid },
+        where: { id: id },
         include: [
           {
             model: db.cart,
