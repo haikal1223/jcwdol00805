@@ -15,7 +15,7 @@ module.exports = {
     try {
       const validateTokenResult = validateToken(token);
       req.uid = validateTokenResult;
-
+      console.log(req.uid);
       next();
     } catch (error) {
       res.status(401).send({

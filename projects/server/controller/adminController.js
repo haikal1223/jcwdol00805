@@ -213,11 +213,14 @@ module.exports = {
     }
   },
 
-  addProductCategory: async (req, res, next) => {
+  addProductCategory: async (req, res) => {
     try {
       const { id } = req.uid;
 
+      console.log("a", id);
+
       const user = await db.user.findOne({ where: { id } });
+
       if (user.role !== "admin") {
         return res.status(401).send({
           isError: true,
@@ -336,6 +339,7 @@ module.exports = {
   editProductCategory: async (req, res) => {
     try {
       const { id } = req.uid;
+      console.log("a");
 
       const user = await db.user.findOne({ where: { id } });
       if (user.role !== "admin") {
@@ -358,7 +362,10 @@ module.exports = {
           data: null,
         });
       }
-      const category = await db.product_category.findOne({ where: { cid } });
+
+      const category = await db.product_category.findOne({
+        where: { id: cid },
+      });
       if (!category) {
         res.status(404).send({
           isError: true,
@@ -382,9 +389,9 @@ module.exports = {
   },
   deleteProductCategory: async (req, res) => {
     try {
-      const { uid } = req.uid;
+      const { id } = req.uid;
 
-      const user = await db.user.findOne({ where: { uid } });
+      const user = await db.user.findOne({ where: { id } });
       if (user.role !== "admin") {
         return res.status(401).send({
           isError: true,
@@ -392,8 +399,12 @@ module.exports = {
           data: null,
         });
       }
-      const { id } = req.params;
-      const category = await db.product_category.findOne({ where: { id } });
+      const { cid } = req.params;
+      const category = await db.product_category.findOne({
+        where: { id: cid },
+      });
+      console.log("s", category);
+
       if (!category) {
         res.status(404).send({
           isError: true,
@@ -402,7 +413,7 @@ module.exports = {
         });
       }
 
-      await category.destroy();
+      await category.destroy({ where: { id: cid } });
       res.status(200).send({
         isError: false,
         message: "Product Category Removed",

@@ -18,6 +18,7 @@ import {
   InputGroup,
   HStack,
 } from "@chakra-ui/react";
+import Cookies from "js-cookie";
 
 export default function ProductCategoryAdmin() {
   const [category_name, setCategory_name] = useState("");
@@ -29,19 +30,18 @@ export default function ProductCategoryAdmin() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmitAdd = async (event) => {
-    event.preventDefault();
-    setIsLoading(true);
-
     try {
-      const token = localStorage.getItem("adminToken");
+      setIsLoading(true);
+      event.preventDefault();
+      const token = Cookies.get("adminToken");
+      const data = {
+        category_name,
+      };
       const response = await axios.post(
         "http://localhost:8000/admin/product-category",
-        {
-          category_name,
-        },
-        { headers: { token } }
+        data,
+        { headers: { token: token } }
       );
-
       toast({
         title: "Success",
         description: "Add Product Category Success",
@@ -68,7 +68,7 @@ export default function ProductCategoryAdmin() {
   };
 
   const showProductCategory = async () => {
-    let token = localStorage.getItem("adminToken");
+    let token = Cookies.get("adminToken");
     const response = await axios.get(
       "http://localhost:8000/admin/product-category",
       {
@@ -88,7 +88,7 @@ export default function ProductCategoryAdmin() {
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem("adminToken");
+      const token = Cookies.get("adminToken");
       const response = await axios.put(
         `http://localhost:8000/admin/product-category/${editCategoryId}`,
         {
@@ -132,7 +132,7 @@ export default function ProductCategoryAdmin() {
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem("adminToken");
+      const token = Cookies.get("adminToken");
       const response = await axios.delete(
         `http://localhost:8000/admin/product-category/${deleteCategoryId}`,
         {
