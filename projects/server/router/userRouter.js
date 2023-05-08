@@ -22,7 +22,7 @@ Router.patch(
   userController.uploadPhoto
 );
 Router.get("/getphoto", userController.getProfilePhoto);
-Router.patch("/updateprofile/:uid", userController.updateProfile);
+Router.patch("/updateprofile/:id", userController.updateProfile);
 Router.patch("/updatepassword", userController.updatePassword);
 Router.get("/verifytoken", userController.verifyToken);
 Router.get("/login", tokenVerify, userController.login);
