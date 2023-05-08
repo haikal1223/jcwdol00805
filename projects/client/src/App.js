@@ -22,6 +22,7 @@ import CheckOut from "./pages/CheckOut";
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
+import ProductCategoryAdmin from "./pages/Admin/Category";
 import AdminOrder from "./pages/Admin/Order";
 import AdminProduct from "./pages/Admin/Product/Home";
 import AdminProductDetail from "./pages/Admin/Product/Detail";
@@ -98,7 +99,6 @@ function App() {
     }
     return children;
   };
-
 
   const AuthMainAdmin = ({ children }) => {
     const adminRoleLogged = localStorage.getItem("role");
@@ -181,16 +181,23 @@ function App() {
 
           {/* Admin Routing */}
           <Route path="/admin" element={<AdminHome />} />
-          <Route
+              <Route
             path="/admin/user"
             element={
               <AuthAdmin>
-                <AuthMainAdmin>
-                  <AdminUser />
-                </AuthMainAdmin>
+                <AdminUser />
               </AuthAdmin>
             }
           />
+          <Route
+            path="/admin/category"
+            element={
+              <AuthAdmin>
+                <ProductCategoryAdmin />
+              </AuthAdmin>
+            }
+          />
+
             <Route 
               path='/admin/order' 
               element={
