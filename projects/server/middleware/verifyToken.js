@@ -12,6 +12,8 @@ module.exports = {
       });
     }
 
+    console.log("s", token);
+
     try {
       const validateTokenResult = validateToken(token);
       req.uid = validateTokenResult;

@@ -203,16 +203,18 @@ export default function CheckOut(props) {
   let getUserCart = async () => {
     let token = localStorage.getItem("myToken");
     try {
-      let response = await axios.get(`http://localhost:8000/cart/getUserCart`, {
-        headers: { token: token },
-      });
+      let response = await axios.get(
+        `http://localhost:8000/cart/getUserCartx`,
+        {
+          headers: { token: token },
+        }
+      );
       let item_weight = 0;
       response.data.data.forEach((v, i) => {
         item_weight = v.quantity * 1000;
       });
       setweight(item_weight);
       setCart(response.data.data);
-
       setorigin(
         response.data.data[0].product.product_stocks[0].warehouse.city.split(
           "."
