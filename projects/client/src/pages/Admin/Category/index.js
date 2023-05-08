@@ -84,10 +84,9 @@ export default function ProductCategoryAdmin() {
   };
 
   const handleEditSubmit = async (event) => {
-    event.preventDefault();
-    setIsLoading(true);
-
     try {
+      event.preventDefault();
+      setIsLoading(true);
       const token = Cookies.get("adminToken");
       const response = await axios.put(
         `http://localhost:8000/admin/product-category/${editCategoryId}`,
@@ -119,8 +118,9 @@ export default function ProductCategoryAdmin() {
         isClosable: true,
       });
     } finally {
-      setIsLoading(false);
+      Navigate(0);
     }
+    setIsLoading(false);
   };
 
   const handleDeleteButton = (category_id) => {
