@@ -5,9 +5,7 @@ const JWT_KEY = process.env.JWT_KEY;
 module.exports = {
   createToken: (payload) => {
     return jwt.sign(payload, `${JWT_KEY}`, {
-
       expiresIn: "30d",
-
     });
   },
 
