@@ -5,13 +5,13 @@ const { default: axios } = require("axios");
 module.exports = {
   getJNE: async (req, res) => {
     let { origin, destination, weight, courier } = req.body;
-    let { uid } = req.uid;
-    let key = "38cc0e5fdc569640ad614c40fcf5432c";
+    let { id } = req.uid;
+    let key = "0ab1e1cb6b9b40df49560b26aec4ec79";
 
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
-          where: { uid },
+          where: { id },
           include: { model: db.user_address, where: { main_address: true } },
         });
         destination = user_addresses[0].dataValues.city.split(".")[0];
@@ -47,12 +47,12 @@ module.exports = {
   },
   getPOS: async (req, res) => {
     let { origin, destination, weight } = req.body;
-    const { uid } = req.uid;
-    let key = "38cc0e5fdc569640ad614c40fcf5432c";
+    const { id } = req.uid;
+    let key = "0ab1e1cb6b9b40df49560b26aec4ec79";
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
-          where: { uid },
+          where: { id },
           include: { model: db.user_address, where: { main_address: true } },
         });
         destination = user_addresses[0].dataValues.city.split(".")[0];
@@ -88,12 +88,12 @@ module.exports = {
   },
   getTIKI: async (req, res) => {
     let { origin, destination, weight } = req.body;
-    const { uid } = req.uid;
-    let key = "38cc0e5fdc569640ad614c40fcf5432c";
+    const { id } = req.uid;
+    let key = "0ab1e1cb6b9b40df49560b26aec4ec79";
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
-          where: { uid },
+          where: { id },
           include: { model: db.user_address, where: { main_address: true } },
         });
         destination = user_addresses[0].dataValues.city.split(".")[0];
@@ -130,12 +130,12 @@ module.exports = {
 
   getCost: async (req, res) => {
     let { origin, destination, weight, courier } = req.body;
-    let { uid } = req.uid;
-    let key = "38cc0e5fdc569640ad614c40fcf5432c";
+    let { id } = req.uid;
+    let key = "0ab1e1cb6b9b40df49560b26aec4ec79";
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
-          where: { uid },
+          where: { id },
           include: { model: db.user_address, where: { main_address: true } },
         });
         destination = user_addresses[0].dataValues.city.split(".")[0];
@@ -162,6 +162,8 @@ module.exports = {
         });
       }
     } catch (error) {
+      let { origin, destination, weight, courier } = req.body;
+      let { id } = req.uid;
       res.status(500).send({
         isError: true,
         message: error.message,

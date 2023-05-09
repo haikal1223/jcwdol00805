@@ -107,7 +107,8 @@ export default function CheckOut(props) {
           borderRadius="18px"
           boxShadow="18.2143px 18.2143px 36.4286px rgba(211, 209, 216, 0.25)"
         >
-          <p className="mt-[15px] font-ibmMed border-b-2">
+          {renderOrderList()}
+          {/* <p className="mt-[15px] font-ibmMed border-b-2">
             Waiting for payment
           </p>
           <Box>
@@ -224,7 +225,7 @@ export default function CheckOut(props) {
             >
               Upload Payment
             </Button>
-          </Box>
+          </Box> */}
         </Box>
       </div>
      {/* <Text

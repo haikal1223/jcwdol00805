@@ -204,4 +204,106 @@ module.exports = {
       });
     }
   },
+
+  createOrder: async (req, res) => {
+    const t = await db.sequelize.transaction();
+    try {
+      // get data
+      let { paid_amt, address, ship_cost, uid, whid } = req.query
+      let { detail, cartId } = req.body
+
+      // dummy order
+      /* paid_amt = 1
+      address = 1
+      ship_cost = 15000
+      uid = 1
+      whid = 1 */
+      
+      // dummy detail
+      detail = [
+        {
+          pid: 2,
+          name: 'Test Product AA',
+          price: 14000,
+          qty: 1
+        },
+        {
+          pid: 27,
+          name: 'Test Product BB',
+          price: 25000,
+          qty: 2
+        }
+      ]
+
+      /* cartId = [1 , 2] */
+
+      //validate product availability
+      for( let i = 0 ; i < detail.length ; i++ ) {
+        let stock = await db.product_stock.sum(
+          'stock',{
+            where: {
+              product_id: detail[i].pid
+            }
+          }, {
+            group: 'product_id' 
+          })
+          
+        if (stock < detail[i].qty) {
+          return res.status(500).send({
+            isError: true,
+            message: `Insufficient stock for item ${detail[i].name}`,
+            data: null,
+          })
+        }  
+      }
+
+      // run query
+      let order = await db.order.create({
+        paid_amount: parseInt(paid_amt),
+        user_address_id: parseInt(address),
+        shipping_cost: parseInt(ship_cost),
+        order_status_id: 1,
+        user_id: parseInt(uid),
+        warehouse_id: parseInt(whid)
+      }/* , { transaction: t } */) 
+
+      /* NEED LOOP */
+      for( let i = 0 ; i < detail.length ; i++ ) {
+        await db.order_detail.create({
+          order_id: order.id, 
+          product_id: detail[i].pid,
+          product_price: detail[i].price,
+          product_quantity: detail[i].qty,
+          subtotal: detail[i].price * detail[i].qty 
+        }/* , { transaction: t } */)
+      }
+
+      // loop to destroy cart
+      for ( let i = 0 ; i < cartId.length ; i++) {
+        await db.cart.destroy({
+          where : {
+            id: cartId[i]
+          }
+        })
+      }
+      
+      // response
+      res.status(201).send({
+        isError: false,
+        message: 'Order successfully created',
+        data: {
+          order
+        }
+      })
+
+    } catch (error) {
+      t.rollback();
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  }
+
 };

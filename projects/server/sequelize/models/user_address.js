@@ -28,6 +28,8 @@ module.exports = (sequelize, DataTypes) => {
       recipient_name: DataTypes.STRING,
       recipient_phone: DataTypes.INTEGER,
       postal_code: DataTypes.INTEGER,
+      lat: DataTypes.DOUBLE,
+      lng: DataTypes.DOUBLE,
     },
     {
       sequelize,
