@@ -143,4 +143,65 @@ module.exports = {
       });
     }
   },
+  
+  getCart: async (req, res) => {
+    try {
+      const { uid } = req.uid;
+
+      if (!uid) {
+        return res.status(400).send({
+          isError: true,
+          message: "Invalid user ID",
+          data: null,
+        });
+      }
+
+      const { id } = await db.user.findOne({
+        where: {
+          uid,
+        },
+      });
+
+      const order = await db.order.findOne({
+        where: {
+          user_id: id,
+        },
+      });
+
+      const findUserOrder = await db.order_detail.findAll({
+        where: {
+          order_id: order.id,
+        },
+        include: [
+          {
+            model: db.order,
+          },
+          {
+            model: db.product,
+            attributes: ["name", "price", "product_category_id", "image_url"],
+          },
+        ],
+      });
+
+      if (!findUserOrder) {
+        return res.status(404).send({
+          isError: true,
+          message: "No Order Found",
+          data: null,
+        });
+      }
+
+      return res.status(200).send({
+        isError: false,
+        message: "Cart items fetched successfully",
+        data: findUserOrder,
+      });
+    } catch (error) {
+      return res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
 };

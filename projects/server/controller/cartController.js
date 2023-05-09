@@ -25,6 +25,7 @@ const handlebars = require("handlebars");
 const { kStringMaxLength } = require("buffer");
 
 const bcrypt = require("bcrypt");
+const order = require("../sequelize/models/order");
 
 module.exports = {
   getCartFilterProduct: async (req, res) => {
@@ -95,6 +96,121 @@ module.exports = {
       });
     }
   },
+  
+   getUserCartx: async (req, res) => {
+    try {
+      const { uid } = req.uid;
+
+      // Validate uid parameter
+      if (!uid) {
+        return res.status(400).send({
+          isError: true,
+          message: "Invalid user ID",
+          data: null,
+        });
+      }
+
+      const { id } = await db.user.findOne({
+        where: {
+          uid,
+        },
+      });
+
+      const findUserCart = await db.cart.findAll({
+        where: {
+          user_id: id,
+        },
+        include: [
+          {
+            model: db.product,
+            attributes: ["name", "price", "product_category_id", "image_url"],
+            include: [
+              {
+                model: db.product_stock,
+                include: [
+                  {
+                    model: db.warehouse,
+                    attributes: ["city"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(200).send({
+        isError: false,
+        message: "Cart items fetched successfully",
+        data: findUserCart,
+      });
+    } catch (error) {
+      // Send error response to the client
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
+    }
+  },
+
+  getUserCartx: async (req, res) => {
+    try {
+      const { id } = req.uid;
+
+      // Validate uid parameter
+      // if (!uid) {
+      //   return res.status(400).send({
+      //     isError: true,
+      //     message: "Invalid user ID",
+      //     data: null,
+      //   });
+      // }
+      console.log("test", id);
+
+      // const { id } = await db.user.findOne({
+      //   where: {
+      //     uid,
+      //   },
+      // });
+
+      const findUserCart = await db.cart.findAll({
+        where: {
+          user_id: id,
+        },
+        include: [
+          {
+            model: db.product,
+            attributes: ["name", "price", "product_category_id", "image_url"],
+            include: [
+              {
+                model: db.product_stock,
+                include: [
+                  {
+                    model: db.warehouse,
+                    attributes: ["city"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(200).send({
+        isError: false,
+        message: "Cart items fetched successfully",
+        data: findUserCart,
+      });
+    } catch (error) {
+      // Send error response to the client
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
+    }
+  },
 
   addCartProduct: async (req, res) => {
     try {
@@ -146,7 +262,7 @@ module.exports = {
   },
   addAddress: async (req, res) => {
     const t = await sequelize.transaction();
-    const { uid } = req.uid;
+    const { id } = req.uid;
     const {
       recipient_name,
       recipient_phone,
@@ -159,7 +275,7 @@ module.exports = {
     } = req.body;
 
     try {
-      const { id } = await db.user.findOne({ where: { uid } });
+      // const { id } = await db.user.findOne({ where: { uid } });
       console.log("id", id);
       if (main_address) {
         await db.user_address.update(
@@ -201,11 +317,12 @@ module.exports = {
   },
 
   getAddress: async (req, res) => {
-    const { uid } = req.uid;
+    const { id } = req.uid;
+
     try {
-      const { id } = await db.user.findOne({
-        where: { uid: uid },
-      });
+      // const { id } = await db.user.findOne({
+      //   where: { uid: uid },
+      // });
 
       const address = await db.user_address.findAll({
         where: { user_id: id },
@@ -261,7 +378,7 @@ module.exports = {
     try {
       const { data } = await axios.get(
         "https://api.rajaongkir.com/starter/province",
-        { headers: { key: "96dc80599e54e6d84bbd8f3b948da258" } }
+        { headers: { key: "38cc0e5fdc569640ad614c40fcf5432c" } }
       );
       res.status(200).send({
         isError: false,
@@ -289,7 +406,7 @@ module.exports = {
       let response = await axios.get(
         `https://api.rajaongkir.com/starter/city?province=${province_id}`,
         {
-          headers: { key: "96dc80599e54e6d84bbd8f3b948da258" },
+          headers: { key: "38cc0e5fdc569640ad614c40fcf5432c" },
         }
       );
 
@@ -330,7 +447,104 @@ module.exports = {
     }
   },
 
-  delCart: async (req, res) => {
+  sendDataToOrder: async (req, res) => {
+    try {
+      t = await sequelize.transaction();
+      const { uid } = req.uid;
+      const {
+        paid_amount,
+        user_address_id,
+        shipping_cost,
+        warehouse_id,
+        order_status_id,
+      } = req.body;
+      if (!uid) {
+        return res.status(400).send({
+          isError: true,
+          message: "Invalid user ID",
+          data: null,
+        });
+      }
+
+      const { id: user_id } = await db.user.findOne({
+        where: {
+          uid,
+        },
+      });
+
+      const cartItems = await db.cart.findAll({
+        where: {
+          user_id,
+          is_checked: 1,
+        },
+      });
+      console.log(cartItems);
+
+      const order_status = await db.order_status.create({
+        id: order_status_id,
+        status: "Pending",
+      });
+
+      const order = await db.order.create(
+        {
+          user_id,
+          user_address_id,
+          paid_amount,
+          shipping_cost,
+          warehouse_id,
+          payment_proof: "Pending",
+          order_status_id: order_status.id,
+          carts: cartItems, // include the associated cart items
+        },
+        { transaction: t }
+      );
+
+      const t2 = await sequelize.transaction();
+      await db.cart.destroy({
+        where: {
+          user_id,
+          is_checked: 1,
+        },
+        transaction: t2,
+      });
+      await t2.commit();
+
+      const orderDetailsArray = [];
+
+      for (const cart of cartItems) {
+        const order_details = await db.order_detail.create(
+          {
+            product_price: cart.price,
+            product_quantity: cart.quantity,
+            subtotal: cart.price * cart.quantity,
+            order_id: order.id,
+            product_id: cart.product_id,
+          },
+          { transaction: t }
+        );
+
+        orderDetailsArray.push(order_details);
+      }
+
+      await t.commit();
+
+      res.status(200).send({
+        isError: false,
+        message: "Order created successfully",
+        data: order,
+        order_status,
+        orderDetailsArray,
+      });
+    } catch (error) {
+      console.log(error.message);
+      await t.rollback();
+      res.status(500).send({
+        isError: true,
+        message: "An error occurred while processing your request",
+        data: null,
+      });
+    }},
+ delCart: async (req, res) => {
     try {
       let { id } = req.query;
       let deleteCart = await db.cart.destroy({
@@ -345,7 +559,7 @@ module.exports = {
       });
     } catch (error) {}
   },
-
+  
   updateNumberProduct: async (req, res) => {
     try {
       let { id } = req.query;
@@ -365,11 +579,12 @@ module.exports = {
       });
     } catch (error) {}
   },
+  
   getStockOrigin: async (req, res) => {
-    const { uid } = req.uid;
+    const { id } = req.uid;
     try {
       const user = await db.user.findOne({
-        where: { uid: uid },
+        where: { id: id },
         include: [
           {
             model: db.cart,
@@ -392,7 +607,6 @@ module.exports = {
           },
         ],
       });
-
       const cart = user.carts.map((cart) => {
         return {
           quantity: cart.quantity,
@@ -406,7 +620,6 @@ module.exports = {
           },
         };
       });
-
       res.send({ cart });
     } catch (error) {
       res.status(404).send({
