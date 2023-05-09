@@ -40,10 +40,12 @@ import {
   TbChevronsRight,
 } from "react-icons/tb";
 import toast, { Toaster } from "react-hot-toast";
+import Cookies from "js-cookie";
 
 const AdminUser = () => {
   const [adminDataMode, setAdminDataMode] = useState(true);
   const [userDataMode, setUserDataMode] = useState(false);
+  const [WHAssignMode, setWHAssignMode] = useState(false);
   const [adminData, setAdminData] = useState([]);
   const [show, setShow] = useState(false);
   const [userData, setUserData] = useState([]);
@@ -104,6 +106,31 @@ const AdminUser = () => {
   let changeDataMode = () => {
     setAdminDataMode(!adminDataMode);
     setUserDataMode(!userDataMode);
+    setWHAssignMode(!WHAssignMode);
+    setPageAdmin(1);
+    setMaxPageAdmin(0);
+  };
+
+  let changeDataModeToAdmin = () => {
+    setAdminDataMode(true);
+    setUserDataMode(false);
+    setWHAssignMode(false);
+    setPageAdmin(1);
+    setMaxPageAdmin(0);
+  };
+
+  let changeDataModeToUser = () => {
+    setAdminDataMode(false);
+    setUserDataMode(true);
+    setWHAssignMode(false);
+    setPageAdmin(1);
+    setMaxPageAdmin(0);
+  };
+
+  let changeDataModeToWH = () => {
+    setAdminDataMode(false);
+    setUserDataMode(false);
+    setWHAssignMode(true);
     setPageAdmin(1);
     setMaxPageAdmin(0);
   };
@@ -124,7 +151,7 @@ const AdminUser = () => {
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem("myToken");
+      const token = Cookies.get("adminToken");
       const response = await axios.post(
         "http://localhost:8000/admin/assign-wh-admin",
         {
@@ -161,7 +188,7 @@ const AdminUser = () => {
   };
 
   const showAllUserData = async () => {
-    let token = localStorage.getItem("myToken");
+    const token = Cookies.get("adminToken");
     const response = await axios.get("http://localhost:8000/admin/data-user", {
       headers: { token: token },
     });
@@ -552,7 +579,7 @@ const AdminUser = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={changeDataMode}
+                    onClick={changeDataModeToAdmin}
                     color="#5D5FEF"
                     borderColor="#5D5FEF"
                   >
@@ -567,13 +594,31 @@ const AdminUser = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={changeDataMode}
+                    onClick={changeDataModeToUser}
                     color="#5D5FEF"
                     borderColor="#5D5FEF"
                   >
                     User Data
                   </Button>
                 )}
+                {WHAssignMode ? (
+                  <>
+                    <Button bg="#5D5FEF" color="white" size="lg">
+                      Warehouse Data
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={changeDataModeToWH}
+                    color="#5D5FEF"
+                    borderColor="#5D5FEF"
+                  >
+                    Warehouse Data
+                  </Button>
+                )}
+                <></>
               </Stack>
               <div className="w-full h-full mt-[20px]">
                 {adminDataMode ? (
@@ -1082,127 +1127,214 @@ const AdminUser = () => {
                     </TableContainer>
                     {renderPageButton()}
                   </>
+                ) : WHAssignMode ? (
+                  <>
+                    <Box mt={8}>
+                      <Heading
+                        mb={4}
+                        className="font-ibmFont"
+                        fontSize={30}
+                        fontWeight={500}
+                      >
+                        Assign Warehouse Admin
+                      </Heading>
+                      <form onSubmit={handleSubmit}>
+                        <VStack spacing={4}>
+                          <FormControl isRequired>
+                            <FormLabel
+                              className="font-ibmFont"
+                              fontSize={20}
+                              fontWeight={500}
+                            >
+                              Warehouse ID
+                            </FormLabel>
+                            <Input
+                              type="text"
+                              width="120px"
+                              height="30px"
+                              value={warehouseId}
+                              onChange={(event) =>
+                                setWarehouseId(event.target.value)
+                              }
+                            />
+                          </FormControl>
+
+                          <FormControl isRequired>
+                            <FormLabel
+                              className="font-ibmFont"
+                              fontSize={20}
+                              fontWeight={500}
+                            >
+                              Warehouse Admin ID
+                            </FormLabel>
+                            <Input
+                              type="text"
+                              width="120px"
+                              height="30px"
+                              value={warehouseAdminId}
+                              onChange={(event) =>
+                                setWarehouseAdminId(event.target.value)
+                              }
+                            />
+                          </FormControl>
+
+                          <Button
+                            type="submit"
+                            bg="#5D5FEF"
+                            color="white"
+                            isLoading={isLoading}
+                            alignSelf="flex-start"
+                          >
+                            Assign
+                          </Button>
+                        </VStack>
+                      </form>
+                      <Box mt={8}>
+                        <Heading
+                          mb={4}
+                          className="font-ibmFont"
+                          fontSize={20}
+                          fontWeight={500}
+                        >
+                          Admin Data
+                        </Heading>
+                        <Table variant="simple">
+                          <Thead>
+                            <Tr>
+                              <Th>ID</Th>
+                              <Th>Username</Th>
+                              <Th>Email</Th>
+                              <Th>Role</Th>
+                            </Tr>
+                          </Thead>
+                          <Tbody>
+                            {userDatax.map((user) => (
+                              <Tr key={user.id}>
+                                <Td>{user.id}</Td>
+                                <Td>{user.first_name}</Td>
+                                <Td>{user.email}</Td>
+                                <Td>{user.role}</Td>
+                              </Tr>
+                            ))}
+                          </Tbody>
+                        </Table>
+                        <Heading
+                          mb={4}
+                          className="font-ibmFont"
+                          fontSize={20}
+                          fontWeight={500}
+                        >
+                          Warehouse Admin List
+                        </Heading>
+                        <Table variant="simple">
+                          <Thead>
+                            <Tr>
+                              <Th>ID</Th>
+                              <Th>USER ID</Th>
+                              <Th>WH ID</Th>
+                              <Th>USERNAME</Th>
+                            </Tr>
+                          </Thead>
+                          <Tbody>
+                            {whData.map((wh) => (
+                              <Tr key={wh.id}>
+                                <Td>{wh.id}</Td>
+                                <Td>{wh.user_id}</Td>
+                                <Td>{wh.warehouse_id}</Td>
+                                <Td>{wh.user.first_name}</Td>
+                                <Button
+                                  colorScheme="red"
+                                  size="sm"
+                                  onClick={async () => {
+                                    const token =
+                                      localStorage.getItem("myToken");
+                                    try {
+                                      await axios.delete(
+                                        `http://localhost:8000/admin/delete/${wh.id}`,
+                                        { headers: { token } }
+                                      );
+                                      toast({
+                                        title: "Success",
+                                        description:
+                                          "Warehouse admin deleted successfully",
+                                        status: "success",
+                                        duration: 5000,
+                                        isClosable: true,
+                                      });
+                                      showAllUserData();
+                                    } catch (error) {
+                                      console.log(error);
+                                      toast({
+                                        title: "Error",
+                                        description:
+                                          "Failed to delete warehouse admin",
+                                        status: "error",
+                                        duration: 5000,
+                                        isClosable: true,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              </Tr>
+                            ))}
+                          </Tbody>
+                        </Table>
+                      </Box>
+                      <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
+                        {" "}
+                        <IconButton
+                          isDisabled={pageAdmin === 1}
+                          onClick={firstPageHandler}
+                          size={"sm"}
+                          bg="#5D5FEF"
+                          aria-label="previous page"
+                          icon={
+                            <TbChevronsLeft color="white" boxsize={"16px"} />
+                          }
+                        />
+                        <IconButton
+                          isDisabled={pageAdmin === 1}
+                          onClick={prevPageHandler}
+                          size={"sm"}
+                          bg="#5D5FEF"
+                          aria-label="previous page"
+                          icon={
+                            <TbChevronLeft color="white" boxsize={"16px"} />
+                          }
+                        />
+                        <div className="font-ibmReg text-dgrey">
+                          Page {pageAdmin} / {maxPageAdmin}
+                        </div>
+                        <IconButton
+                          isDisabled={pageAdmin === maxPageAdmin}
+                          onClick={nextPageHandler}
+                          size={"sm"}
+                          bg="#5D5FEF"
+                          aria-label="next page"
+                          icon={
+                            <TbChevronRight color="white" boxsize={"16px"} />
+                          }
+                        />
+                        <IconButton
+                          isDisabled={pageAdmin === maxPageAdmin}
+                          onClick={maxPageHandler}
+                          size={"sm"}
+                          bg="#5D5FEF"
+                          aria-label="next page"
+                          icon={
+                            <TbChevronsRight color="white" boxsize={"16px"} />
+                          }
+                        />
+                      </div>
+                    </Box>
+                  </>
                 ) : (
                   <></>
                 )}
               </div>
             </div>
-            <Box mt={8}>
-              <Heading mb={4}>Assign Warehouse Admin</Heading>
-              <form onSubmit={handleSubmit}>
-                <VStack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel>Warehouse ID</FormLabel>
-                    <Input
-                      type="text"
-                      width="120px"
-                      height="30px"
-                      value={warehouseId}
-                      onChange={(event) => setWarehouseId(event.target.value)}
-                    />
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>Warehouse Admin ID</FormLabel>
-                    <Input
-                      type="text"
-                      width="120px"
-                      height="30px"
-                      value={warehouseAdminId}
-                      onChange={(event) =>
-                        setWarehouseAdminId(event.target.value)
-                      }
-                    />
-                  </FormControl>
-
-                  <Button
-                    type="submit"
-                    colorScheme="teal"
-                    isLoading={isLoading}
-                    alignSelf="flex-start"
-                  >
-                    Assign
-                  </Button>
-                </VStack>
-              </form>
-              <Box mt={8}>
-                <Heading mb={4}>User Data</Heading>
-                <Table variant="simple">
-                  <Thead>
-                    <Tr>
-                      <Th>ID</Th>
-                      <Th>Username</Th>
-                      <Th>Email</Th>
-                      <Th>Role</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {userDatax.map((user) => (
-                      <Tr key={user.id}>
-                        <Td>{user.id}</Td>
-                        <Td>{user.first_name}</Td>
-                        <Td>{user.email}</Td>
-                        <Td>{user.role}</Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-                <Heading mb={4}>WH ADMIN</Heading>
-                <Table variant="simple">
-                  <Thead>
-                    <Tr>
-                      <Th>ID</Th>
-                      <Th>USER ID</Th>
-                      <Th>WH ID</Th>
-                      <Th>USERNAME</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {whData.map((wh) => (
-                      <Tr key={wh.id}>
-                        <Td>{wh.id}</Td>
-                        <Td>{wh.user_id}</Td>
-                        <Td>{wh.warehouse_id}</Td>
-                        <Td>{wh.user.first_name}</Td>
-                        <Button
-                          colorScheme="red"
-                          size="sm"
-                          onClick={async () => {
-                            const token = localStorage.getItem("myToken");
-                            try {
-                              await axios.delete(
-                                `http://localhost:8000/admin/delete/${wh.id}`,
-                                { headers: { token } }
-                              );
-                              toast({
-                                title: "Success",
-                                description:
-                                  "Warehouse admin deleted successfully",
-                                status: "success",
-                                duration: 5000,
-                                isClosable: true,
-                              });
-                              showAllUserData();
-                            } catch (error) {
-                              console.log(error);
-                              toast({
-                                title: "Error",
-                                description: "Failed to delete warehouse admin",
-                                status: "error",
-                                duration: 5000,
-                                isClosable: true,
-                              });
-                            }
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              </Box>
-            </Box>
           </div>
         </div>
         <Toaster />
