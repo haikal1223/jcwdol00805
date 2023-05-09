@@ -11,4 +11,3 @@ sequelize
 	.catch((error) => {
 		console.log(error);
 	});
-	

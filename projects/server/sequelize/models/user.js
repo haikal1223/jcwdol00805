@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-     
+      
       this.hasMany(models.wh_admin, {
         foreignKey: 'user_id'
       })
@@ -22,19 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.stock_mutation, {
         foreignKey: 'user_id'
       })
-      this.hasMany(models.wh_admin, {
-        foreignKey: 'user_id'
-      })
-      this.hasMany(models.stock_mutation, {
-        foreignKey: 'requester_id'
-      })
-      this.hasMany(models.stock_mutation, {
-        foreignKey: 'reviewer_id'
-      })
       this.hasMany(models.stock_log, {
-        foreignKey: 'user_id'
-      })
-      this.hasMany(models.user_address, {
         foreignKey: 'user_id'
       })
     }

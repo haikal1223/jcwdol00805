@@ -1,6 +1,4 @@
 import {
-  ButtonGroup,
-  IconButton,
   Box,
   Card,
   FormControl,
@@ -14,29 +12,30 @@ import {
   Image,
   useToast,
 } from "@chakra-ui/react";
-import { AddIcon, MinusIcon } from "@chakra-ui/icons";
-
 import axios from "axios";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
+
 export default function Product(props) {
-  const [userId, setUserId] = useState("");
+  const [uid, setUid] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [stock, setStock] = useState(0);
-  const { id } = useParams();
-  const Navigate = useNavigate();
+
   const location = useLocation();
-  const [productData, setProductData] = useState([]);
+
+  const Navigate = useNavigate();
+
+  const { id } = useParams();
 
   let getProductDetail = async () => {
     try {
       let getProductDetail = await axios.get(
-        `http://localhost:8000/product/detail/${id}`
+        `http://localhost:8000/product/detail?id=${id}`
       );
-      setProductData(getProductDetail.data.data[0]);
-    } catch (error) { }
+      setPrice(getProductDetail.data.data[0].price);
+    } catch (error) {}
   };
 
   let getCartFilterProduct = async () => {
@@ -45,10 +44,10 @@ export default function Product(props) {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setUserId(response.data.data.id);
-      if (id) {
+      setUid(response.data.data.uid);
+      if (uid) {
         let getCartFilterProduct = await axios.get(
-          `http://localhost:8000/cart/getCartFilterProduct?user_id=${userId}&product_id=${id}`
+          `http://localhost:8000/cart/getCartFilterProduct?user_uid=${uid}&product_id=${id}`
         );
         if (getCartFilterProduct.data.data[0]) {
           setQuantity(getCartFilterProduct.data.data[0].quantity + 1);
@@ -56,7 +55,7 @@ export default function Product(props) {
           setQuantity(1);
         }
       }
-    } catch (error) { }
+    } catch (error) {}
   };
 
   let getProductStock = async () => {
@@ -70,66 +69,8 @@ export default function Product(props) {
         sumStock += getProductStock.data.data[i].stock;
       }
       setStock(sumStock);
-    } catch (error) { }
+    } catch (error) {}
   };
-
-  const handleQuantityChange = (type) => {
-    if (type === "increase") {
-      setQuantity(quantity + 1);
-    } else if (type === "decrease" && quantity > 1) {
-      setQuantity(quantity - 1);
-
-      let handleAddOrder = async () => {
-        try {
-          if (!props.login) {
-            toast.error("Please log in first", {
-              duration: 3000,
-            });
-          } else {
-            if (quantity === 1) {
-              console.log(userId);
-              let addCart = await axios.post(
-                `http://localhost:8000/cart/addCart`,
-                {
-                  quantity,
-                  price,
-                  user_id: userId,
-                  product_id: id,
-                }
-              );
-
-              toast.success("Added to cart", {
-                duration: 3000,
-              });
-            } else {
-              if (quantity > stock) {
-                toast.error("Your cart has maximum stock of the product", {
-                  duration: 3000,
-                });
-              } else {
-                let updateCart = await axios.patch(
-                  `http://localhost:8000/cart/updateCart?user_id=${userId}&product_id=${id}`,
-                  {
-                    quantity,
-                    price,
-                  }
-                );
-                toast.success("Added to cart", {
-                  duration: 3000,
-                });
-              }
-            }
-            getCartFilterProduct();
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      };
-    }
-  };
-  useEffect(() => {
-    getProductDetail();
-  }, []);
 
   useEffect(() => {
     getProductDetail();
@@ -137,63 +78,58 @@ export default function Product(props) {
   }, []);
   useEffect(() => {
     getCartFilterProduct();
-  }, [userId]);
+  }, [uid]);
+
+  let handleAddOrder = async () => {
+    try {
+      if (!props.login) {
+        toast.error("Please log in first", {
+          duration: 3000,
+        });
+      } else {
+        if (quantity === 1) {
+          let addCart = await axios.post(`http://localhost:8000/cart/addCart`, {
+            quantity,
+            price,
+            user_uid: uid,
+            product_id: id,
+          });
+          toast.success("Added to cart", {
+            duration: 3000,
+          });
+        } else {
+          if (quantity > stock) {
+            toast.error("Your cart has maximum stock of the product", {
+              duration: 3000,
+            });
+          } else {
+            let updateCart = await axios.patch(
+              `http://localhost:8000/cart/updateCart?user_uid=${uid}&product_id=${id}`,
+              {
+                quantity,
+                price,
+              }
+            );
+            toast.success("Added to cart", {
+              duration: 3000,
+            });
+          }
+        }
+        getCartFilterProduct();
+      }
+    } catch (error) {}
+  };
 
   return (
-    <div>
-      <Card w="full">
-        <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-          <Image
-            h="200px"
-            w="full"
-            p="2"
-            objectFit="contain"
-            src={productData.image_url}
-          />
-
-          <Text align="center">{productData.name}</Text>
-          <Text align="center">
-            {productData.price?.toLocaleString("id-ID", {
-              style: "currency",
-              currency: "IDR",
-            })}
-          </Text>
-
-          <Box p="5">
-            <Box w="full" as="button" mt={10}>
-              <ButtonGroup spacing="2">
-                <IconButton
-                  aria-label="decrease quantity"
-                  icon={<MinusIcon />}
-                  onClick={() => handleQuantityChange("decrease")}
-                  size="sm"
-                  variant="outline"
-                  isDisabled={quantity === 1}
-                />
-                <Button
-                  w="full"
-                  bg={"#5D5FEF"}
-                  color="white"
-                  _hover={{
-                    color: "blue.500",
-                    bg: "white",
-                    border: "1px solid skyblue",
-                  }}
-                >
-                  ADD TO CART ({quantity})
-                </Button>
-                <IconButton
-                  aria-label="increase quantity"
-                  icon={<AddIcon />}
-                  onClick={() => handleQuantityChange("increase")}
-                  size="sm"
-                  variant="outline"
-                />
-              </ButtonGroup>
-            </Box>
-          </Box>
-        </Box>
-      </Card>
-    </div>
+    <>
+      <div> This is product page {id}</div>
+      <div> Stock: {stock}</div>
+      {stock > 0 ? (
+        <Button onClick={handleAddOrder}> This is product page {id}</Button>
+      ) : (
+        <Button isDisabled="true"> This is product page {id}</Button>
+      )}
+      <Toaster />
+    </>
   );
 }

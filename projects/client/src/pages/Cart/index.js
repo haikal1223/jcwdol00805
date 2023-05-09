@@ -27,7 +27,7 @@ import "../../App.css";
 import CartCard from "../../components/cartCard";
 
 export default function Cart() {
-  const [id, setId] = useState("");
+  const [uid, setUid] = useState("");
   const [userCart, setUserCart] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [stock, setStock] = useState(0);
@@ -38,11 +38,11 @@ export default function Cart() {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setId(response.data.data.id);
+      setUid(response.data.data.uid);
       let price = 0;
-      if (id) {
+      if (uid) {
         let getUserCart = await axios.get(
-          `http://localhost:8000/cart/getUserCart?user_id=${id}`
+          `http://localhost:8000/cart/getUserCart?user_uid=${uid}`
         );
         setUserCart(getUserCart.data.data);
         for (let i = 0; i < getUserCart.data.data.length; i++) {
@@ -64,10 +64,11 @@ export default function Cart() {
   };
   useEffect(() => {
     getUserCart();
-  }, [id]);
+  }, [uid]);
 
   let addCart = async (val) => {
     try {
+      console.log(val);
       let sumStock = 0;
       let getProductStock = await axios.get(
         `http://localhost:8000/product/productStock?product_id=${val.product_id}`
@@ -75,7 +76,7 @@ export default function Cart() {
       for (let i = 0; i < getProductStock.data.data.length; i++) {
         sumStock += getProductStock.data.data[i].stock;
       }
-      setStock(sumStock);
+      setStock(sumStock)
       if (val.quantity < sumStock) {
         let addCart = await axios.patch(
           `http://localhost:8000/cart/updateNumberCart?id=${val.id}`,
@@ -90,7 +91,6 @@ export default function Cart() {
 
   let minCart = async (val) => {
     try {
-
       if (val.quantity === 1) {
         let delCart = await axios.delete(
           `http://localhost:8000/cart/delCart?id=${val.id}`
@@ -114,7 +114,7 @@ export default function Cart() {
           productIdx={idx}
           deleteFunction={(e) => deleteCart(val)}
           addFunction={(e) => addCart(val)}
-          dminFunction={(e) => minCart(val)}
+          minFunction={(e) => minCart(val)}
         />
       );
     });
@@ -150,7 +150,7 @@ export default function Cart() {
           >
             Total Price:{" "}
             <Text fontSize={24} fontWeight={700}>
-              Rp{totalPrice.toLocaleString('id-ID')}
+              Rp{totalPrice.toLocaleString()}.00
             </Text>
           </Text>
         </>

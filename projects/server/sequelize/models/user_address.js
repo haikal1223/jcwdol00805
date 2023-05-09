@@ -1,5 +1,7 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const {
+  Model
+} = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class user_address extends Model {
     /**
@@ -7,32 +9,26 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+    static associate({ user }) {
       // define association here
-      this.belongsTo(models.user, { foreignKey: "user_id" });
-      this.hasMany(models.order, {
-        foreignKey: "user_address_id",
-      });
+      this.belongsTo(user, { foreignKey: "user_id" })
     }
   }
-  user_address.init(
-    {
-      main_address: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
-      },
-      street_address: DataTypes.STRING,
-      subdistrict: DataTypes.STRING,
-      city: DataTypes.STRING,
-      province: DataTypes.STRING,
-      recipient_name: DataTypes.STRING,
-      recipient_phone: DataTypes.INTEGER,
-      postal_code: DataTypes.INTEGER,
+  user_address.init({
+    main_address: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
-    {
-      sequelize,
-      modelName: "user_address",
-    }
-  );
+    street_address: DataTypes.STRING,
+    subdistrict: DataTypes.STRING,
+    city: DataTypes.STRING,
+    province: DataTypes.STRING,
+    recipient_name: DataTypes.STRING,
+    recipient_phone: DataTypes.INTEGER,
+    postal_code: DataTypes.INTEGER
+  }, {
+    sequelize,
+    modelName: 'user_address',
+  });
   return user_address;
 };

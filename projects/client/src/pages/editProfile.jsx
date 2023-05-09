@@ -43,7 +43,6 @@ export default function EditProfile() {
   const modalAddress = useDisclosure();
   const modalSwitch = useDisclosure();
   const [mainAddress, setMainAddress] = useState({});
-
   const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
   const [show, setShow] = useState(false);
@@ -54,7 +53,6 @@ export default function EditProfile() {
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
   const [uid, setUid] = useState("");
-  const [id, setId] = useState("");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -74,7 +72,14 @@ export default function EditProfile() {
 
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-
+  let getUid = async () => {
+    try {
+      let token = localStorage.getItem("myToken");
+      let response = await axios.get(
+        `http://localhost:8000/user/verifytoken?token=${token}`
+      );
+    } catch (error) {}
+  };
   let validatePassword = (val) => {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{4,}$/;
@@ -112,7 +117,7 @@ export default function EditProfile() {
   const handleEditProfile = () => {
     if (editMode) {
       setEditMode(!editMode);
-      axios.patch(`http://localhost:8000/user/updateprofile/${id}`, {
+      axios.patch(`http://localhost:8000/address/getAddress/${uid}`, {
         first_name: firstName,
         last_name: lastName,
         gender: genderValue,
@@ -126,14 +131,14 @@ export default function EditProfile() {
 
   let getImage = () => {
     axios
-      .get(`http://localhost:8000/user/getphoto?id=${id}`)
+      .get(`http://localhost:8000/user/getphoto?uid=${uid}`)
       .then((res) => {
         let profilePictureSplit =
           res.data.data[0].profile_photo.split(/\\/g)[2];
         setProfilePicture(
           `http://localhost:8000/images/${profilePictureSplit}`
         );
-        console.log(res);
+        console.log(profilePicture);
       })
       .catch((err) => {
         console.log(err);
@@ -143,9 +148,8 @@ export default function EditProfile() {
   let getData = async () => {
     try {
       let response = await axios.get(
-        `http://localhost:8000/user/verification?id=${id}`
+        `http://localhost:8000/user/verification?uid=${uid}`
       );
-      console.log(response)
       setFirstName(response.data.data[0].first_name);
       setLastName(response.data.data[0].last_name);
       setEmail(response.data.data[0].email);
@@ -175,7 +179,7 @@ export default function EditProfile() {
         let formData = new FormData();
         formData.append("images", file);
         await axios.patch(
-          `http://localhost:8000/user/uploadphoto?id=${id}`,
+          `http://localhost:8000/user/uploadphoto?uid=${uid}`,
           formData,
           {
             headers: {
@@ -184,7 +188,7 @@ export default function EditProfile() {
           }
         );
         toast({
-          title: "Your profile picture is updated!",
+          title: "Register Success",
           status: "success",
           duration: 2000,
           isClosable: true,
@@ -203,14 +207,14 @@ export default function EditProfile() {
     }
   };
 
-  let changePassword = async (id) => {
+  let changePassword = async (uid) => {
     try {
       let inputOldPassword = oldPassword;
       let inputNewPassword = newPassword;
       let inputConfirmPassword = confirmPassword;
 
       let response = await axios.patch(
-        `http://localhost:8000/user/updatepassword?id=${id}`,
+        `http://localhost:8000/user/updatepassword?uid=${uid}`,
         {
           inputOldPassword,
           inputNewPassword,
@@ -230,7 +234,6 @@ export default function EditProfile() {
       setIsChangePassword(isChangePassword);
       setMessage("");
     } catch (error) {
-      console.log(error)
       toast({
         title: error.response.data.message,
         status: "error",
@@ -248,10 +251,10 @@ export default function EditProfile() {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setId(response.data.data.id);
-      if (id) {
+      setUid(response.data.data.uid);
+      if (uid) {
         let getAddress = await axios.get(
-          `http://localhost:8000/address/getAddress?id=${id}`
+          `http://localhost:8000/address/getAddress?uid=${uid}`
         );
         setAllAddress(getAddress.data.data);
         const main = getAddress.data.data.filter(
@@ -275,7 +278,7 @@ export default function EditProfile() {
     getAddress();
     getImage();
     getData();
-  }, [id]);
+  }, [uid]);
 
   const splitText = (text) => {
     if (text) {

@@ -92,10 +92,10 @@ module.exports = {
   },
 
   getData: async (req, res) => {
-    let { id } = req.query;
+    let { uid } = req.query;
     const findUsers = await db.user.findAll({
       where: {
-        id,
+        uid,
       },
     });
     if (findUsers)
@@ -287,7 +287,7 @@ module.exports = {
           });
 
         let token = createToken({
-          id: findEmail.dataValues.id,
+          uid: findEmail.dataValues.uid,
         });
 
         res.status(200).send({
@@ -323,7 +323,6 @@ module.exports = {
       }
 
       const validateTokenResult = validateToken(token);
-      console.log(validateTokenResult)
       return res.status(200).send({
         isError: true,
         message: "Token is found",
@@ -340,10 +339,10 @@ module.exports = {
 
   getProfilePhoto: async (req, res) => {
     try {
-      let { id } = req.query;
+      let { uid } = req.query;
       const findUsers = await db.user.findAll({
         where: {
-          id,
+          uid,
         },
       });
       if (findUsers)
@@ -357,7 +356,7 @@ module.exports = {
 
   uploadPhoto: async (req, res) => {
     try {
-      let { id } = req.query;
+      let { uid } = req.query;
       const { file } = req.files;
 
       await db.user.update(
@@ -366,7 +365,7 @@ module.exports = {
         },
         {
           where: {
-            id,
+            uid,
           },
         }
       );
@@ -397,7 +396,7 @@ module.exports = {
         },
         {
           where: {
-            id: req.params.id,
+            uid: req.params.uid,
           },
         }
       );
@@ -418,7 +417,7 @@ module.exports = {
 
   updatePassword: async (req, res) => {
     try {
-      let { id } = req.query;
+      let { uid } = req.query;
       let {
         inputOldPassword,
         inputNewPassword,
@@ -449,13 +448,13 @@ module.exports = {
 
       let findUser = await db.user.findOne({
         where: {
-          id,
+          uid,
         },
       });
-      
+
       let hashMatchResult = await matchPassword(
         inputOldPassword,
-        findUser?.password
+        findUser.dataValues.password
       );
 
       if (!hashMatchResult)
@@ -473,7 +472,7 @@ module.exports = {
         },
         {
           where: {
-            id,
+            uid,
           },
         }
       );
@@ -487,7 +486,7 @@ module.exports = {
       res.status(404).send({
         isError: true,
         message: "Something Error",
-        data: error.message,
+        data: null,
       });
     }
   },
