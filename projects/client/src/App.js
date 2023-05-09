@@ -158,7 +158,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/orders"
+            path="/admin/order"
             element={
               <AuthAdmin>
                 <OrderAdminPage />
