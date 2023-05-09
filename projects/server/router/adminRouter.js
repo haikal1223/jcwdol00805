@@ -5,6 +5,18 @@ const Router = express.Router();
 const { adminController } = require("../controller");
 const { tokenVerify } = require("../middleware/verifyToken");
 
+
+const { tokenVerify } = require("../middleware/verifyToken");
+
+Router.delete("/delete/:id", adminController.deleteWHAdmin);
+Router.post(
+  "/assign-wh-admin",
+  tokenVerify,
+  adminController.assignWarehouseAdmin
+);
+Router.get("/data-user", tokenVerify, adminController.showAllUserData);
+Router.get('/login', adminController.login);
+
 Router.get("/product-category", adminController.showProductCategory);
 Router.post(
   "/product-category",
@@ -23,6 +35,7 @@ Router.delete(
 );
 
 Router.get("/login", adminController.login);
+
 Router.get("/verify-token", adminController.verifyToken);
 Router.get("/fetch-warehouse", adminController.fetchWarehouse);
 Router.get("/adminData", adminController.adminData);

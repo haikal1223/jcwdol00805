@@ -71,6 +71,70 @@ module.exports = {
     }
   },
 
+
+  assignWarehouseAdmin: async (req, res) => {
+    try {
+      const { id } = req.uid;
+
+      const users = await db.user.findOne({
+        where: { id: id },
+      });
+
+      if (users.role !== "admin") {
+        return res.status(403).send({
+          isError: true,
+          message: "Only Admin User can access",
+          data: null,
+        });
+      }
+
+      const { warehouseId, warehouseAdminId } = req.body;
+
+      const warehouse = await db.warehouse.findByPk(warehouseId);
+      const warehouseAdmin = await db.user.findByPk(warehouseAdminId);
+      if (!warehouse || !warehouseAdmin) {
+        return res.status(404).send({
+          isError: true,
+          message: "Warehouse or warehouse admin not found",
+          data: null,
+        });
+      }
+
+      await db.wh_admin.create({
+        warehouse_id: warehouseId,
+        user_id: warehouseAdminId,
+      });
+
+      await db.user.update(
+        { role: "warehouse_admin" },
+        { where: { id: warehouseAdminId } }
+      );
+
+      const isAssigned = await db.wh_admin.findOne({
+        where: { user_id: warehouseAdminId },
+      });
+
+      if (!isAssigned) {
+        await db.user.update(
+          { role: "user" },
+          { where: { id: warehouseAdminId } }
+        );
+      }
+
+      res.status(200).send({
+        isError: false,
+        message: "Warehouse admin assigned successfully",
+        data: null,
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+          });
+    }
+  },
+
+
   showProductCategory: async (req, res) => {
     try {
       let data = await db.product_category.findAll({});
@@ -506,6 +570,28 @@ module.exports = {
     }
   },
 
+  showAllUserData: async (req, res) => {
+    try {
+      const allUsers = await db.user.findAll({});
+      const allWHData = await db.wh_admin.findAll({
+        include: { model: db.user },
+      });
+      res.status(201).send({
+        isError: false,
+        message: "All User Data",
+        data: allUsers,
+        allWHData,
+      });
+      console.log(allUsers);
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
+
   editAdmin: async (req, res) => {
     try {
       let { email, first_name, last_name, role, warehouseName } = req.body;
@@ -592,6 +678,32 @@ module.exports = {
         isError: true,
         message: "Edit Profile Failed",
         data: error,
+      });
+    }
+  },
+
+  deleteWHAdmin: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const warehouseAdmin = await db.wh_admin.findByPk(id);
+      if (!warehouseAdmin) {
+        return res.status(404).send({
+          isError: true,
+          message: "Warehouse admin not found",
+          data: null,
+        });
+      }
+      await warehouseAdmin.destroy();
+      return res.status(200).send({
+        isError: false,
+        message: "Warehouse admin deleted successfully",
+        data: null,
+      });
+    } catch (error) {
+      return res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: null,
       });
     }
   },

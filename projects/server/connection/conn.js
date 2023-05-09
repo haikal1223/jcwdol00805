@@ -9,7 +9,6 @@ const db = mysql.createConnection({
 
   database: "db_test1",
 
-
   port: 8000,
 });
 
