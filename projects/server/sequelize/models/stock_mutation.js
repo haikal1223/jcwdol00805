@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class stock_mutation extends Model {
     /**
@@ -12,38 +10,46 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.mutation_status, {
-        foreignKey: 'mutation_status_id'
-      })
+        foreignKey: "mutation_status_id",
+      });
       this.belongsTo(models.user, {
-        foreignKey: 'requester_id'
-      })
+        foreignKey: "user_id",
+      });
       this.belongsTo(models.user, {
-        foreignKey: 'reviewer_id'
-      })
+        foreignKey: "requester_id",
+      });
+      this.belongsTo(models.user, {
+        foreignKey: "reviewer_id",
+      });
       this.belongsTo(models.order, {
-        foreignKey: 'order_id'
-      })
+        foreignKey: "order_id",
+      });
       this.belongsTo(models.product, {
-        foreignKey: 'product_id'
-      })
+        foreignKey: "product_id",
+      });
       this.belongsTo(models.warehouse, {
-        foreignKey: 'origin_wh_id'
-      })
+        foreignKey: "origin_wh_id",
+      });
       this.belongsTo(models.warehouse, {
-        foreignKey: 'target_wh_id'
-      })
+        foreignKey: "target_wh_id",
+      });
       this.hasMany(models.stock_log, {
-        foreignKey: 'mutation_id'
-      })
+        foreignKey: "mutation_id",
+      });
     }
   }
-  stock_mutation.init({
-    rejection_reason: DataTypes.STRING,
-    quantity: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'stock_mutation',
-    freezeTableName: true
-  });
+  stock_mutation.init(
+    {
+      origin_wh_id: DataTypes.INTEGER,
+      target_wh_id: DataTypes.INTEGER,
+      rejection_reason: DataTypes.STRING,
+      quantity: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "stock_mutation",
+      freezeTableName: true,
+    }
+  );
   return stock_mutation;
 };

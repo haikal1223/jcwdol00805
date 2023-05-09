@@ -92,10 +92,10 @@ module.exports = {
   },
 
   getData: async (req, res) => {
-    let { uid } = req.query;
+    let { id } = req.query;
     const findUsers = await db.user.findAll({
       where: {
-        uid,
+        id,
       },
     });
     if (findUsers)
@@ -340,10 +340,10 @@ module.exports = {
 
   getProfilePhoto: async (req, res) => {
     try {
-      let { uid } = req.query;
+      let { id } = req.query;
       const findUsers = await db.user.findAll({
         where: {
-          uid,
+          id,
         },
       });
       if (findUsers)
@@ -357,7 +357,7 @@ module.exports = {
 
   uploadPhoto: async (req, res) => {
     try {
-      let { uid } = req.query;
+      let { id } = req.query;
       const { file } = req.files;
 
       await db.user.update(
@@ -366,7 +366,7 @@ module.exports = {
         },
         {
           where: {
-            uid,
+            id,
           },
         }
       );
@@ -397,7 +397,7 @@ module.exports = {
         },
         {
           where: {
-            uid: req.params.uid,
+            id: req.params.id,
           },
         }
       );
@@ -418,7 +418,7 @@ module.exports = {
 
   updatePassword: async (req, res) => {
     try {
-      let { uid } = req.query;
+      let { id } = req.query;
       let {
         inputOldPassword,
         inputNewPassword,
@@ -449,13 +449,13 @@ module.exports = {
 
       let findUser = await db.user.findOne({
         where: {
-          uid,
+          id,
         },
       });
-
+      
       let hashMatchResult = await matchPassword(
         inputOldPassword,
-        findUser.dataValues.password
+        findUser?.password
       );
 
       if (!hashMatchResult)
@@ -473,7 +473,7 @@ module.exports = {
         },
         {
           where: {
-            uid,
+            id,
           },
         }
       );
@@ -487,7 +487,7 @@ module.exports = {
       res.status(404).send({
         isError: true,
         message: "Something Error",
-        data: null,
+        data: error.message,
       });
     }
   },
