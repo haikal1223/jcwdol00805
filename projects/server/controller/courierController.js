@@ -8,7 +8,7 @@ module.exports = {
     let { id } = req.uid;
     let key = "96dc80599e54e6d84bbd8f3b948da258";
     let { uid } = req.uid;
-    let key = "38cc0e5fdc569640ad614c40fcf5432c";
+    key = "38cc0e5fdc569640ad614c40fcf5432c";
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
@@ -52,7 +52,7 @@ module.exports = {
     let key = "96dc80599e54e6d84bbd8f3b948da258";
 
     const { uid } = req.uid;
-    let key = "38cc0e5fdc569640ad614c40fcf5432c";
+    key = "38cc0e5fdc569640ad614c40fcf5432c";
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
@@ -95,7 +95,7 @@ module.exports = {
     const { id } = req.uid;
     let key = "96dc80599e54e6d84bbd8f3b948da258";
     const { uid } = req.uid;
-    let key = "38cc0e5fdc569640ad614c40fcf5432c";
+    key = "38cc0e5fdc569640ad614c40fcf5432c";
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
@@ -139,7 +139,7 @@ module.exports = {
     let { id } = req.uid;
     let key = "96dc80599e54e6d84bbd8f3b948da258";
     let { uid } = req.uid;
-    let key = "38cc0e5fdc569640ad614c40fcf5432c";
+    key = "38cc0e5fdc569640ad614c40fcf5432c";
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
