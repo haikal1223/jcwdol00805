@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'product_id'
       })
 
+      this.hasMany(models.order_detail,{
+        foreignKey: 'product_id'
+      })
+
       this.hasMany(models.cart, {
         foreignKey: "product_id",
       });
@@ -24,6 +28,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "product_id",
       });
 
+      this.hasMany(models.stock_mutation, {
+        foreignKey: 'product_id'
+      })
+      this.hasMany(models.stock_log, {
+        foreignKey: 'product_id'
+      })
       this.hasMany(models.stock_mutation, {
         foreignKey: 'product_id'
       })
