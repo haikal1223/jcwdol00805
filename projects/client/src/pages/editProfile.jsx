@@ -53,7 +53,7 @@ export default function EditProfile() {
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
   const [uid, setUid] = useState("");
-
+  const [id, setId] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -80,6 +80,7 @@ export default function EditProfile() {
       );
     } catch (error) {}
   };
+
   let validatePassword = (val) => {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{4,}$/;
@@ -117,7 +118,7 @@ export default function EditProfile() {
   const handleEditProfile = () => {
     if (editMode) {
       setEditMode(!editMode);
-      axios.patch(`http://localhost:8000/address/getAddress/${uid}`, {
+      axios.patch(`http://localhost:8000/user/updateprofile/${id}`, {
         first_name: firstName,
         last_name: lastName,
         gender: genderValue,
@@ -131,14 +132,14 @@ export default function EditProfile() {
 
   let getImage = () => {
     axios
-      .get(`http://localhost:8000/user/getphoto?uid=${uid}`)
+      .get(`http://localhost:8000/user/getphoto?id=${id}`)
       .then((res) => {
         let profilePictureSplit =
           res.data.data[0].profile_photo.split(/\\/g)[2];
         setProfilePicture(
           `http://localhost:8000/images/${profilePictureSplit}`
         );
-        console.log(profilePicture);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);
@@ -148,8 +149,9 @@ export default function EditProfile() {
   let getData = async () => {
     try {
       let response = await axios.get(
-        `http://localhost:8000/user/verification?uid=${uid}`
+        `http://localhost:8000/user/verification?id=${id}`
       );
+      console.log(response)
       setFirstName(response.data.data[0].first_name);
       setLastName(response.data.data[0].last_name);
       setEmail(response.data.data[0].email);
@@ -179,7 +181,7 @@ export default function EditProfile() {
         let formData = new FormData();
         formData.append("images", file);
         await axios.patch(
-          `http://localhost:8000/user/uploadphoto?uid=${uid}`,
+          `http://localhost:8000/user/uploadphoto?id=${id}`,
           formData,
           {
             headers: {
@@ -188,7 +190,7 @@ export default function EditProfile() {
           }
         );
         toast({
-          title: "Register Success",
+          title: "Your profile picture is updated!",
           status: "success",
           duration: 2000,
           isClosable: true,
@@ -207,14 +209,14 @@ export default function EditProfile() {
     }
   };
 
-  let changePassword = async (uid) => {
+  let changePassword = async (id) => {
     try {
       let inputOldPassword = oldPassword;
       let inputNewPassword = newPassword;
       let inputConfirmPassword = confirmPassword;
 
       let response = await axios.patch(
-        `http://localhost:8000/user/updatepassword?uid=${uid}`,
+        `http://localhost:8000/user/updatepassword?id=${id}`,
         {
           inputOldPassword,
           inputNewPassword,
@@ -234,6 +236,7 @@ export default function EditProfile() {
       setIsChangePassword(isChangePassword);
       setMessage("");
     } catch (error) {
+      console.log(error)
       toast({
         title: error.response.data.message,
         status: "error",
@@ -251,10 +254,10 @@ export default function EditProfile() {
       let response = await axios.get(
         `http://localhost:8000/user/verifytoken?token=${token}`
       );
-      setUid(response.data.data.uid);
-      if (uid) {
+      setId(response.data.data.id);
+      if (id) {
         let getAddress = await axios.get(
-          `http://localhost:8000/address/getAddress?uid=${uid}`
+          `http://localhost:8000/address/getAddress?id=${id}`
         );
         setAllAddress(getAddress.data.data);
         const main = getAddress.data.data.filter(
@@ -278,7 +281,8 @@ export default function EditProfile() {
     getAddress();
     getImage();
     getData();
-  }, [uid]);
+  }, [id]);
+
 
   const splitText = (text) => {
     if (text) {

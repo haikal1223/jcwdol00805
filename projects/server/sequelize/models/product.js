@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class product extends Model {
     /**
@@ -12,7 +10,14 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.product_category, {
-        foreignKey: 'product_category_id'
+        foreignKey: "product_category_id",
+      });
+      this.hasMany(models.order_detail,{
+        foreignKey: 'product_id'
+      })
+
+      this.hasMany(models.order_detail,{
+        foreignKey: 'product_id'
       })
 
       this.hasMany(models.order_detail,{
@@ -20,6 +25,23 @@ module.exports = (sequelize, DataTypes) => {
       })
 
       this.hasMany(models.cart, {
+        foreignKey: "product_id",
+      });
+
+      this.hasMany(models.product_stock, {
+        foreignKey: "product_id",
+      });
+
+      this.hasMany(models.stock_mutation, {
+        foreignKey: 'product_id'
+      })
+      this.hasMany(models.stock_log, {
+        foreignKey: 'product_id'
+      })
+      this.hasMany(models.stock_mutation, {
+        foreignKey: 'product_id'
+      })
+      this.hasMany(models.stock_log, {
         foreignKey: 'product_id'
       })
       this.hasMany(models.stock_mutation, {
@@ -30,15 +52,18 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
   }
-  product.init({
-    name: DataTypes.STRING,
-    price: DataTypes.INTEGER,
-    product_category_id: DataTypes.INTEGER,
-    image_url: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'product',
-    freezeTableName: true
-  });
+  product.init(
+    {
+      name: DataTypes.STRING,
+      price: DataTypes.INTEGER,
+      product_category_id: DataTypes.INTEGER,
+      image_url: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "product",
+      freezeTableName: true,
+    }
+  );
   return product;
 };
