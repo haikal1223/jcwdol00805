@@ -2,9 +2,11 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
+import Cookies from "js-cookie";
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Order from "./pages/Order";
+import OrderDetail from "./pages/Order/OrderDetail";
 import Product from "./pages/Product";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
@@ -16,12 +18,15 @@ import UpdatePassword from "./pages/newPassword";
 import EditProfile from "./pages/editProfile";
 import CheckOut from "./pages/CheckOut";
 
-//Admin Components
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
 import AdminNavbar from "./pages/Admin/components/navbar";
-import OrderAdminPage from "./pages/Order";
-import Dashboard from "./pages/Admin/Dashboard";
+import ProductCategoryAdmin from "./pages/Admin/Category";
+import AdminOrder from "./pages/Admin/Order";
+import AdminProduct from "./pages/Admin/Product/Home";
+import AdminProductDetail from "./pages/Admin/Product/Detail";
+import AdminMutation from "./pages/Admin/Mutation";
+import AdminDashboard from "./pages/Admin/Dashboard";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -43,7 +48,7 @@ function App() {
 
   const keepAdminLoggedIn = () => {
     try {
-      const token = localStorage.getItem("adminToken");
+      const token = Cookies.get("adminToken");
       if (token) {
         setAdminLoggedIn(true);
       } else {
@@ -77,7 +82,7 @@ function App() {
   };
 
   const AuthAdmin = ({ children }) => {
-    const adminIsLogged = localStorage.getItem("adminToken");
+    const adminIsLogged = Cookies.get("adminToken");
 
     if (!adminIsLogged) {
       return (
@@ -93,13 +98,31 @@ function App() {
     return children;
   };
 
-  const onLogout = () => {
+
+  const AuthMainAdmin = ({ children }) => {
+    const adminRoleLogged = localStorage.getItem("role");
+
+    if (adminRoleLogged != "admin") {
+      return (
+        <>
+          <Navigate to="/admin" />
+          {toast.error("You don't have access to this page", {
+            id: "adminlogin",
+            duration: 2000,
+          })}
+        </>
+      );
+    }
+    return children;
+  };
+
+  const adminLogout = () => {
     return (
       <>
-        {localStorage.removeItem("adminToken")}
-        {navigate("/admin")}
+        {Cookies.remove("adminToken")}
+        {Cookies.remove("role")}
         {setTimeout(() => {
-          window.location.reload();
+          window.location.href = "/admin";
         }, 200)}
         {toast.success("You have been logged out", {
           id: "logout",
@@ -119,7 +142,7 @@ function App() {
         }
       >
         {window.location.pathname.includes("/admin") ? (
-          <AdminNavbar login={adminLoggedIn} func={onLogout} />
+          <AdminNavbar login={adminLoggedIn} func={adminLogout} />
         ) : (
           <Navbar login={isLoggedIn} />
         )}
@@ -129,7 +152,14 @@ function App() {
           <Route path="/register" element={<RegisterUser />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/product/:id" element={<Product login={isLoggedIn} />} />
-          <Route path="/checkout" element={<CheckOut />} />
+          <Route
+            path="/checkout"
+            element={
+              <RequireAuth>
+                <CheckOut />
+              </RequireAuth>
+            }
+          />
           <Route
             path="/cart"
             element={
@@ -146,6 +176,14 @@ function App() {
               </RequireAuth>
             }
           />
+          <Route
+            path="/order/detail/:orderId"
+            element={
+              <RequireAuth>
+                <OrderDetail login={isLoggedIn} />
+              </RequireAuth>
+            }
+          />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
           {/* Admin Routing */}
@@ -159,10 +197,43 @@ function App() {
             }
           />
           <Route
-            path="/admin/orders"
+            path="/admin/category"
             element={
               <AuthAdmin>
-                <OrderAdminPage />
+                <ProductCategoryAdmin />
+              </AuthAdmin>
+            }
+          />
+
+          <Route
+            path="/admin/order"
+            element={
+              <AuthAdmin>
+                <AdminOrder />
+              </AuthAdmin>
+            }
+          />
+          <Route
+            path="/admin/product"
+            element={
+              <AuthAdmin>
+                <AdminProduct />
+              </AuthAdmin>
+            }
+          />
+          <Route
+            path="/admin/product/:product_id"
+            element={
+              <AuthAdmin>
+                <AdminProductDetail />
+              </AuthAdmin>
+            }
+          />
+          <Route
+            path="/admin/mutation"
+            element={
+              <AuthAdmin>
+                <AdminMutation />
               </AuthAdmin>
             }
           />
@@ -170,12 +241,11 @@ function App() {
             path="/admin/dashboard"
             element={
               <AuthAdmin>
-                <Dashboard />
+                <AdminDashboard />
               </AuthAdmin>
             }
           />
         </Routes>
-
         {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />
       </div>

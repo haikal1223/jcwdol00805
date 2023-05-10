@@ -15,11 +15,23 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.user, {
         foreignKey: "user_id",
       });
+      this.belongsTo(models.user, {
+        foreignKey: "requester_id",
+      });
+      this.belongsTo(models.user, {
+        foreignKey: "reviewer_id",
+      });
       this.belongsTo(models.order, {
         foreignKey: "order_id",
       });
       this.belongsTo(models.product, {
         foreignKey: "product_id",
+      });
+      this.belongsTo(models.warehouse, {
+        foreignKey: "origin_wh_id",
+      });
+      this.belongsTo(models.warehouse, {
+        foreignKey: "target_wh_id",
       });
       this.hasMany(models.stock_log, {
         foreignKey: "mutation_id",
@@ -30,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       origin_wh_id: DataTypes.INTEGER,
       target_wh_id: DataTypes.INTEGER,
+      rejection_reason: DataTypes.STRING,
       quantity: DataTypes.INTEGER,
     },
     {
