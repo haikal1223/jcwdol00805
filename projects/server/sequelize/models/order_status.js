@@ -1,5 +1,4 @@
 
-
 "use strict";
 const { Model } = require("sequelize");
 
@@ -13,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.hasMany(models.order, {
+
 
         foreignKey: "order_status_id",
       });

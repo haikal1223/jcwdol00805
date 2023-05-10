@@ -56,6 +56,7 @@ export default function EditProfile() {
   const [uid, setUid] = useState("");
   const [id, setId] = useState("");
 
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -275,7 +276,9 @@ export default function EditProfile() {
     getAddress();
     getImage();
     getData();
+
   }, [id]);
+
 
   const splitText = (text) => {
     if (text) {
