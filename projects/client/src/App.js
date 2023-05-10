@@ -17,6 +17,8 @@ import ForgotPassword from "./pages/forgotPassword";
 import UpdatePassword from "./pages/newPassword";
 import EditProfile from "./pages/editProfile";
 import CheckOut from "./pages/CheckOut";
+import AboutUs from "./pages/aboutUs";
+import TnC from "./pages/Terms";
 
 import AdminHome from "./pages/Admin/Home";
 import AdminUser from "./pages/Admin/User";
@@ -150,6 +152,8 @@ function App() {
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
           <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/terms-condition" element={<TnC />} />
           <Route path="/product/:id" element={<Product login={isLoggedIn} />} />
           <Route
             path="/checkout"
