@@ -125,8 +125,23 @@ function App() {
         {setTimeout(() => {
           window.location.href = "/admin";
         }, 200)}
-        {toast.success("You have been logged out", {
+        {toast.loading("Logging out...", {
           id: "logout",
+          duration: 3000,
+        })}
+      </>
+    );
+  };
+
+  const Logout = () => {
+    return (
+      <>
+        {localStorage.removeItem('myToken')}
+        {setTimeout(() => {
+          window.location.href = "/";
+        }, 200)}
+        {toast.loading("Logging out...", {
+          id: "logout-user",
           duration: 3000,
         })}
       </>
@@ -145,7 +160,7 @@ function App() {
         {window.location.pathname.includes("/admin") ? (
           <AdminNavbar login={adminLoggedIn} func={adminLogout} />
         ) : (
-          <Navbar login={isLoggedIn} />
+          <Navbar login={isLoggedIn} func={Logout} />
         )}
         <Routes>
           <Route path="/" element={<Home login={isLoggedIn} />} />

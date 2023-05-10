@@ -97,7 +97,7 @@ module.exports = {
     }
   },
   
-   getUserCartx: async (req, res) => {
+   /* getUserCartx: async (req, res) => {
     try {
       const { uid } = req.uid;
 
@@ -152,7 +152,7 @@ module.exports = {
         data: null,
       });
     }
-  },
+  }, */
 
   getUserCartx: async (req, res) => {
     try {
