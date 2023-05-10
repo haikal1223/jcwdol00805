@@ -104,7 +104,7 @@ export default function Activation() {
                 position: "top",
             });
             setMessage("");
-            navigate("/login");
+            navigate("/");
             setIsLoading(false);
         } catch (error) {
             setIsLoading(false);
