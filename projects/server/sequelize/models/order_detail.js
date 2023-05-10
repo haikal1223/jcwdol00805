@@ -33,3 +33,4 @@ module.exports = (sequelize, DataTypes) => {
   return order_detail;
 };
 
+
