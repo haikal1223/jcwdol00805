@@ -99,22 +99,23 @@ module.exports = {
   
    getUserCartx: async (req, res) => {
     try {
-      const { uid } = req.uid;
+      const { id } = req.uid;
 
       // Validate uid parameter
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
+      // if (!uid) {
+      //   return res.status(400).send({
+      //     isError: true,
+      //     message: "Invalid user ID",
+      //     data: null,
+      //   });
+      // }
+      console.log("test", id);
 
-      const { id } = await db.user.findOne({
-        where: {
-          uid,
-        },
-      });
+      // const { id } = await db.user.findOne({
+      //   where: {
+      //     uid,
+      //   },
+      // });
 
       const findUserCart = await db.cart.findAll({
         where: {
@@ -153,7 +154,7 @@ module.exports = {
       });
     }
   },
-
+  
   getCheckoutCart: async (req, res) => {
     try {
       const { user_id } = req.query;
@@ -265,7 +266,7 @@ module.exports = {
   },
   addAddress: async (req, res) => {
     const t = await sequelize.transaction();
-    const { uid } = req.uid;
+    const { id } = req.uid;
     const {
       recipient_name,
       recipient_phone,
@@ -278,7 +279,7 @@ module.exports = {
     } = req.body;
 
     try {
-      const { id } = await db.user.findOne({ where: { uid } });
+      // const { id } = await db.user.findOne({ where: { uid } });
       console.log("id", id);
       if (main_address) {
         await db.user_address.update(
@@ -322,7 +323,6 @@ module.exports = {
   getAddress: async (req, res) => {
     const { id } = req.uid;
     try {
-
       const address = await db.user_address.findAll({
         where: { user_id: id },
       });
@@ -580,10 +580,10 @@ module.exports = {
   },
   
   getStockOrigin: async (req, res) => {
-    const { uid } = req.uid;
+    const { id } = req.uid;
     try {
       const user = await db.user.findOne({
-        where: { uid: uid },
+        where: { id: id },
         include: [
           {
             model: db.cart,
