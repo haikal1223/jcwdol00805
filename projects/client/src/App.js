@@ -98,6 +98,7 @@ function App() {
     return children;
   };
 
+
   const AuthMainAdmin = ({ children }) => {
     const adminRoleLogged = localStorage.getItem("role");
 
@@ -187,7 +188,7 @@ function App() {
           <Route path="/updatePassword/:uid" element={<UpdatePassword />} />
           {/* Admin Routing */}
           <Route path="/admin" element={<AdminHome />} />
-              <Route
+          <Route
             path="/admin/user"
             element={
               <AuthAdmin>
@@ -204,47 +205,46 @@ function App() {
             }
           />
 
-            <Route 
-              path='/admin/order' 
-              element={
-                <AuthAdmin>
-                  <AdminOrder />
-                </AuthAdmin>
-              }
-            />
-            <Route 
-              path='/admin/product' 
-              element={
-                <AuthAdmin>
-                  <AdminProduct />
-                </AuthAdmin>
-              }
-            />  
-            <Route 
-              path='/admin/product/:product_id' 
-              element={
-                <AuthAdmin>
-                  <AdminProductDetail />
-                </AuthAdmin>
-              }
-            />
-            <Route 
-              path='/admin/mutation' 
-              element={
-                <AuthAdmin>
-                  <AdminMutation />
-                </AuthAdmin>
-              }
-            />  
-          <Route 
-              path='/admin/dashboard' 
-              element={
-                <AuthAdmin>
-                  <AdminDashboard />
-                </AuthAdmin>
-              }
-            />    
-
+          <Route
+            path="/admin/order"
+            element={
+              <AuthAdmin>
+                <AdminOrder />
+              </AuthAdmin>
+            }
+          />
+          <Route
+            path="/admin/product"
+            element={
+              <AuthAdmin>
+                <AdminProduct />
+              </AuthAdmin>
+            }
+          />
+          <Route
+            path="/admin/product/:product_id"
+            element={
+              <AuthAdmin>
+                <AdminProductDetail />
+              </AuthAdmin>
+            }
+          />
+          <Route
+            path="/admin/mutation"
+            element={
+              <AuthAdmin>
+                <AdminMutation />
+              </AuthAdmin>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AuthAdmin>
+                <AdminDashboard />
+              </AuthAdmin>
+            }
+          />
         </Routes>
         {window.location.pathname.includes("/admin") ? <></> : <Footer />}
         <Toaster />
