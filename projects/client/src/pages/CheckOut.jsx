@@ -312,14 +312,22 @@ export default function CheckOut(props) {
       // get value
       
       // post order
-      /* let response =  */await axios.post(
-        `http://localhost:8000/order/create-order?paid_amt=${getTotalPrice()}&address=${useraddressid}&ship_cost=${shippingCost}&uid=${id}&whid=${getWHid}`,
-        {
-          detail: [],
-          cartId: cartId
-        }
-      )
-      toast.success("Order successfully placed")
+      
+      if (shippingMethod === "") {
+        toast.error('Please select shipping method first')
+      }  else {
+        await axios.post(
+          `http://localhost:8000/order/create-order?paid_amt=${getTotalPrice()}&address=${useraddressid}&ship_cost=${shippingCost}&uid=${id}&whid=${getWHid}`,
+          {
+            cartId: cartId
+          }
+        )
+
+        toast.success("Order successfully placed", { duration: 3000 })
+        window.location.href = '/order'
+      }
+
+      
 
     } catch (error) {
       console.log(error.message)

@@ -210,45 +210,31 @@ module.exports = {
     try {
       // get data
       let { paid_amt, address, ship_cost, uid, whid } = req.query
-      let { detail, cartId } = req.body
+      let { cartId } = req.body
 
-      // dummy order
-      /* paid_amt = 1
-      address = 1
-      ship_cost = 15000
-      uid = 1
-      whid = 1 */
-      
-      // dummy detail
-      detail = [
-        {
-          pid: 2,
-          name: 'Test Product AA',
-          price: 14000,
-          qty: 1
-        },
-        {
-          pid: 27,
-          name: 'Test Product BB',
-          price: 25000,
-          qty: 2
-        }
-      ]
 
-      /* cartId = [1 , 2] */
+      // fetch checkout cart ischecked
+      let carts = await db.sequelize.query(
+        `SELECT a.product_id, a.price, a.quantity, b.name
+        FROM db_warehouse.carts a 
+        LEFT JOIN product b on a.product_id = b.id
+        WHERE a.is_checked = 1 AND a.user_id = ${uid}`
+      )
+
+      let detail = carts[0]
 
       //validate product availability
       for( let i = 0 ; i < detail.length ; i++ ) {
         let stock = await db.product_stock.sum(
           'stock',{
             where: {
-              product_id: detail[i].pid
+              product_id: detail[i].product_id
             }
           }, {
             group: 'product_id' 
           })
           
-        if (stock < detail[i].qty) {
+        if (stock < detail[i].quantity) {
           return res.status(500).send({
             isError: true,
             message: `Insufficient stock for item ${detail[i].name}`,
@@ -271,10 +257,10 @@ module.exports = {
       for( let i = 0 ; i < detail.length ; i++ ) {
         await db.order_detail.create({
           order_id: order.id, 
-          product_id: detail[i].pid,
+          product_id: detail[i].product_id,
           product_price: detail[i].price,
-          product_quantity: detail[i].qty,
-          subtotal: detail[i].price * detail[i].qty 
+          product_quantity: detail[i].quantity,
+          subtotal: detail[i].price * detail[i].quantity 
         }/* , { transaction: t } */)
       }
 
@@ -285,14 +271,15 @@ module.exports = {
             id: cartId[i]
           }
         })
-      }
-      
+      }  
+
       // response
       res.status(201).send({
         isError: false,
         message: 'Order successfully created',
         data: {
-          order
+          order,
+          detail
         }
       })
 
