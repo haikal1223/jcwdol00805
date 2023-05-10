@@ -56,35 +56,19 @@ module.exports = {
 
   cancel: async (req, res) => {
     try {
-      const { uid } = req.uid;
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
-      const user = await db.user.findOne({
-        where: {
-          uid,
+      const { order_id } = req.query;
+
+      let cancelOrder = await db.order.update(
+        {
+          order_status_id: 6,
         },
-      });
-      const order = await db.order.findOne({
-        where: {
-          user_id: user.id,
-          payment_proof: {
-            [Op.ne]: null,
+        {
+          where: {
+            id: order_id,
           },
-        },
-      });
-      if (!order) {
-        return res.status(404).send({
-          isError: true,
-          message: "No order found with pending payment proof",
-          data: null,
-        });
-      }
-      await order.destroy();
+        }
+      );
+
       return res.status(200).send({
         isError: false,
         message: "Order cancelled successfully",
@@ -143,24 +127,10 @@ module.exports = {
       });
     }
   },
-  
+
   getCart: async (req, res) => {
     try {
-      const { uid } = req.uid;
-
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
-
-      const { id } = await db.user.findOne({
-        where: {
-          uid,
-        },
-      });
+      const { id } = req.uid;
 
       const order = await db.order.findOne({
         where: {
