@@ -1,467 +1,458 @@
-import React, { useEffect, useState } from "react";
-import Sidebar from "../components/sidebar";
-import axios from "axios";
-import Cookies from "js-cookie";
-import {
-  TbChevronLeft,
-  TbChevronRight,
-  TbChevronsLeft,
-  TbChevronsRight,
-} from "react-icons/tb";
 import {
   Box,
   Button,
-  HStack,
-  IconButton,
-  Input,
-  InputGroup,
-  InputRightElement,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalCloseButton,
-  VStack,
+  Center,
   Heading,
-  Select,
-  Text,
   Table,
-  Thead,
+  TableCaption,
   Tbody,
-  Tr,
   Td,
-  TableContainer,
+  Text,
+  Image,
+  Th,
+  Thead,
+  Tr,
+  useToast,
 } from "@chakra-ui/react";
-import { Search2Icon } from "@chakra-ui/icons";
-import { toast, Toaster } from "react-hot-toast";
-import OrderDetail from "./components/orderDetail";
+import { Label, Spinner } from "flowbite-react";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../../Admin/components/sidebar";
+import Cookies from "js-cookie";
 
-const AdminOrder = () => {
-  const [uid, setUid] = useState("");
-  const [whid, setWhid] = useState("");
-  const [filter, setFilter] = useState({
-    searchOrderId: "",
-    filterWarehouse: "",
-  });
-  const [filteredOrder, setFilteredOrder] = useState([]);
-  const [whList, setWhList] = useState([]);
-  const [search, setSearch] = useState(false);
-  const [sort, setSort] = useState("ORDER BY a.createdAt DESC, a.id DESC");
-  const [page, setPage] = useState(1);
-  const [maxPage, setMaxPage] = useState(0);
-  const rowPerPage = 10;
+import OrderCard from "../../../components/orderCard";
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [orderData, setOrderData] = useState({});
-  const [selectedId, setSelectedId] = useState(0);
+export default function CheckOut(props) {
+  const Navigate = useNavigate();
+  const [orderList, setOrderList] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [itemTotalPrice, setItemTotalPrice] = useState(0);
+  const [shippingCost, setShippingCost] = useState(0);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
-  const {
-    isOpen: isOpenCancel,
-    onOpen: onOpenCancel,
-    onClose: onCloseCancel,
-  } = useDisclosure();
-
-  const getUid = async () => {
+  let getOrderCart = async () => {
+    let token = localStorage.getItem("myToken");
     try {
-      let token = Cookies.get("adminToken");
       let response = await axios.get(
-        `http://localhost:8000/admin/verify-token?token=${token}`
-      );
-      setUid(response.data.data.id);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  const fetchWarehouse = async () => {
-    if (uid) {
-      try {
-        let response = await axios.get(
-          `http://localhost:8000/admin/fetch-warehouse?id=${uid}`
-        );
-        setWhid(response.data.data[0][0].wh_id);
-      } catch (error) {
-        console.log(error.message);
-      }
-    }
-  };
-
-  const fetchOrder = async () => {
-    const offset = (page - 1) * rowPerPage;
-    if (whid) {
-      try {
-        let response = await axios.get(
-          `http://localhost:8000/admin-order/view/${whid}?id=${filter.searchOrderId}&wh=${filter.filterWarehouse}&sort=${sort}&offset=${offset}&row=${rowPerPage}`
-        );
-        setFilteredOrder(response.data.data.orders[0]);
-        setMaxPage(
-          Math.ceil(
-            parseInt(response.data.data.countOrders[0][0].num_order) /
-              rowPerPage
-          )
-        );
-        setWhList(response.data.data.wh_list[0]);
-        if (response.data.data.orders[0].length == 0) {
-          toast.error("No order found. Try different query");
+        `http://localhost:8000/order/getOrderCart`,
+        {
+          headers: { token: token },
         }
-      } catch (error) {
-        console.log(error.message);
-      }
+      );
+      setShippingCost(response.data.data[0].order.shipping_cost);
+      setItemTotalPrice(response.data.data[0].order.paid_amount);
+      setCart(response.data.data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  // Modal Detail
-  const handleModalOpen = async (id) => {
+  let getOrderList = async () => {
+    let token = localStorage.getItem("myToken");
     try {
       let response = await axios.get(
-        `http://localhost:8000/admin-order/order-detail/${id}`
+        `http://localhost:8000/order/getOrderList`,
+        {
+          headers: { token: token },
+        }
       );
-      setOrderData(response.data.data);
+      setOrderList(response.data.data);
     } catch (error) {
-      console.log(error.message);
+      console.log(error.response.data);
     }
-    setIsModalOpen(true);
   };
 
-  const handleModalClose = () => {
-    setOrderData({});
-    setIsModalOpen(false);
-  };
-
-  const renderOrder = () => {
-    return filteredOrder.map((val, idx) => {
-      const createDate = new Date(val.createdAt);
-      const formattedCreateDate =
-        createDate.getFullYear() +
-        "-" +
-        ("0" + (createDate.getMonth() + 1)).slice(-2) +
-        "-" +
-        ("0" + createDate.getDate()).slice(-2) +
-        " " +
-        ("0" + createDate.getHours()).slice(-2) +
-        ":" +
-        ("0" + createDate.getMinutes()).slice(-2) +
-        ":" +
-        ("0" + createDate.getSeconds()).slice(-2) +
-        " " +
-        "+" +
-        ("0" + -createDate.getTimezoneOffset() / 60).slice(-2) +
-        "00";
-      const updateDate = new Date(val.updatedAt);
-      const formattedUpdateDate =
-        updateDate.getFullYear() +
-        "-" +
-        ("0" + (updateDate.getMonth() + 1)).slice(-2) +
-        "-" +
-        ("0" + updateDate.getDate()).slice(-2) +
-        " " +
-        ("0" + updateDate.getHours()).slice(-2) +
-        ":" +
-        ("0" + updateDate.getMinutes()).slice(-2) +
-        ":" +
-        ("0" + updateDate.getSeconds()).slice(-2) +
-        " " +
-        "+" +
-        ("0" + -updateDate.getTimezoneOffset() / 60).slice(-2) +
-        "00";
-
+  const renderOrderList = () => {
+    return orderList.map((val, idx) => {
       return (
-        <Tr key={idx} className="bg-white">
-          <Td>{val.id}</Td>
-          <Td>{val.user_email}</Td>
-          <Td>{val.num_item}</Td>
-          <Td>{"Rp " + val.paid_amount.toLocaleString()}</Td>
-          <Td>{val.wh_name}</Td>
-          <Td>{formattedCreateDate}</Td>
-          <Td>{formattedUpdateDate}</Td>
-          <Td>{val.status}</Td>
-          <Td className="grid grid-cols-3 w-[250px] sticky right-0 z-50 bg-white shadow-[-10px_0px_30px_0px_#efefef]">
-            <Button
-              color={"#5D5FEF"}
-              variant={"link"}
-              onClick={() => handleModalOpen(val.id)}
-            >
-              view
-            </Button>
-            {val.status === "Pending Payment" ||
-            val.status === "Pending Confirmation" ? (
-              <Button
-                isDisabled={val.status != "Pending Confirmation"}
-                _disabled={{ color: "#D9D9D9" }}
-                color={"#4EE476"}
-                variant={"link"}
-              >
-                confirm
-              </Button>
-            ) : (
-              <Button
-                isDisabled={val.status != "Processed"}
-                _disabled={{ color: "#D9D9D9" }}
-                color={"#4EE476"}
-                variant={"link"}
-              >
-                ship
-              </Button>
-            )}
-            <Button
-              isDisabled={val.order_status_id > 3}
-              _disabled={{ color: "#D9D9D9" }}
-              color={"red"}
-              variant={"link"}
-              onClick={(e) => openCancelModal(val.id)}
-            >
-              cancel
-            </Button>
-          </Td>
-        </Tr>
+        <OrderCard
+          orderData={val}
+          productIdx={idx}
+          cancel={(e) => cancel(val)}
+          orderDetail={(e) => orderDetail(val.id)}
+          uploadPayment={(e) => uploadPayment(val)}
+        />
       );
     });
   };
-
-  // pagination
-  const nextPageHandler = () => {
-    if (page < maxPage) {
-      setPage(page + 1);
-    }
-  };
-  const prevPageHandler = () => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
-  };
-  const firstPageHandler = () => {
-    if (page > 1) {
-      setPage(1);
-    }
-  };
-  const maxPageHandler = () => {
-    if (page < maxPage) {
-      setPage(maxPage);
-    }
+  const getTotalPrice = () => {
+    return shippingCost + itemTotalPrice;
   };
 
-  // search, sort & filter
-  const whOptions = [...new Set(whList.map((val) => val.wh_name))];
-  const searchInputHandler = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-    setFilter({
-      ...filter,
-      [name]: value,
-    });
-  };
-  const searchButtonHandler = () => {
-    setPage(1);
-    setSearch(!search);
-  };
-  const sortHandler = (e) => {
-    const value = e.target.value;
-    setSort(value);
-  };
-
-  useEffect(() => {
-    getUid();
-  }, []);
-  useEffect(() => {
-    fetchWarehouse();
-  }, [uid]);
-  useEffect(() => {
-    fetchOrder();
-  }, [whid, page, search, sort]);
-
-  // cancel order
-  const openCancelModal = async (val) => {
+  let cancel = async () => {
+    let token = localStorage.getItem("myToken");
     try {
-      onOpenCancel();
-      setSelectedId(val);
+      if (window.confirm("Are you sure you want to cancel this order?")) {
+        let response = await axios.delete(
+          `http://localhost:8000/order/cancel`,
+          {
+            headers: { token: token },
+          }
+        );
+        toast.success("Order Canceled");
+        setTimeout(() => {
+          Navigate("/cart");
+        }, 2000);
+      }
     } catch (error) {}
   };
 
-  const cancelOrder = async () => {
+  let uploadPayment = async (id) => {
+    // code for upload payment
+  };
+
+  let orderDetail = async (id) => {
+    Navigate(`/order/detail/${id}`);
+  };
+
+  const fetchOrders = async () => {
     try {
-      let response = await axios.get(
-        `http://localhost:8000/admin-order/cancel-order/${selectedId}`
-      );
-      window.location.reload();
+      const response = await axios.get("http://localhost:8000/admin/orders");
+      setOrders(response.data.data);
+      setLoading(false);
     } catch (error) {
-      console.log(error.message);
+      toast({
+        title: "Error",
+        description: "Failed to fetch orders",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
+  const handleUpdateStatus = async (orderId) => {
+    try {
+      const token = Cookies.get("adminToken");
+      const response = await axios.put(
+        `http://localhost:8000/admin/orders/${orderId}`,
+        {},
+        {
+          headers: { token },
+        }
+      );
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === response.data.data.id ? response.data.data : order
+        )
+      );
+      toast({
+        title: "Success",
+        description: "Order status updated",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleDelivered = async (orderId) => {
+    try {
+      const token = Cookies.get("adminToken");
+      const response = await axios.put(
+        `http://localhost:8000/admin/orders/${orderId}/delivered`,
+        {},
+        {
+          headers: { token },
+        }
+      );
+      const updatedOrder = response.data.data;
+      if (
+        updatedOrder.order_status_id === 4 &&
+        !updatedOrder.approved_by_user
+      ) {
+        setTimeout(async () => {
+          try {
+            const response = await axios.put(
+              `http://localhost:8000/admin/orders/${orderId}/status`,
+              { order_status_id: 5 },
+              {
+                headers: { token },
+              }
+            );
+            setOrders((prevOrders) =>
+              prevOrders.map((order) =>
+                order.id === response.data.data.id ? response.data.data : order
+              )
+            );
+            toast({
+              title: "Success",
+              description: "Order status updated to '5'",
+              status: "success",
+              duration: 3000,
+              isClosable: true,
+            });
+          } catch (error) {
+            console.log(error);
+            toast({
+              title: "Error",
+              description: "Failed to update order status",
+              status: "error",
+              duration: 3000,
+              isClosable: true,
+            });
+          }
+        }, 604800000); // 1 week in milliseconds
+      } else {
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === updatedOrder.id ? updatedOrder : order
+          )
+        );
+        toast({
+          title: "Success",
+          description: "Order status updated to delivered",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: "Failed to update order status to delivered",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  useEffect(() => {
+    getOrderList();
+    getOrderCart();
+    fetchOrders();
+  }, []);
 
   return (
-    <div className="w-[100%] flex flex-1 justify-between">
-      <Sidebar />
-      <div className="bg-[#f1f1f1] w-[1240px] h-auto z-0 shadow-inner flex flex-col py-[40px] px-[50px]">
-        <div className="w-[1140px] min-h-screen flex justify-center items-start overflow-auto ">
-          <Box className="bg-white w-full h-[1100px] drop-shadow-md p-9">
-            <Text className="font-ibmMed text-4xl">Order List</Text>
-            <hr className="my-4 border-[2px]" />
-            <HStack justifyContent={"space-between"} className="mb-4">
-              <div className="flex justify-start gap-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <InputGroup>
-                    <Input
-                      name="searchOrderId"
-                      onChange={searchInputHandler}
-                      placeholder="... search by order id"
-                      className="p-1"
-                    />
-                    <InputRightElement
-                      pointerEvents="none"
-                      children={<Search2Icon />}
-                    />
-                  </InputGroup>
-                  <Select
-                    name="filterWarehouse"
-                    placeholder="All warehouse"
-                    color={"gray"}
-                    onChange={searchInputHandler}
-                  >
-                    {whOptions.map((val, idx) => {
-                      return (
-                        <option value={val} key={idx}>
-                          {val}
-                        </option>
-                      );
-                    })}
-                  </Select>
-                </div>
-                <IconButton
-                  onClick={searchButtonHandler}
-                  bg="#5D5FEF"
-                  aria-label="search product"
-                  icon={<Search2Icon color="white" />}
-                />
-              </div>
-              <Select w={"auto"} color={"gray"} onChange={sortHandler}>
-                <option value="ORDER BY a.createdAt DESC, a.id DESC">
-                  order by create date (Z-A)
-                </option>
-                <option value="ORDER BY a.createdAt ASC, a.id ASC">
-                  order by create date (A-Z)
-                </option>
-              </Select>
-            </HStack>
-            <TableContainer>
-              <Table variant="simple">
-                <Thead>
-                  <Tr className="font-bold bg-[#f1f1f1]">
-                    <Td>id</Td>
-                    <Td>email</Td>
-                    <Td>#item</Td>
-                    <Td>paid amount</Td>
-                    <Td>warehouse</Td>
-                    <Td>created at</Td>
-                    <Td>last modified</Td>
-                    <Td>status</Td>
-                    <Td className="flex justify-center w-[250px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
-                      action
-                    </Td>
-                  </Tr>
-                </Thead>
-                <Tbody className="bg-white">{renderOrder()}</Tbody>
-              </Table>
-            </TableContainer>
-            <Modal
-              isOpen={isModalOpen}
-              onClose={handleModalClose}
-              scrollBehavior={"inside"}
-              size={"xl"}
-            >
-              <ModalOverlay />
-              <ModalContent>
-                <OrderDetail
-                  orderDetail={orderData.order_detail}
-                  productDetail={orderData.product_detail}
-                />
-              </ModalContent>
-            </Modal>
+    <>
+      <div className="w-[100%] flex flex-1 justify-between">
+        <Sidebar />
+        <div className="bg-[#f1f1f1] w-[1240px] h-auto z-0 shadow-inner flex flex-col py-[40px] px-[50px]">
+          <div className="w-[1140px] flex justify-center items-start overflow-auto "></div>
 
-            <Modal isOpen={isOpenCancel} onClose={onCloseCancel}>
-              <ModalOverlay />
-              <ModalContent>
-                <Box w={["full", "md"]} p={[8, 20]} mt={[20, "1vh"]} mx="auto">
-                  <VStack spacing={4} align="flex-start" w="full">
-                    <HStack spacing={1} align={["flex-start", "left"]} w="full">
-                      <Heading>
-                        <Text className="font-ibmReg">
-                          Do you want to cancel the order?
+          <Heading as="h2" mb={4}>
+            Order Status List
+          </Heading>
+          {loading ? (
+            <Center>
+              <Spinner />
+            </Center>
+          ) : (
+            <Table variant="stripped">
+              <TableCaption>Orders List</TableCaption>
+              <Thead>
+                <Tr>
+                  <Th>ORDER ID</Th>
+                  <Th>Customer ID</Th>
+                  <Th>Order Status</Th>
+                  <Th>Action</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {console.log(orders)}
+                {orders.map((order) => (
+                  <>
+                    <Tr key={order.id}>
+                      <Text fontWeight="bold" color="blue.500">
+                        <Td>{order.id}</Td>
+                      </Text>
+                      {/* <Td>{order.customer.name}</Td> */}
+                      <Td>
+                        <Text fontWeight="bold" color="blue.500">
+                          {order.user_id}
                         </Text>
-                      </Heading>
-                      <ModalCloseButton />
-                    </HStack>
+                      </Td>
+                      <Td>
+                        {order.order_status_id === 3 ? (
+                          <Button
+                            colorScheme="green"
+                            size="sm"
+                            onClick={() => handleUpdateStatus(order.id)}
+                          >
+                            Mark as Processing
+                          </Button>
+                        ) : order.order_status_id === 4 ? (
+                          <Button
+                            colorScheme="blue"
+                            size="sm"
+                            onClick={() => handleDelivered(order.id)}
+                          >
+                            Mark as Delivered
+                          </Button>
+                        ) : (
+                          <Text>-</Text>
+                        )}
+                      </Td>
+                      <Td>
+                        {order.order_status_id === 3 ? (
+                          <Text fontWeight="bold" color="blue.500">
+                            Shipped
+                          </Text>
+                        ) : order.order_status_id === 4 ? (
+                          <Text fontWeight="bold" color="blue.500">
+                            Waiting User Approval
+                          </Text>
+                        ) : order.order_status_id === 5 ? (
+                          <Text fontWeight="bold" color="blue.500">
+                            Completed
+                          </Text>
+                        ) : null}
+                      </Td>
+                    </Tr>
+                  </>
+                ))}
+              </Tbody>
+            </Table>
+          )}
 
-                    <Button
-                      rounded="lg"
-                      alignSelf="center"
-                      backgroundColor="#5D5FEF"
-                      color="white"
-                      className="font-ibmReg"
-                      onClick={cancelOrder}
-                      size="lg"
-                    >
-                      Yes, cancel it
-                    </Button>
-                    <Button
-                      rounded="lg"
-                      alignSelf="center"
-                      backgroundColor="white"
-                      color="#5D5FEF"
-                      className="font-ibmReg"
-                      variant="outline"
-                      onClick={onCloseCancel}
-                      size="lg"
-                    >
-                      No, keep it
-                    </Button>
-                  </VStack>
-                </Box>
-              </ModalContent>
-            </Modal>
-            <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
-              <IconButton
-                isDisabled={page === 1}
-                onClick={firstPageHandler}
-                size={"sm"}
-                bg="#5D5FEF"
-                aria-label="previous page"
-                icon={<TbChevronsLeft color="white" boxsize={"16px"} />}
-              />
-              <IconButton
-                isDisabled={page === 1}
-                onClick={prevPageHandler}
-                size={"sm"}
-                bg="#5D5FEF"
-                aria-label="previous page"
-                icon={<TbChevronLeft color="white" boxsize={"16px"} />}
-              />
-              <div className="font-ibmReg text-dgrey">
-                Page {page} / {maxPage}
-              </div>
-              <IconButton
-                isDisabled={page === maxPage}
-                onClick={nextPageHandler}
-                size={"sm"}
-                bg="#5D5FEF"
-                aria-label="next page"
-                icon={<TbChevronRight color="white" boxsize={"16px"} />}
-              />
-              <IconButton
-                isDisabled={page === maxPage}
-                onClick={maxPageHandler}
-                size={"sm"}
-                bg="#5D5FEF"
-                aria-label="next page"
-                icon={<TbChevronsRight color="white" boxsize={"16px"} />}
-              />
+          <div className=" mt-[15px] pl-[24px] ">
+            <div className="border-b-2">
+              <h1 className="font-ibmBold">Order</h1>
             </div>
-          </Box>
+            <Box
+              bg="#ffffff"
+              p="4"
+              borderRadius="18px"
+              boxShadow="18.2143px 18.2143px 36.4286px rgba(211, 209, 216, 0.25)"
+            >
+              <p className="mt-[15px] font-ibmMed border-b-2">
+                Waiting for payment
+              </p>
+              <Box>
+                <Box>
+                  {cart.length === 0 ? (
+                    <Spinner />
+                  ) : (
+                    cart.map((item) => (
+                      <Box
+                        key={item.id}
+                        display="flex"
+                        alignItems="center"
+                        mb="4"
+                        mt="0"
+                      >
+                        <Image
+                          src={item.product.image_url}
+                          alt={item.product.name}
+                          boxSize="84px"
+                          mt="0px"
+                          objectFit="contain"
+                          mr="4"
+                        />
+                        <Box>
+                          <Text className=" font-ibmMed">
+                            {item.product.name}
+                          </Text>
+                          <Text className=" font-ibmReg" align="left">
+                            Price:{" "}
+                            {new Intl.NumberFormat("id-ID", {
+                              style: "currency",
+                              currency: "IDR",
+                            }).format(item.product_price)}{" "}
+                            * {item.product_quantity}
+                          </Text>
+                        </Box>
+                      </Box>
+                    ))
+                  )}
+                </Box>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingBottom: "14px",
+                  }}
+                >
+                  <span
+                    htmlFor="shipping-cost"
+                    style={{
+                      marginRight: "8px",
+                      marginTop: "20px",
+                      textAlign: "left",
+                      fontSize: "14px",
+                    }}
+                    className="font-ibmReg"
+                  >
+                    Shipping Cost
+                  </span>
+                  <span style={{ marginLeft: "auto" }}>
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(shippingCost)}
+                  </span>
+                </div>
+
+                <div className="border-b-2 mt-8"></div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingBottom: "14px",
+                  }}
+                >
+                  <span
+                    htmlFor="shipping-cost"
+                    style={{
+                      marginRight: "8px",
+                      textAlign: "left",
+                      fontSize: "20px",
+                    }}
+                    className="font-ibmBold"
+                  >
+                    Grand Total
+                  </span>
+                  <span style={{ marginLeft: "auto", fontSize: "20px" }}>
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(getTotalPrice())}
+                  </span>
+                </div>
+              </Box>
+              <Box display="flex" justifyContent="space-evenly" pr="29px">
+                <Button
+                  bg="#ff3838"
+                  boxShadow="0px 20px 30px rgba(211,209,216, 0.521)"
+                  borderRadius="28.5px"
+                  color="white"
+                  width="155px"
+                  height="43px"
+                  onClick={cancel}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  bg="#5D5FEF"
+                  borderRadius="28.5px"
+                  boxShadow="0px 20px 30px rgba(211,209,216, 0.521)"
+                  color="white"
+                  width="155px"
+                  height="43px"
+                >
+                  Upload Payment
+                </Button>
+              </Box>
+            </Box>
+          </div>
         </div>
       </div>
-      <Toaster />
-    </div>
+    </>
   );
-};
-
-export default AdminOrder;
+}

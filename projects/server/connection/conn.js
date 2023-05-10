@@ -7,7 +7,7 @@ const db = mysql.createConnection({
 
   password: "ot3ra1han12",
 
-  database: "db_test1",
+  database: "db_warehouse_dummy2",
 
   port: 8000,
 });
