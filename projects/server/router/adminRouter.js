@@ -44,5 +44,12 @@ Router.get("/adminWarehouse", adminController.adminWarehouse);
 Router.get("/admin-all-stats", adminController.adminAllStats);
 Router.get("/admin-type", adminController.adminType);
 Router.get("/local-admin", adminController.localAdmin);
+Router.put("/orders/:orderId", tokenVerify, adminController.updateOrderStatus);
+Router.put(
+  "/orders/:orderId/delivered",
+  tokenVerify,
+  adminController.updateUserOrderStatus
+);
+Router.get("/orders", adminController.showOrderData);
 
 module.exports = Router;
