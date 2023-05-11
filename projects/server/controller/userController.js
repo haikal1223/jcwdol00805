@@ -91,7 +91,7 @@ module.exports = {
     }
   },
 
-  getData: async (req, res) => {
+  /* getData: async (req, res) => {
     let { id } = req.query;
     const findUsers = await db.user.findAll({
       where: {
@@ -104,7 +104,7 @@ module.exports = {
         message: "Data is found",
         data: findUsers,
       });
-  },
+  }, */
 
   inputPassword: async (req, res) => {
     try {
