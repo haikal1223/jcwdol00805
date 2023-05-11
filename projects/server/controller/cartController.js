@@ -97,62 +97,6 @@ module.exports = {
     }
   },
   
-   /* getUserCartx: async (req, res) => {
-    try {
-      const { uid } = req.uid;
-
-      // Validate uid parameter
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
-
-      const { id } = await db.user.findOne({
-        where: {
-          uid,
-        },
-      });
-
-      const findUserCart = await db.cart.findAll({
-        where: {
-          user_id: id,
-        },
-        include: [
-          {
-            model: db.product,
-            attributes: ["name", "price", "product_category_id", "image_url"],
-            include: [
-              {
-                model: db.product_stock,
-                include: [
-                  {
-                    model: db.warehouse,
-                    attributes: ["city"],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      });
-
-      return res.status(200).send({
-        isError: false,
-        message: "Cart items fetched successfully",
-        data: findUserCart,
-      });
-    } catch (error) {
-      // Send error response to the client
-      return res.status(500).send({
-        isError: true,
-        message: "Internal server error",
-        data: null,
-      });
-    }
-  }, */
 
   getUserCartx: async (req, res) => {
     try {
