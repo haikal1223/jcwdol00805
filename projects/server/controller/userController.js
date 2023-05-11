@@ -92,10 +92,10 @@ module.exports = {
   },
 
   getData: async (req, res) => {
-    let { uid } = req.query;
+    let { id } = req.query;
     const findUsers = await db.user.findAll({
       where: {
-        uid,
+        id,
       },
     });
     if (findUsers)
@@ -455,7 +455,7 @@ module.exports = {
       
       let hashMatchResult = await matchPassword(
         inputOldPassword,
-        findUser?.password
+        findUser?.dataValues.password
       );
 
       if (!hashMatchResult)

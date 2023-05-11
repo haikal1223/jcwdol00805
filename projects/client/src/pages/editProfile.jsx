@@ -53,7 +53,6 @@ export default function EditProfile() {
   const handleClickChangePassword = () =>
     setIsChangePassword(!isChangePassword);
   const [editMode, setEditMode] = useState(false);
-  const [uid, setUid] = useState("");
   const [id, setId] = useState("");
 
 
@@ -230,6 +229,7 @@ export default function EditProfile() {
       });
       setIsChangePassword(isChangePassword);
       setMessage("");
+      Navigate(0)
     } catch (error) {
       console.log(error)
       toast({
@@ -664,7 +664,7 @@ export default function EditProfile() {
               backgroundColor="#5D5FEF"
               color="white"
               className="font-ibmFont"
-              onClick={() => changePassword(uid)}
+              onClick={() => changePassword(id)}
             >
               Save Password
             </Button>
