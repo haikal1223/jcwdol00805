@@ -122,9 +122,9 @@ export default function Home(props) {
     }
   };
   const prevPageHandler = () => {
-        if (page > 1) {
-            setPage(page - 1);
-        }
+    if (page > 1) {
+      setPage(page - 1);
+    }
   };
 
   const firstPageHandler = () => {
@@ -154,10 +154,10 @@ export default function Home(props) {
   const catFilter = (catId) => {
     setFilter({
       ...filter,
-      searchCategory: catId
-    })
-    setPage(1)
-  }
+      searchCategory: catId,
+    });
+    setPage(1);
+  };
 
   const sortHandler = (e) => {
     const value = e.target.value;
@@ -258,7 +258,9 @@ export default function Home(props) {
           }
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
