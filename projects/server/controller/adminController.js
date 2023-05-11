@@ -1071,7 +1071,7 @@ module.exports = {
       });
     }
   },
-  
+
   productStockByWarehouse: async (req, res) => {
     try {
       const { id } = req.uid;
@@ -1205,12 +1205,12 @@ module.exports = {
 
   summaryAllProductMonthly: async (req, res) => {
     try {
-      const { uid } = req.uid;
+      const { id } = req.uid;
       const { Op } = require("sequelize");
       const { month, year, warehouse_id } = req.query;
       const moment = require("moment");
 
-      const user = await db.user.findOne({ where: { uid } });
+      const user = await db.user.findOne({ where: { id } });
       if (user.role === "warehouse_admin") {
         const whAdmin = await db.wh_admin.findOne({
           where: { user_id: user.id, warehouse_id: warehouseId },
@@ -1295,12 +1295,12 @@ module.exports = {
 
   fetchStockLog: async (req, res) => {
     try {
-      const { uid } = req.uid;
+      const { id } = req.uid;
       const { Op } = require("sequelize");
       const { product_id, warehouse_id, month, year } = req.query;
       const moment = require("moment");
 
-      const user = await db.user.findOne({ where: { uid } });
+      const user = await db.user.findOne({ where: { id } });
       if (user.role === "warehouse_admin") {
         const whAdmin = await db.wh_admin.findOne({
           where: { user_id: user.id, warehouse_id },

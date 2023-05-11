@@ -6,7 +6,9 @@ module.exports = {
   getJNE: async (req, res) => {
     let { origin, destination, weight, courier } = req.body;
     let { id } = req.uid;
+
     let key = "96dc80599e54e6d84bbd8f3b948da258";
+
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
@@ -47,7 +49,9 @@ module.exports = {
   getPOS: async (req, res) => {
     let { origin, destination, weight } = req.body;
     const { id } = req.uid;
+
     let key = "96dc80599e54e6d84bbd8f3b948da258";
+
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
@@ -88,7 +92,9 @@ module.exports = {
   getTIKI: async (req, res) => {
     let { origin, destination, weight } = req.body;
     const { id } = req.uid;
+
     let key = "96dc80599e54e6d84bbd8f3b948da258";
+
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
@@ -130,7 +136,9 @@ module.exports = {
   getCost: async (req, res) => {
     let { origin, destination, weight, courier } = req.body;
     let { id } = req.uid;
+
     let key = "96dc80599e54e6d84bbd8f3b948da258";
+
     try {
       if (destination === 0) {
         let { user_addresses } = await db.user.findOne({
@@ -162,6 +170,8 @@ module.exports = {
         });
       }
     } catch (error) {
+      let { origin, destination, weight, courier } = req.body;
+      let { id } = req.uid;
       res.status(500).send({
         isError: true,
         message: error.message,

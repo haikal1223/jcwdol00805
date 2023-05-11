@@ -19,7 +19,7 @@ export default function Footer() {
                                         <Image src={logo} />
                                     </div>
                                 </Link>
-                                <Link _hover={{ textDecoration: 'none' }}>
+                                <Link _hover={{ textDecoration: 'none' }} href='/'>
                                     <div className="font-ibmBold text-[16px] text-purple">
                                         ikeanye
                                     </div>
@@ -28,19 +28,19 @@ export default function Footer() {
                         </div>
                         <div className="flex flex-col justify-between">
                             <div className="font-ibmMed font-[10px]">Follow us</div>
-                            <Link _hover={{ textDecoration: 'none' }}>
+                            <Link _hover={{ textDecoration: 'none' }} href='https://github.com/haikal1223/jcwdol00805' isExternal>
                                 <div className="font-ibmReg font-[10px] text-lgrey hover:text-purple">GitHub</div>
                             </Link>
-                            <Link _hover={{ textDecoration: 'none' }}>
+                            <Link _hover={{ textDecoration: 'none' }} href='https://twitter.com/' isExternal>
                                 <div className="font-ibmReg font-[10px] text-lgrey hover:text-purple">Twitter</div>
                             </Link>
                         </div>
                         <div className="flex flex-col justify-between">
                             <div className="font-ibmMed font-[10px]">Resources</div>
-                            <Link _hover={{ textDecoration: 'none' }}>
+                            <Link _hover={{ textDecoration: 'none' }} href='/about-us'>
                                 <div className="font-ibmReg font-[10px] text-lgrey hover:text-purple">About Us</div>
                             </Link>
-                            <Link _hover={{ textDecoration: 'none' }}>
+                            <Link _hover={{ textDecoration: 'none' }} href='/terms-condition'>
                                 <div className="font-ibmReg font-[10px] text-lgrey hover:text-purple">Terms & Condition</div>
                             </Link>
                         </div>

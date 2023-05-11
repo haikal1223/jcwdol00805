@@ -66,8 +66,8 @@ module.exports = {
       );
 
       let products = [...productWithStock[0], ...productWithoutStock[0]].slice(
-        offset,
-        offset + row
+        parseInt(offset),
+        parseInt(offset) + parseInt(row)
       );
 
       let numItem = await sequelize.query(
@@ -154,7 +154,7 @@ module.exports = {
       // get value
       let { product_id } = req.query;
 
-      const findProductStock = await db.product_stock.findOne({
+      const findProductStock = await db.product_stock.findAll({
         where: {
           product_id,
         },

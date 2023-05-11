@@ -99,63 +99,6 @@ module.exports = {
   
    getUserCartx: async (req, res) => {
     try {
-      const { uid } = req.uid;
-
-      // Validate uid parameter
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
-
-      const { id } = await db.user.findOne({
-        where: {
-          uid,
-        },
-      });
-
-      const findUserCart = await db.cart.findAll({
-        where: {
-          user_id: id,
-        },
-        include: [
-          {
-            model: db.product,
-            attributes: ["name", "price", "product_category_id", "image_url"],
-            include: [
-              {
-                model: db.product_stock,
-                include: [
-                  {
-                    model: db.warehouse,
-                    attributes: ["city"],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      });
-
-      return res.status(200).send({
-        isError: false,
-        message: "Cart items fetched successfully",
-        data: findUserCart,
-      });
-    } catch (error) {
-      // Send error response to the client
-      return res.status(500).send({
-        isError: true,
-        message: "Internal server error",
-        data: null,
-      });
-    }
-  },
-
-  getUserCartx: async (req, res) => {
-    try {
       const { id } = req.uid;
 
       // Validate uid parameter
@@ -211,11 +154,73 @@ module.exports = {
       });
     }
   },
+  
+  getCheckoutCart: async (req, res) => {
+    try {
+      const { user_id } = req.query;
+
+      const findUserCart = await db.cart.findAll({
+        where: {
+          user_id,
+          is_checked: 1
+        },
+        include: [
+          {
+            model: db.product,
+            attributes: ["name", "price", "product_category_id", "image_url"],
+            include: [
+              {
+                model: db.product_stock,
+                include: [
+                  {
+                    model: db.warehouse,
+                    attributes: ["city", "province"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      const fetchId = await sequelize.query(
+        `SELECT distinct id from carts 
+        WHERE user_id = ${user_id} AND is_checked = 1`
+      ) 
+      
+      const cartId = fetchId[0].map(obj => obj.id)
+
+      if (!findUserCart) {
+        return res.status(404).send({
+          isError: true,
+          message: "Cart is empty",
+          data: null,
+        });
+      }
+
+      return res.status(200).send({
+        isError: false,
+        message: "Cart items fetched successfully",
+        data: {
+          findUserCart,
+          cartId
+        },
+      });
+    } catch (error) {
+      // Send error response to the client
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
+    }
+  },
 
   addCartProduct: async (req, res) => {
     try {
       let { quantity, price, user_id, product_id } = req.body;
       let dataToSend = await db.cart.create({
+        is_checked: 1,
         quantity,
         price,
         user_id,
@@ -230,7 +235,7 @@ module.exports = {
     } catch (error) {
       res.status(404).send({
         isError: true,
-        message: "Something Error",
+        message: error,
         data: error,
       });
     }
@@ -318,12 +323,7 @@ module.exports = {
 
   getAddress: async (req, res) => {
     const { id } = req.uid;
-
     try {
-      // const { id } = await db.user.findOne({
-      //   where: { uid: uid },
-      // });
-
       const address = await db.user_address.findAll({
         where: { user_id: id },
       });
@@ -378,7 +378,7 @@ module.exports = {
     try {
       const { data } = await axios.get(
         "https://api.rajaongkir.com/starter/province",
-        { headers: { key: "38cc0e5fdc569640ad614c40fcf5432c" } }
+        { headers: { key: "0ab1e1cb6b9b40df49560b26aec4ec79" } }
       );
       res.status(200).send({
         isError: false,
@@ -406,7 +406,7 @@ module.exports = {
       let response = await axios.get(
         `https://api.rajaongkir.com/starter/city?province=${province_id}`,
         {
-          headers: { key: "38cc0e5fdc569640ad614c40fcf5432c" },
+          headers: { key: "0ab1e1cb6b9b40df49560b26aec4ec79" },
         }
       );
 
