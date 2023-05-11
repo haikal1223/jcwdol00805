@@ -175,7 +175,9 @@ module.exports = {
       res.status(500).send({
         isError: true,
         message: error.message,
-        data: error,
+        data: {
+          origin, destination, weight, courier, id
+        },
       });
     }
   },
