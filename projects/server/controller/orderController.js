@@ -174,4 +174,93 @@ module.exports = {
       });
     }
   },
+
+  createOrder: async (req, res) => {
+    const t = await db.sequelize.transaction();
+    try {
+      // get data
+      let { paid_amt, address, ship_cost, uid, whid } = req.query
+      let { cartId } = req.body
+
+
+      // fetch checkout cart ischecked
+      let carts = await db.sequelize.query(
+        `SELECT a.product_id, a.price, a.quantity, b.name
+        FROM db_warehouse.carts a 
+        LEFT JOIN product b on a.product_id = b.id
+        WHERE a.is_checked = 1 AND a.user_id = ${uid}`
+      )
+
+      let detail = carts[0]
+
+      //validate product availability
+      for( let i = 0 ; i < detail.length ; i++ ) {
+        let stock = await db.product_stock.sum(
+          'stock',{
+            where: {
+              product_id: detail[i].product_id
+            }
+          }, {
+            group: 'product_id' 
+          })
+          
+        if (stock < detail[i].quantity) {
+          return res.status(500).send({
+            isError: true,
+            message: `Insufficient stock for item ${detail[i].name}`,
+            data: null,
+          })
+        }  
+      }
+
+      // run query
+      let order = await db.order.create({
+        paid_amount: parseInt(paid_amt),
+        user_address_id: parseInt(address),
+        shipping_cost: parseInt(ship_cost),
+        order_status_id: 1,
+        user_id: parseInt(uid),
+        warehouse_id: parseInt(whid)
+      }/* , { transaction: t } */) 
+
+      /* NEED LOOP */
+      for( let i = 0 ; i < detail.length ; i++ ) {
+        await db.order_detail.create({
+          order_id: order.id, 
+          product_id: detail[i].product_id,
+          product_price: detail[i].price,
+          product_quantity: detail[i].quantity,
+          subtotal: detail[i].price * detail[i].quantity 
+        }/* , { transaction: t } */)
+      }
+
+      // loop to destroy cart
+      for ( let i = 0 ; i < cartId.length ; i++) {
+        await db.cart.destroy({
+          where : {
+            id: cartId[i]
+          }
+        })
+      }  
+
+      // response
+      res.status(201).send({
+        isError: false,
+        message: 'Order successfully created',
+        data: {
+          order,
+          detail
+        }
+      })
+
+    } catch (error) {
+      t.rollback();
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  }
+
 };

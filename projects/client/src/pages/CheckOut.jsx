@@ -31,6 +31,8 @@ export default function CheckOut(props) {
     main_address: false,
   });
 
+  const [id, setId] = useState("");
+  const [cartId, setCartId] = useState([])
   const [getWHid, setgetWHid] = useState([]);
   const [useraddressid, setuseraddressid] = useState([]);
   const [data, setData] = useState([]);
@@ -65,6 +67,18 @@ export default function CheckOut(props) {
 
   const modalAddress = useDisclosure();
   const modalSwitch = useDisclosure();
+
+  const getId = async () => {
+    try {
+      let token = localStorage.getItem("myToken");
+      let response = await axios.get(
+        `http://localhost:8000/user/verifytoken?token=${token}`
+      );
+      setId(response?.data?.data?.id);
+    } catch (error) {
+      console.log(error.response.data);
+    }
+  };
 
   const onAddAddress = async (data) => {
     setShow({ ...show, loading: true });
@@ -104,7 +118,7 @@ export default function CheckOut(props) {
         `http://localhost:8000/cart/rajaongkir-city?province_id=${province_id}`,
         {
           headers: {
-            key: "38cc0e5fdc569640ad614c40fcf5432c",
+            key: "0ab1e1cb6b9b40df49560b26aec4ec79",
           },
         }
       );
@@ -120,7 +134,7 @@ export default function CheckOut(props) {
         `http://localhost:8000/cart/rajaongkir-province`,
         {
           headers: {
-            key: "38cc0e5fdc569640ad614c40fcf5432c",
+            key: "0ab1e1cb6b9b40df49560b26aec4ec79",
 
           },
         }
@@ -203,24 +217,31 @@ export default function CheckOut(props) {
   let getUserCart = async () => {
     let token = localStorage.getItem("myToken");
     try {
-      let response = await axios.get(
-        `http://localhost:8000/cart/getUserCartx`,
-        {
-          headers: { token: token },
-        }
-      );
+      let response = await axios.get(`http://localhost:8000/cart/checkout?user_id=${id}`, {
+        headers: { token: token },
+      });
+      if (response.data.data.findUserCart.length === 0) {
+        return (
+          <>
+            {setTimeout(() => Navigate("/cart"), 2000)}
+            {toast.error("Your checkout is empty. We will send you back to your Cart", {
+              id: "no_checkout",
+              duration: 2000,
+            })}
+          </>
+        )
+      }
       let item_weight = 0;
-      response.data.data.forEach((v, i) => {
+      response.data.data.findUserCart.forEach((v, i) => {
         item_weight = v.quantity * 1000;
       });
       setweight(item_weight);
-      setCart(response.data.data);
-      setorigin(
-        response.data.data[0].product.product_stocks[0].warehouse.city.split(
-          "."
-        )[0]
-      );
-      setgetWHid(response.data.data[0].product.product_stocks[0].warehouse_id);
+      setCart(response.data.data.findUserCart);
+      setCartId(response.data.data.cartId)
+
+      // need improvement later by checking nearest WH
+      setorigin(response.data.data.findUserCart[0].product.product_stocks[0].warehouse.city.split(".")[0]);
+      setgetWHid(response.data.data.findUserCart[0].product.product_stocks[0].warehouse_id);
     } catch (error) {
       console.log(error);
     }
@@ -246,7 +267,7 @@ export default function CheckOut(props) {
         {
           headers: {
             token: token,
-            key: "38cc0e5fdc569640ad614c40fcf5432c",
+            key: "0ab1e1cb6b9b40df49560b26aec4ec79",
           },
         }
       );
@@ -285,6 +306,33 @@ export default function CheckOut(props) {
       console.log(error);
     }
   };
+
+  const createOrder = async () => {
+    try {
+      // get value
+      
+      // post order
+      
+      if (shippingMethod === "") {
+        toast.error('Please select shipping method first')
+      }  else {
+        await axios.post(
+          `http://localhost:8000/order/create-order?paid_amt=${getTotalPrice()}&address=${useraddressid}&ship_cost=${shippingCost}&uid=${id}&whid=${getWHid}`,
+          {
+            cartId: cartId
+          }
+        )
+
+        toast.success("Order successfully placed", { duration: 3000 })
+        window.location.href = '/order'
+      }
+
+      
+
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
 
   const sendDataToOrder = async (data) => {
     setShow({ ...show, loading: true });
@@ -325,12 +373,16 @@ export default function CheckOut(props) {
   };
 
   useEffect(() => {
+    getId();
     rakirCity();
     rakirProvince();
     getAddress();
-    getUserCart();
     selectedAddress();
   }, []);
+  
+  useEffect(() => {
+    getUserCart();
+  }, [id])
 
   useEffect(() => {
     getCourier();
@@ -339,6 +391,7 @@ export default function CheckOut(props) {
 
   return (
     <>
+    <Box w={'100%'} justifyContent={'space-between'} display={'flex'} flexDirection={'column'} alignItems={'space-between'} pt={'5'} pb={'10'} >
       <div className=" mt-[15px] pl-[24px] ">
         <div className="border-b-2">
           <h1 className="font-ibmBold">CheckOut</h1>
@@ -797,12 +850,13 @@ export default function CheckOut(props) {
           type="button"
           disabled={disable}
 
-          onClick={() => sendDataToOrder()}
+          onClick={() => createOrder()}
 
         >
-          <Text className=" font-ibmFontRegular">Pay</Text>
+          <Text className=" font-ibmFontRegular">Create Order</Text>
         </Button>
       </div>
+      </Box>
     </>
   );
 }
