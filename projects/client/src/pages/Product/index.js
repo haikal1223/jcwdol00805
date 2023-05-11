@@ -36,7 +36,7 @@ export default function Product(props) {
         `http://localhost:8000/product/detail/${id}`
       );
       setProductData(getProductDetail.data.data[0]);
-    } catch (error) { }
+    } catch (error) {}
   };
 
   let getCartFilterProduct = async () => {
@@ -56,7 +56,7 @@ export default function Product(props) {
           setQuantity(1);
         }
       }
-    } catch (error) { }
+    } catch (error) {}
   };
 
   let getProductStock = async () => {
@@ -70,7 +70,51 @@ export default function Product(props) {
         sumStock += getProductStock.data.data[i].stock;
       }
       setStock(sumStock);
-    } catch (error) { }
+    } catch (error) {}
+  };
+
+  let handleAddOrder = async () => {
+    try {
+      if (!props.login) {
+        toast.error("Please log in first", {
+          duration: 3000,
+        });
+      } else {
+        if (quantity === 1) {
+          console.log(userId);
+          let addCart = await axios.post(`http://localhost:8000/cart/addCart`, {
+            quantity,
+            price,
+            user_id: userId,
+            product_id: id,
+          });
+
+          toast.success("Added to cart", {
+            duration: 3000,
+          });
+        } else {
+          if (quantity > stock) {
+            toast.error("Your cart has maximum stock of the product", {
+              duration: 3000,
+            });
+          } else {
+            let updateCart = await axios.patch(
+              `http://localhost:8000/cart/updateCart?user_id=${userId}&product_id=${id}`,
+              {
+                quantity,
+                price,
+              }
+            );
+            toast.success("Added to cart", {
+              duration: 3000,
+            });
+          }
+        }
+        getCartFilterProduct();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleQuantityChange = (type) => {
@@ -78,53 +122,6 @@ export default function Product(props) {
       setQuantity(quantity + 1);
     } else if (type === "decrease" && quantity > 1) {
       setQuantity(quantity - 1);
-
-      let handleAddOrder = async () => {
-        try {
-          if (!props.login) {
-            toast.error("Please log in first", {
-              duration: 3000,
-            });
-          } else {
-            if (quantity === 1) {
-              console.log(userId);
-              let addCart = await axios.post(
-                `http://localhost:8000/cart/addCart`,
-                {
-                  quantity,
-                  price,
-                  user_id: userId,
-                  product_id: id,
-                }
-              );
-
-              toast.success("Added to cart", {
-                duration: 3000,
-              });
-            } else {
-              if (quantity > stock) {
-                toast.error("Your cart has maximum stock of the product", {
-                  duration: 3000,
-                });
-              } else {
-                let updateCart = await axios.patch(
-                  `http://localhost:8000/cart/updateCart?user_id=${userId}&product_id=${id}`,
-                  {
-                    quantity,
-                    price,
-                  }
-                );
-                toast.success("Added to cart", {
-                  duration: 3000,
-                });
-              }
-            }
-            getCartFilterProduct();
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      };
     }
   };
   useEffect(() => {
@@ -158,6 +155,7 @@ export default function Product(props) {
               currency: "IDR",
             })}
           </Text>
+          <Text align="center">Stock: {stock}</Text>
 
           <Box p="5">
             <Box w="full" as="button" mt={10}>
@@ -170,18 +168,37 @@ export default function Product(props) {
                   variant="outline"
                   isDisabled={quantity === 1}
                 />
-                <Button
-                  w="full"
-                  bg={"#5D5FEF"}
-                  color="white"
-                  _hover={{
-                    color: "blue.500",
-                    bg: "white",
-                    border: "1px solid skyblue",
-                  }}
-                >
-                  ADD TO CART ({quantity})
-                </Button>
+                {quantity > stock ? (
+                  <Button
+                    w="full"
+                    bg={"#5D5FEF"}
+                    color="white"
+                    _hover={{
+                      color: "blue.500",
+                      bg: "white",
+                      border: "1px solid skyblue",
+                    }}
+                    onClick={handleAddOrder}
+                    isDisabled={quantity > stock}
+                  >
+                    ADD TO CART ({quantity - 1})
+                  </Button>
+                ) : (
+                  <Button
+                    w="full"
+                    bg={"#5D5FEF"}
+                    color="white"
+                    _hover={{
+                      color: "blue.500",
+                      bg: "white",
+                      border: "1px solid skyblue",
+                    }}
+                    onClick={handleAddOrder}
+                    isDisabled={quantity > stock}
+                  >
+                    ADD TO CART ({quantity})
+                  </Button>
+                )}
                 <IconButton
                   aria-label="increase quantity"
                   icon={<AddIcon />}

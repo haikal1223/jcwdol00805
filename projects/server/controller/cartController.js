@@ -216,6 +216,7 @@ module.exports = {
     try {
       let { quantity, price, user_id, product_id } = req.body;
       let dataToSend = await db.cart.create({
+        is_checked: 1,
         quantity,
         price,
         user_id,
@@ -230,7 +231,7 @@ module.exports = {
     } catch (error) {
       res.status(404).send({
         isError: true,
-        message: "Something Error",
+        message: error,
         data: error,
       });
     }
