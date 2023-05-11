@@ -100,6 +100,7 @@ function App() {
     return children;
   };
 
+
   const AuthMainAdmin = ({ children }) => {
     const adminRoleLogged = localStorage.getItem("role");
 

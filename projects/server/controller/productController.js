@@ -154,7 +154,7 @@ module.exports = {
       // get value
       let { product_id } = req.query;
 
-      const findProductStock = await db.product_stock.findOne({
+      const findProductStock = await db.product_stock.findAll({
         where: {
           product_id,
         },

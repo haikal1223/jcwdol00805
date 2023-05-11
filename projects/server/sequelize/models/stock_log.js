@@ -1,7 +1,9 @@
+
 'use strict';
 const {
   Model
 } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class stock_log extends Model {
     /**
@@ -40,3 +42,4 @@ module.exports = (sequelize, DataTypes) => {
   });
   return stock_log;
 };
+
