@@ -66,8 +66,8 @@ module.exports = {
       );
 
       let products = [...productWithStock[0], ...productWithoutStock[0]].slice(
-        offset,
-        offset + row
+        parseInt(offset),
+        parseInt(offset) + parseInt(row)
       );
 
       let numItem = await sequelize.query(
