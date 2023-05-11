@@ -36,6 +36,7 @@ export default function Product(props) {
         `http://localhost:8000/product/detail/${id}`
       );
       setProductData(getProductDetail.data.data[0]);
+      setPrice(getProductDetail.data.data[0].price);
     } catch (error) {}
   };
 
