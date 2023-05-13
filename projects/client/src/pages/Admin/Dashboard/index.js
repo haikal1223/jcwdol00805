@@ -1,31 +1,20 @@
 import {
-  Stack,
   Button,
   Text,
-  TableContainer,
   Table,
-  TableCaption,
   Thead,
   Tr,
   Th,
   Tbody,
+  Spacer,
   Td,
-  Tfoot,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalCloseButton,
   Box,
+  Flex,
   VStack,
   HStack,
   Heading,
-  FormControl,
-  FormLabel,
   Input,
   InputGroup,
-  InputRightElement,
-  Icon,
   Select,
   IconButton,
   Stat,
@@ -68,6 +57,23 @@ const AdminUser = () => {
   const [localWarehouseAdminId, setLocalWarehouseAdminId] = useState("");
   const [adminType, setAdminType] = useState("");
   const [adminId, setAdminId] = useState("");
+
+  const [productStockData, setProductStockData] = useState([]);
+  const [stockLogData, setStockLogData] = useState([]);
+  const [warehouseId, setWarehouseId] = useState(null);
+  const [productId, setProductId] = useState(null);
+  const [month, setMonth] = useState(null);
+  const [year, setYear] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [warehouses, setWarehouses] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [pageAdmin, setPageAdmin] = useState(1);
+  const [maxPageAdmin, setMaxPageAdmin] = useState(0);
+  const [pageUser, setPageUser] = useState(1);
+  const [maxPageUser, setMaxPageUser] = useState(0);
+  const rowPerPage = 10;
+  const [productStockMode, setProductStockMode] = useState(false);
+  const [detailProductStockMode, setDetailProductStockMode] = useState(false);
 
   const [filter, setFilter] = useState({
     searchProductName: "",
@@ -151,6 +157,146 @@ const AdminUser = () => {
       console.log(error);
     }
   };
+
+  const fetchWarehouses = async () => {
+    setLoading(true);
+    try {
+      const token = Cookies.get("adminToken");
+      const response = await axios.get(
+        "http://localhost:8000/admin/warehouses",
+        {
+          headers: { token },
+        }
+      );
+      setWarehouses(response.data.data);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("http://localhost:8000/admin/products");
+      setProducts(response.data.data);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  };
+
+  const fetchStockLog = async () => {
+    setLoading(true);
+    try {
+      const token = Cookies.get("adminToken");
+      const response = await axios.get(
+        "http://localhost:8000/admin/detail-report",
+        {
+          params: {
+            product_id: productId,
+            warehouse_id: warehouseId,
+            month,
+            year,
+          },
+          headers: { token },
+        }
+      );
+      setStockLogData(response.data.data);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  };
+
+  const fetchProductStockData = async () => {
+    setLoading(true);
+    try {
+      const token = Cookies.get("adminToken");
+      const response = await axios.get(
+        "http://localhost:8000/admin/sum-report",
+        {
+          params: { warehouse_id: warehouseId, month, year },
+          headers: { token },
+        }
+      );
+      setProductStockData(response.data.data);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  };
+
+  const handleProductChange2 = (event) => {
+    setProductId(event.target.value);
+  };
+
+  const handleWarehouseChange2 = (event) => {
+    setWarehouseId(event.target.value);
+  };
+
+  const handleMonthChange2 = (event) => {
+    setMonth(event.target.value);
+  };
+
+  const handleYearChange2 = (event) => {
+    setYear(event.target.value);
+  };
+
+  const handleWarehouseChange = (event) => {
+    setWarehouseId(event.target.value);
+  };
+
+  const handleMonthChange = (event) => {
+    setMonth(event.target.value);
+  };
+
+  const handleYearChange = (event) => {
+    setYear(event.target.value);
+  };
+
+  const nextPageHandler = () => {
+    if (pageAdmin < maxPageAdmin) {
+      setPageAdmin(pageAdmin + 1);
+    }
+    if (pageUser < maxPageUser) {
+      setPageUser(pageUser + 1);
+    }
+  };
+  const prevPageHandler = () => {
+    if (pageAdmin > 1) {
+      setPageAdmin(pageAdmin - 1);
+    }
+    if (pageUser > 1) {
+      setPageUser(pageUser - 1);
+    }
+  };
+  const firstPageHandler = () => {
+    if (pageAdmin > 1) {
+      setPageAdmin(1);
+    }
+    if (pageUser > 1) {
+      setPageUser(1);
+    }
+  };
+  const maxPageHandler = () => {
+    if (pageAdmin < maxPageAdmin) {
+      setPageAdmin(maxPageAdmin);
+    }
+    if (pageUser < maxPageUser) {
+      setPageUser(maxPageUser);
+    }
+  };
+
+  useEffect(() => {
+    fetchWarehouses();
+    fetchProducts();
+    fetchStockLog();
+  }, []);
 
   useEffect(() => {
     getWarehouse();
@@ -565,6 +711,8 @@ const AdminUser = () => {
     setAllSalesMode(true);
     setCategorySalesMode(false);
     setProductSalesMode(false);
+    setProductStockMode(false);
+    setDetailProductStockMode(false);
     setSalesTitle("Sales Report");
   };
 
@@ -572,6 +720,8 @@ const AdminUser = () => {
     setAllSalesMode(false);
     setCategorySalesMode(true);
     setProductSalesMode(false);
+    setProductStockMode(false);
+    setDetailProductStockMode(false);
     setSalesTitle("Sales Report by Product Category");
   };
 
@@ -579,285 +729,650 @@ const AdminUser = () => {
     setAllSalesMode(false);
     setCategorySalesMode(false);
     setProductSalesMode(true);
+    setProductStockMode(false);
+    setDetailProductStockMode(false);
     setSalesTitle("Sales Report by Product");
   };
 
+  let changeProductStockMode = () => {
+    setAllSalesMode(false);
+    setCategorySalesMode(false);
+    setProductSalesMode(false);
+    setProductStockMode(true);
+    setDetailProductStockMode(false);
+    setSalesTitle("Product Stock History Report");
+  };
+
+  let changeDetailProductMode = () => {
+    setAllSalesMode(false);
+    setCategorySalesMode(false);
+    setProductSalesMode(false);
+    setProductStockMode(false);
+    setDetailProductStockMode(true);
+    setSalesTitle("Detail Product Report");
+  };
+
   return (
-    <div className="w-[100%]">
-      <div className="w-[100%] flex flex-1 justify-between">
-        <Sidebar />
-        <div className="bg-white w-[1240px] h-auto z-0 shadow-inner flex flex-col overflow-auto py-[40px] pl-[50px]">
-          <div className="w-[1140px] h-auto">
-            <div className="w-full h-full">
-              <VStack align={["left"]} w="full" className="font-ibmFont">
-                <Text
-                  fontSize={30}
-                  fontWeight={500}
-                  borderBottom="2px"
-                  borderColor="black"
-                >
-                  <span className="text-purple">Admin</span>
-                  <span> Dashboard</span>
-                </Text>
-                <HStack justifyContent={"space-between"}>
-                  <div className="w-auto flex justify-between items-center my-7">
-                    <Text
-                      w={"auto"}
-                      className="mr-1 font-ibmMed"
-                      fontSize={18}
-                      fontWeight={500}
-                    >
-                      Warehouse:
-                    </Text>
-                    {adminType === "admin" ? (
+    <>
+      <div className="w-[100%]">
+        <div className="w-[100%] flex flex-1 justify-between">
+          <Sidebar />
+          <div className="bg-white w-[1240px] h-auto z-0 shadow-inner flex flex-col overflow-auto py-[40px] pl-[50px]">
+            <div className="w-[1140px] h-auto">
+              <div className="w-full h-full">
+                <VStack align={["left"]} w="full" className="font-ibmFont">
+                  <Text
+                    fontSize={30}
+                    fontWeight={500}
+                    borderBottom="2px"
+                    borderColor="black"
+                  >
+                    <span className="text-purple">Admin</span>
+                    <span> Dashboard</span>
+                  </Text>
+                  <HStack justifyContent={"space-between"}>
+                    <div className="w-auto flex justify-between items-center my-7">
+                      <Text
+                        w={"auto"}
+                        className="mr-1 font-ibmMed"
+                        fontSize={18}
+                        fontWeight={500}
+                      >
+                        Warehouse:
+                      </Text>
+                      {adminType === "admin" ? (
+                        <>
+                          <Select
+                            w={"180px"}
+                            name="filterWarehouse"
+                            placeholder="All warehouse"
+                            color={"gray"}
+                            onChange={searchInputHandler}
+                          >
+                            {whList.map((val, idx) => {
+                              return (
+                                <option value={val.id} key={idx}>
+                                  {val.name}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                        </>
+                      ) : (
+                        <>
+                          <Text
+                            w={"auto"}
+                            className="mr-1 font-ibmMed"
+                            fontSize={18}
+                            fontWeight={500}
+                          >
+                            {localWarehouseAdminName}
+                          </Text>
+                        </>
+                      )}
+                    </div>
+                  </HStack>
+                  <HStack>
+                    {allSalesMode ? (
                       <>
-                        <Select
-                          w={"180px"}
-                          name="filterWarehouse"
-                          placeholder="All warehouse"
-                          color={"gray"}
-                          onChange={searchInputHandler}
-                        >
-                          {whList.map((val, idx) => {
-                            return (
-                              <option value={val.id} key={idx}>
-                                {val.name}
-                              </option>
-                            );
-                          })}
-                        </Select>
+                        <Button bg="#5D5FEF" color="white" size="lg">
+                          Sales Report
+                        </Button>
                       </>
                     ) : (
                       <>
-                        <Text
-                          w={"auto"}
-                          className="mr-1 font-ibmMed"
-                          fontSize={18}
-                          fontWeight={500}
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          color="#5D5FEF"
+                          borderColor="#5D5FEF"
+                          onClick={changeAllMode}
                         >
-                          {localWarehouseAdminName}
-                        </Text>
+                          Sales Report
+                        </Button>
                       </>
                     )}
-                  </div>
-                </HStack>
-                <HStack>
+                    {categorySalesMode ? (
+                      <>
+                        <Button bg="#5D5FEF" color="white" size="lg">
+                          Sales Report by Product Category
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          color="#5D5FEF"
+                          borderColor="#5D5FEF"
+                          onClick={changeCategoryMode}
+                        >
+                          Sales Report by Product Category
+                        </Button>
+                      </>
+                    )}
+
+                    {productSalesMode ? (
+                      <>
+                        <Button bg="#5D5FEF" color="white" size="lg">
+                          Sales Report by Product
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          color="#5D5FEF"
+                          borderColor="#5D5FEF"
+                          onClick={changeProductMode}
+                        >
+                          Sales Report by Product
+                        </Button>
+                      </>
+                    )}
+                    {productStockMode ? (
+                      <>
+                        <Button bg="#5D5FEF" color="white" size="lg">
+                          Product Stock Report
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          color="#5D5FEF"
+                          borderColor="#5D5FEF"
+                          onClick={changeProductStockMode}
+                        >
+                          Product Stock Report
+                        </Button>
+                      </>
+                    )}
+                    {detailProductStockMode ? (
+                      <>
+                        <Button bg="#5D5FEF" color="white" size="lg">
+                          Detail Product Report
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          color="#5D5FEF"
+                          borderColor="#5D5FEF"
+                          onClick={changeDetailProductMode}
+                        >
+                          Detail Product Report
+                        </Button>
+                      </>
+                    )}
+                  </HStack>
+                  <Text fontSize={24} fontWeight={500} className="pt-4">
+                    {salesTitle}
+                  </Text>
+                  <Text fontSize={20} fontWeight={500} className="py-4">
+                    {`${lastMonth.toUTCString().slice(5, 16)} - ${today
+                      .toUTCString()
+                      .slice(5, 16)} (last 30 days)`}
+                  </Text>
                   {allSalesMode ? (
                     <>
-                      <Button bg="#5D5FEF" color="white" size="lg">
-                        Sales Report
-                      </Button>
+                      <StatGroup>
+                        <Stat>
+                          <StatLabel>Number of Order</StatLabel>
+                          <StatNumber>
+                            {allStats.findOrderThisMonth?.length}
+                          </StatNumber>
+                          <StatHelpText>
+                            {percentNumberOrder() >= 0 ? (
+                              <>
+                                <StatArrow type="increase" />
+                                {`${(percentNumberOrder() * 100).toFixed(2)}%`}
+                              </>
+                            ) : (
+                              <>
+                                <StatArrow type="decrease" />
+                                {`${(percentNumberOrder() * 100).toFixed(2)}%`}
+                              </>
+                            )}
+                          </StatHelpText>
+                        </Stat>
+                        <Stat>
+                          <StatLabel>Number of Product Sold</StatLabel>
+                          <StatNumber>
+                            {renderQuantity(allStats.findOrderDetailThisMonth)}
+                          </StatNumber>
+                          <StatHelpText>
+                            {percentNumberProduct() >= 0 ? (
+                              <>
+                                <StatArrow type="increase" />
+                                {`${(percentNumberProduct() * 100).toFixed(
+                                  2
+                                )}%`}
+                              </>
+                            ) : (
+                              <>
+                                <StatArrow type="decrease" />
+                                {`${(percentNumberProduct() * 100).toFixed(
+                                  2
+                                )}%`}
+                              </>
+                            )}
+                          </StatHelpText>
+                        </Stat>
+                        <Stat>
+                          <StatLabel>Total Revenue</StatLabel>
+                          <StatNumber>
+                            {`Rp${renderRevenue(
+                              allStats.findOrderDetailThisMonth
+                            ).toLocaleString("id-ID", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}`}
+                          </StatNumber>
+                          <StatHelpText>
+                            {percentRevenue() >= 0 ? (
+                              <>
+                                <StatArrow type="increase" />
+                                {`${(percentRevenue() * 100).toFixed(2)}%`}
+                              </>
+                            ) : (
+                              <>
+                                <StatArrow type="increase" />
+                                {`${(percentRevenue() * 100).toFixed(2)}%`}
+                              </>
+                            )}
+                          </StatHelpText>
+                        </Stat>
+                      </StatGroup>
+                      <StatGroup>
+                        <Stat>
+                          <StatLabel>Average Revenue per Order</StatLabel>
+                          <StatNumber>
+                            {`Rp${(
+                              renderRevenue(allStats.findOrderDetailThisMonth) /
+                              allStats.findOrderThisMonth?.length
+                            ).toLocaleString("id-ID", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}`}
+                          </StatNumber>
+                          <StatHelpText></StatHelpText>
+                        </Stat>
+                        <Stat>
+                          <StatLabel>Average Revenue per Product</StatLabel>
+                          <StatNumber>
+                            {`Rp${(
+                              renderRevenue(allStats.findOrderDetailThisMonth) /
+                              renderQuantity(allStats.findOrderDetailThisMonth)
+                            ).toLocaleString("id-ID", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}`}
+                          </StatNumber>
+                          <StatHelpText></StatHelpText>
+                        </Stat>
+                        <Stat>
+                          <StatLabel></StatLabel>
+                          <StatNumber></StatNumber>
+                          <StatHelpText></StatHelpText>
+                        </Stat>
+                      </StatGroup>
                     </>
-                  ) : (
+                  ) : productStockMode ? (
                     <>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        color="#5D5FEF"
-                        borderColor="#5D5FEF"
-                        onClick={changeAllMode}
-                      >
-                        Sales Report
-                      </Button>
-                    </>
-                  )}
-                  {categorySalesMode ? (
-                    <>
-                      <Button bg="#5D5FEF" color="white" size="lg">
-                        Sales Report by Product Category
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        color="#5D5FEF"
-                        borderColor="#5D5FEF"
-                        onClick={changeCategoryMode}
-                      >
-                        Sales Report by Product Category
-                      </Button>
-                    </>
-                  )}
-
-                  {productSalesMode ? (
-                    <>
-                      <Button bg="#5D5FEF" color="white" size="lg">
-                        Sales Report by Product
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        color="#5D5FEF"
-                        borderColor="#5D5FEF"
-                        onClick={changeProductMode}
-                      >
-                        Sales Report by Product
-                      </Button>
-                    </>
-                  )}
-                </HStack>
-                <Text fontSize={24} fontWeight={500} className="pt-4">
-                  {salesTitle}
-                </Text>
-                <Text fontSize={20} fontWeight={500} className="py-4">
-                  {`${lastMonth.toUTCString().slice(5, 16)} - ${today
-                    .toUTCString()
-                    .slice(5, 16)} (last 30 days)`}
-                </Text>
-                {allSalesMode ? (
-                  <>
-                    <StatGroup>
-                      <Stat>
-                        <StatLabel>Number of Order</StatLabel>
-                        <StatNumber>
-                          {allStats.findOrderThisMonth?.length}
-                        </StatNumber>
-                        <StatHelpText>
-                          {percentNumberOrder() >= 0 ? (
-                            <>
-                              <StatArrow type="increase" />
-                              {`${(percentNumberOrder() * 100).toFixed(2)}%`}
-                            </>
-                          ) : (
-                            <>
-                              <StatArrow type="decrease" />
-                              {`${(percentNumberOrder() * 100).toFixed(2)}%`}
-                            </>
-                          )}
-                        </StatHelpText>
-                      </Stat>
-                      <Stat>
-                        <StatLabel>Number of Product Sold</StatLabel>
-                        <StatNumber>
-                          {renderQuantity(allStats.findOrderDetailThisMonth)}
-                        </StatNumber>
-                        <StatHelpText>
-                          {percentNumberProduct() >= 0 ? (
-                            <>
-                              <StatArrow type="increase" />
-                              {`${(percentNumberProduct() * 100).toFixed(2)}%`}
-                            </>
-                          ) : (
-                            <>
-                              <StatArrow type="decrease" />
-                              {`${(percentNumberProduct() * 100).toFixed(2)}%`}
-                            </>
-                          )}
-                        </StatHelpText>
-                      </Stat>
-                      <Stat>
-                        <StatLabel>Total Revenue</StatLabel>
-                        <StatNumber>
-                          {`Rp${renderRevenue(
-                            allStats.findOrderDetailThisMonth
-                          ).toLocaleString("id-ID", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}`}
-                        </StatNumber>
-                        <StatHelpText>
-                          {percentRevenue() >= 0 ? (
-                            <>
-                              <StatArrow type="increase" />
-                              {`${(percentRevenue() * 100).toFixed(2)}%`}
-                            </>
-                          ) : (
-                            <>
-                              <StatArrow type="increase" />
-                              {`${(percentRevenue() * 100).toFixed(2)}%`}
-                            </>
-                          )}
-                        </StatHelpText>
-                      </Stat>
-                    </StatGroup>
-                    <StatGroup>
-                      <Stat>
-                        <StatLabel>Average Revenue per Order</StatLabel>
-                        <StatNumber>
-                          {`Rp${(
-                            renderRevenue(allStats.findOrderDetailThisMonth) /
-                            allStats.findOrderThisMonth?.length
-                          ).toLocaleString("id-ID", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}`}
-                        </StatNumber>
-                        <StatHelpText></StatHelpText>
-                      </Stat>
-                      <Stat>
-                        <StatLabel>Average Revenue per Product</StatLabel>
-                        <StatNumber>
-                          {`Rp${(
-                            renderRevenue(allStats.findOrderDetailThisMonth) /
-                            renderQuantity(allStats.findOrderDetailThisMonth)
-                          ).toLocaleString("id-ID", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}`}
-                        </StatNumber>
-                        <StatHelpText></StatHelpText>
-                      </Stat>
-                      <Stat>
-                        <StatLabel></StatLabel>
-                        <StatNumber></StatNumber>
-                        <StatHelpText></StatHelpText>
-                      </Stat>
-                    </StatGroup>
-                  </>
-                ) : categorySalesMode ? (
-                  <>{renderCategoryDashboard()}</>
-                ) : (
-                  <>
-                    <div className="flex justify-between mt-4">
-                      <div className="w-auto flex justify-between items-center">
-                        <Text
-                          w={"auto"}
-                          className="mr-1 font-ibmMed"
-                          fontSize={18}
-                          fontWeight={500}
-                        >
-                          Product Category:
-                        </Text>
-                        <Select
-                          w={"auto"}
-                          name="filterCategory"
-                          placeholder="Choose a category"
-                          color={"gray"}
-                          onChange={searchInputHandler}
-                        >
-                          {categoryList.map((val, idx) => {
-                            return (
-                              <option value={val.id} key={idx}>
-                                {val.category_name}
-                              </option>
-                            );
-                          })}
-                        </Select>
+                      <div className="w-[100%] flex flex-1 justify-between">
+                        <div className=" w-[1240px] h-auto z-0 shadow-inner flex flex-col py-[40px] px-[50px]">
+                          <div className="w-[1140px] flex justify-center items-start overflow-auto "></div>
+                          <div className="flex justify-center"></div>
+                          <Box>
+                            <Flex align="center">
+                              <Spacer />
+                              <VStack spacing={4} alignItems="flex-end">
+                                <Select
+                                  placeholder="Select Warehouse"
+                                  onChange={handleWarehouseChange}
+                                >
+                                  {warehouses.map((warehouse) => (
+                                    <option
+                                      key={warehouse.id}
+                                      value={warehouse.id}
+                                    >
+                                      {warehouse.name}
+                                    </option>
+                                  ))}
+                                </Select>
+                                <Flex align="center">
+                                  <Select
+                                    placeholder="Month"
+                                    onChange={handleMonthChange}
+                                    mr={2}
+                                  >
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                  </Select>
+                                  <Select
+                                    placeholder="Year"
+                                    onChange={handleYearChange}
+                                  >
+                                    <option value="2022">2022</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2025">2025</option>
+                                  </Select>
+                                  <Button
+                                    ml={4}
+                                    colorScheme="blue"
+                                    onClick={fetchProductStockData}
+                                  >
+                                    Filter
+                                  </Button>
+                                </Flex>
+                              </VStack>
+                            </Flex>
+                            <Table mt={8} size="sm">
+                              <Thead>
+                                <Tr>
+                                  <Th>Product ID</Th>
+                                  <Th>Product Name</Th>
+                                  <Th>Initial Stock</Th>
+                                  <Th>Addition</Th>
+                                  <Th>Reduction</Th>
+                                  <Th>Latest Stock</Th>
+                                  <Th>Warehouse ID</Th>
+                                </Tr>
+                              </Thead>
+                              <Tbody>
+                                {productStockData.map((product) => (
+                                  <Tr key={product.id}>
+                                    <Td>{product.product_id}</Td>
+                                    <Td>{product.product_name}</Td>
+                                    <Td>{product.Initial_Stock}</Td>
+                                    <Td>{product.addition}</Td>
+                                    <Td>{product.reduction}</Td>
+                                    <Td>{product.latest_stock}</Td>
+                                    <Td>{product.warehouse_id}</Td>
+                                  </Tr>
+                                ))}
+                              </Tbody>
+                            </Table>
+                            <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
+                              {" "}
+                              <IconButton
+                                isDisabled={pageAdmin === 1}
+                                onClick={firstPageHandler}
+                                size={"sm"}
+                                bg="#5D5FEF"
+                                aria-label="previous page"
+                                icon={
+                                  <TbChevronsLeft
+                                    color="white"
+                                    boxsize={"16px"}
+                                  />
+                                }
+                              />
+                              <IconButton
+                                isDisabled={pageAdmin === 1}
+                                onClick={prevPageHandler}
+                                size={"sm"}
+                                bg="#5D5FEF"
+                                aria-label="previous page"
+                                icon={
+                                  <TbChevronLeft
+                                    color="white"
+                                    boxsize={"16px"}
+                                  />
+                                }
+                              />
+                              <div className="font-ibmReg text-dgrey">
+                                Page {pageAdmin} / {maxPageAdmin}
+                              </div>
+                              <IconButton
+                                isDisabled={pageAdmin === maxPageAdmin}
+                                onClick={nextPageHandler}
+                                size={"sm"}
+                                bg="#5D5FEF"
+                                aria-label="next page"
+                                icon={
+                                  <TbChevronRight
+                                    color="white"
+                                    boxsize={"16px"}
+                                  />
+                                }
+                              />
+                              <IconButton
+                                isDisabled={pageAdmin === maxPageAdmin}
+                                onClick={maxPageHandler}
+                                size={"sm"}
+                                bg="#5D5FEF"
+                                aria-label="next page"
+                                icon={
+                                  <TbChevronsRight
+                                    color="white"
+                                    boxsize={"16px"}
+                                  />
+                                }
+                              />
+                            </div>
+                          </Box>
+                        </div>
                       </div>
+                    </>
+                  ) : detailProductStockMode ? (
+                    <>
+                      <Box mt="150px">
+                        <Flex align="center">
+                          <Spacer />
+                          <VStack spacing={4} alignItems="flex-end">
+                            <Select
+                              placeholder="Select Product"
+                              onChange={handleProductChange2}
+                            >
+                              {products.map((product) => (
+                                <option key={product.id} value={product.id}>
+                                  {product.name}
+                                </option>
+                              ))}
+                            </Select>
+                            <Select
+                              placeholder="Select Warehouse"
+                              onChange={handleWarehouseChange2}
+                            >
+                              {warehouses.map((warehouse) => (
+                                <option key={warehouse.id} value={warehouse.id}>
+                                  {warehouse.name}
+                                </option>
+                              ))}
+                            </Select>
+                            <Flex align="center">
+                              <Select
+                                placeholder="Month"
+                                onChange={handleMonthChange2}
+                                mr={2}
+                              >
+                                <option value="01">January</option>
+                                <option value="02">February</option>
+                                <option value="03">March</option>
+                                <option value="04">April</option>
+                                <option value="05">May</option>
+                                <option value="06">June</option>
+                                <option value="07">July</option>
+                                <option value="08">August</option>
+                                <option value="09">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                              </Select>
+                              <Select
+                                placeholder="Year"
+                                onChange={handleYearChange2}
+                              >
+                                <option value="2022">2022</option>
+                                <option value="2023">2023</option>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                              </Select>
+                              <Button
+                                ml={4}
+                                colorScheme="blue"
+                                onClick={fetchStockLog}
+                              >
+                                Filter
+                              </Button>
+                            </Flex>
+                          </VStack>
+                        </Flex>
 
-                      <div className="mb-4 mt-4 flex justify-between" w="450px">
-                        <InputGroup>
-                          <Input
-                            w="350px"
-                            name="searchProductName"
-                            placeholder="Search by Product Name"
-                            className="p-1"
-                            onChange={searchInputHandler}
+                        <Table mt={8} size="sm">
+                          <Thead>
+                            <Tr>
+                              <Th>Product ID</Th>
+                              <Th>Mutation ID</Th>
+                              <Th>New Stock</Th>
+                              <Th>Old Stock</Th>
+                              <Th>Operation</Th>
+                              <Th>Order Id</Th>
+                              <Th>Warehouse ID</Th>
+                            </Tr>
+                          </Thead>
+                          <Tbody>
+                            {stockLogData.map((data) => (
+                              <Tr key={data.id}>
+                                <Td>{data.product_id}</Td>
+                                <Td>{data.mutation_id}</Td>
+                                <Td>{data.new_stock}</Td>
+                                <Td>{data.old_stock}</Td>
+                                <Td>{data.operation}</Td>
+                                <Td>{data.order_id}</Td>
+                                <Td>{data.warehouse_id}</Td>
+                              </Tr>
+                            ))}
+                          </Tbody>
+                        </Table>
+                        <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
+                          {" "}
+                          <IconButton
+                            isDisabled={pageAdmin === 1}
+                            onClick={firstPageHandler}
+                            size={"sm"}
+                            bg="#5D5FEF"
+                            aria-label="previous page"
+                            icon={
+                              <TbChevronsLeft color="white" boxsize={"16px"} />
+                            }
                           />
-                        </InputGroup>
-                        <Button w="100px" ml="20px" onClick={changeSort}>
-                          {sortMode === "ASC" ? "A to Z" : "Z to A"}
-                        </Button>
+                          <IconButton
+                            isDisabled={pageAdmin === 1}
+                            onClick={prevPageHandler}
+                            size={"sm"}
+                            bg="#5D5FEF"
+                            aria-label="previous page"
+                            icon={
+                              <TbChevronLeft color="white" boxsize={"16px"} />
+                            }
+                          />
+                          <div className="font-ibmReg text-dgrey">
+                            Page {pageAdmin} / {maxPageAdmin}
+                          </div>
+                          <IconButton
+                            isDisabled={pageAdmin === maxPageAdmin}
+                            onClick={nextPageHandler}
+                            size={"sm"}
+                            bg="#5D5FEF"
+                            aria-label="next page"
+                            icon={
+                              <TbChevronRight color="white" boxsize={"16px"} />
+                            }
+                          />
+                          <IconButton
+                            isDisabled={pageAdmin === maxPageAdmin}
+                            onClick={maxPageHandler}
+                            size={"sm"}
+                            bg="#5D5FEF"
+                            aria-label="next page"
+                            icon={
+                              <TbChevronsRight color="white" boxsize={"16px"} />
+                            }
+                          />
+                        </div>
+                      </Box>
+                    </>
+                  ) : categorySalesMode ? (
+                    <>{renderCategoryDashboard()}</>
+                  ) : (
+                    <>
+                      <div className="flex justify-between mt-4">
+                        <div className="w-auto flex justify-between items-center">
+                          <Text
+                            w={"auto"}
+                            className="mr-1 font-ibmMed"
+                            fontSize={18}
+                            fontWeight={500}
+                          >
+                            Product Category:
+                          </Text>
+                          <Select
+                            w={"auto"}
+                            name="filterCategory"
+                            placeholder="Choose a category"
+                            color={"gray"}
+                            onChange={searchInputHandler}
+                          >
+                            {categoryList.map((val, idx) => {
+                              return (
+                                <option value={val.id} key={idx}>
+                                  {val.category_name}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                        </div>
+
+                        <div
+                          className="mb-4 mt-4 flex justify-between"
+                          w="450px"
+                        >
+                          <InputGroup>
+                            <Input
+                              w="350px"
+                              name="searchProductName"
+                              placeholder="Search by Product Name"
+                              className="p-1"
+                              onChange={searchInputHandler}
+                            />
+                          </InputGroup>
+                          <Button w="100px" ml="20px" onClick={changeSort}>
+                            {sortMode === "ASC" ? "A to Z" : "Z to A"}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    {filter.filterCategory ? (
-                      productList.length > 0 ? (
-                        <>{renderProductDashboard()}</>
+                      {filter.filterCategory ? (
+                        productList.length > 0 ? (
+                          <>{renderProductDashboard()}</>
+                        ) : (
+                          <>
+                            <Text
+                              fontSize={24}
+                              fontWeight={500}
+                              className="text-black py-2 self-center"
+                            >
+                              ⚠️ Product is Not Found
+                            </Text>
+                          </>
+                        )
                       ) : (
                         <>
                           <Text
@@ -865,30 +1380,271 @@ const AdminUser = () => {
                             fontWeight={500}
                             className="text-black py-2 self-center"
                           >
-                            ⚠️ Product is Not Found
+                            ⚠️ Please Choose a Category
                           </Text>
                         </>
-                      )
-                    ) : (
-                      <>
-                        <Text
-                          fontSize={24}
-                          fontWeight={500}
-                          className="text-black py-2 self-center"
-                        >
-                          ⚠️ Please Choose a Category
-                        </Text>
-                      </>
-                    )}
-                  </>
-                )}
-              </VStack>
+                      )}
+                    </>
+                  )}
+                </VStack>
+              </div>
             </div>
           </div>
         </div>
+        <Toaster />
       </div>
-      <Toaster />
-    </div>
+      {/* <div className="w-[100%] flex flex-1 justify-between">
+        <Sidebar />
+        <div className="bg-[#f1f1f1] w-[1240px] h-auto z-0 shadow-inner flex flex-col py-[40px] px-[50px]">
+          <div className="w-[1140px] flex justify-center items-start overflow-auto "></div>
+          <div className="flex justify-center"></div>
+          <Box>
+            <Flex align="center">
+              <Heading
+                as="h1"
+                size="lg"
+                fontWeight="500"
+                className=" font-ibmBold"
+              >
+                Product Stock History Report
+              </Heading>
+              <Spacer />
+              <VStack spacing={4} alignItems="flex-end">
+                <Select
+                  placeholder="Select Warehouse"
+                  onChange={handleWarehouseChange}
+                >
+                  {warehouses.map((warehouse) => (
+                    <option key={warehouse.id} value={warehouse.id}>
+                      {warehouse.name}
+                    </option>
+                  ))}
+                </Select>
+                <Flex align="center">
+                  <Select
+                    placeholder="Month"
+                    onChange={handleMonthChange}
+                    mr={2}
+                  >
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                  </Select>
+                  <Select placeholder="Year" onChange={handleYearChange}>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                  </Select>
+                  <Button
+                    ml={4}
+                    colorScheme="blue"
+                    onClick={fetchProductStockData}
+                  >
+                    Filter
+                  </Button>
+                </Flex>
+              </VStack>
+            </Flex>
+            <Table mt={8} size="sm">
+              <Thead>
+                <Tr>
+                  <Th>Product ID</Th>
+                  <Th>Product Name</Th>
+                  <Th>Initial Stock</Th>
+                  <Th>Addition</Th>
+                  <Th>Reduction</Th>
+                  <Th>Latest Stock</Th>
+                  <Th>Warehouse ID</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {productStockData.map((product) => (
+                  <Tr key={product.id}>
+                    <Td>{product.product_id}</Td>
+                    <Td>{product.product_name}</Td>
+                    <Td>{product.Initial_Stock}</Td>
+                    <Td>{product.addition}</Td>
+                    <Td>{product.reduction}</Td>
+                    <Td>{product.latest_stock}</Td>
+                    <Td>{product.warehouse_id}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+            <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
+              {" "}
+              <IconButton
+                isDisabled={pageAdmin === 1}
+                onClick={firstPageHandler}
+                size={"sm"}
+                bg="#5D5FEF"
+                aria-label="previous page"
+                icon={<TbChevronsLeft color="white" boxsize={"16px"} />}
+              />
+              <IconButton
+                isDisabled={pageAdmin === 1}
+                onClick={prevPageHandler}
+                size={"sm"}
+                bg="#5D5FEF"
+                aria-label="previous page"
+                icon={<TbChevronLeft color="white" boxsize={"16px"} />}
+              />
+              <div className="font-ibmReg text-dgrey">
+                Page {pageAdmin} / {maxPageAdmin}
+              </div>
+              <IconButton
+                isDisabled={pageAdmin === maxPageAdmin}
+                onClick={nextPageHandler}
+                size={"sm"}
+                bg="#5D5FEF"
+                aria-label="next page"
+                icon={<TbChevronRight color="white" boxsize={"16px"} />}
+              />
+              <IconButton
+                isDisabled={pageAdmin === maxPageAdmin}
+                onClick={maxPageHandler}
+                size={"sm"}
+                bg="#5D5FEF"
+                aria-label="next page"
+                icon={<TbChevronsRight color="white" boxsize={"16px"} />}
+              />
+            </div>
+          </Box>
+
+          <Box mt="150px">
+            <Flex align="center">
+              <Spacer />
+              <VStack spacing={4} alignItems="flex-end">
+                <Select
+                  placeholder="Select Product"
+                  onChange={handleProductChange2}
+                >
+                  {products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  placeholder="Select Warehouse"
+                  onChange={handleWarehouseChange2}
+                >
+                  {warehouses.map((warehouse) => (
+                    <option key={warehouse.id} value={warehouse.id}>
+                      {warehouse.name}
+                    </option>
+                  ))}
+                </Select>
+                <Flex align="center">
+                  <Select
+                    placeholder="Month"
+                    onChange={handleMonthChange2}
+                    mr={2}
+                  >
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                  </Select>
+                  <Select placeholder="Year" onChange={handleYearChange2}>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                  </Select>
+                  <Button ml={4} colorScheme="blue" onClick={fetchStockLog}>
+                    Filter
+                  </Button>
+                </Flex>
+              </VStack>
+            </Flex>
+
+            <Table mt={8} size="sm">
+              <Thead>
+                <Tr>
+                  <Th>Product ID</Th>
+                  <Th>Mutation ID</Th>
+                  <Th>New Stock</Th>
+                  <Th>Old Stock</Th>
+                  <Th>Operation</Th>
+                  <Th>Order Id</Th>
+                  <Th>Warehouse ID</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {stockLogData.map((data) => (
+                  <Tr key={data.id}>
+                    <Td>{data.product_id}</Td>
+                    <Td>{data.mutation_id}</Td>
+                    <Td>{data.new_stock}</Td>
+                    <Td>{data.old_stock}</Td>
+                    <Td>{data.operation}</Td>
+                    <Td>{data.order_id}</Td>
+                    <Td>{data.warehouse_id}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+            <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
+              {" "}
+              <IconButton
+                isDisabled={pageAdmin === 1}
+                onClick={firstPageHandler}
+                size={"sm"}
+                bg="#5D5FEF"
+                aria-label="previous page"
+                icon={<TbChevronsLeft color="white" boxsize={"16px"} />}
+              />
+              <IconButton
+                isDisabled={pageAdmin === 1}
+                onClick={prevPageHandler}
+                size={"sm"}
+                bg="#5D5FEF"
+                aria-label="previous page"
+                icon={<TbChevronLeft color="white" boxsize={"16px"} />}
+              />
+              <div className="font-ibmReg text-dgrey">
+                Page {pageAdmin} / {maxPageAdmin}
+              </div>
+              <IconButton
+                isDisabled={pageAdmin === maxPageAdmin}
+                onClick={nextPageHandler}
+                size={"sm"}
+                bg="#5D5FEF"
+                aria-label="next page"
+                icon={<TbChevronRight color="white" boxsize={"16px"} />}
+              />
+              <IconButton
+                isDisabled={pageAdmin === maxPageAdmin}
+                onClick={maxPageHandler}
+                size={"sm"}
+                bg="#5D5FEF"
+                aria-label="next page"
+                icon={<TbChevronsRight color="white" boxsize={"16px"} />}
+              />
+            </div>
+          </Box>
+        </div>
+      </div> */}
+    </>
   );
 };
 

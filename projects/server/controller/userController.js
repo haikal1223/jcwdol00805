@@ -95,7 +95,7 @@ module.exports = {
     let { uid } = req.query;
     const findUsers = await db.user.findAll({
       where: {
-        uid,
+        id,
       },
     });
     if (findUsers)

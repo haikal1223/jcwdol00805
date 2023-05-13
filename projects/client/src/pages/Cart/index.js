@@ -156,12 +156,23 @@ export default function Cart() {
           </Text>
         </>
       )}
-      <Link href="/checkout">
-        <Button w="420px" mx="30px" mt="30px">
-          Checkout
-        </Button>
-      </Link>
-      <Toaster />
+      <div className="flex flex-col items-center">
+        <Button
+            rounded="3xl"
+            w="248px"
+            h="40px"
+            backgroundColor="#5D5FEF"
+            color="white"
+            mt="5"
+            mb="5"
+            type="button"
+
+            onClick={() => window.location.href = '/checkout'}
+
+          >
+            <Text className=" font-ibmFontRegular">Checkout</Text>
+          </Button>
+      </div>
     </>
   );
 }
