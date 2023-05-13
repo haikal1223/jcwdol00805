@@ -32,7 +32,7 @@ export default function CheckOut(props) {
   });
 
   const [id, setId] = useState("");
-  const [cartId, setCartId] = useState([])
+  const [cartId, setCartId] = useState([]);
   const [getWHid, setgetWHid] = useState([]);
   const [useraddressid, setuseraddressid] = useState([]);
   const [data, setData] = useState([]);
@@ -118,7 +118,7 @@ export default function CheckOut(props) {
         `http://localhost:8000/cart/rajaongkir-city?province_id=${province_id}`,
         {
           headers: {
-            key: "0ab1e1cb6b9b40df49560b26aec4ec79",
+            key: "98114927956fc9abdce23deeef6cfb17  ",
           },
         }
       );
@@ -134,8 +134,7 @@ export default function CheckOut(props) {
         `http://localhost:8000/cart/rajaongkir-province`,
         {
           headers: {
-            key: "0ab1e1cb6b9b40df49560b26aec4ec79",
-
+            key: "98114927956fc9abdce23deeef6cfb17  ",
           },
         }
       );
@@ -217,19 +216,25 @@ export default function CheckOut(props) {
   let getUserCart = async () => {
     let token = localStorage.getItem("myToken");
     try {
-      let response = await axios.get(`http://localhost:8000/cart/checkout?user_id=${id}`, {
-        headers: { token: token },
-      });
+      let response = await axios.get(
+        `http://localhost:8000/cart/checkout?user_id=${id}`,
+        {
+          headers: { token: token },
+        }
+      );
       if (response.data.data.findUserCart.length === 0) {
         return (
           <>
             {setTimeout(() => Navigate("/cart"), 2000)}
-            {toast.error("Your checkout is empty. We will send you back to your Cart", {
-              id: "no_checkout",
-              duration: 2000,
-            })}
+            {toast.error(
+              "Your checkout is empty. We will send you back to your Cart",
+              {
+                id: "no_checkout",
+                duration: 2000,
+              }
+            )}
           </>
-        )
+        );
       }
       let item_weight = 0;
       response.data.data.findUserCart.forEach((v, i) => {
@@ -237,11 +242,18 @@ export default function CheckOut(props) {
       });
       setweight(item_weight);
       setCart(response.data.data.findUserCart);
-      setCartId(response.data.data.cartId)
+      setCartId(response.data.data.cartId);
 
       // need improvement later by checking nearest WH
-      setorigin(response.data.data.findUserCart[0].product.product_stocks[0].warehouse.city.split(".")[0]);
-      setgetWHid(response.data.data.findUserCart[0].product.product_stocks[0].warehouse_id);
+      setorigin(
+        response.data.data.findUserCart[0].product.product_stocks[0].warehouse.city.split(
+          "."
+        )[0]
+      );
+      setgetWHid(
+        response.data.data.findUserCart[0].product.product_stocks[0]
+          .warehouse_id
+      );
     } catch (error) {
       console.log(error);
     }
@@ -267,7 +279,7 @@ export default function CheckOut(props) {
         {
           headers: {
             token: token,
-            key: "0ab1e1cb6b9b40df49560b26aec4ec79",
+            key: "98114927956fc9abdce23deeef6cfb17  ",
           },
         }
       );
@@ -309,30 +321,25 @@ export default function CheckOut(props) {
 
   const createOrder = async () => {
     try {
-      // get value
-      
-      // post order
-      
+      let token = localStorage.getItem("myToken");
       if (shippingMethod === "") {
-        toast.error('Please select shipping method first')
-      }  else {
+        toast.error("Please select shipping method first");
+      } else {
         await axios.post(
           `http://localhost:8000/order/create-order?paid_amt=${getTotalPrice()}&address=${useraddressid}&ship_cost=${shippingCost}&uid=${id}&whid=${getWHid}`,
           {
-            cartId: cartId
-          }
-        )
+            cartId: cartId,
+          },
+          { headers: { token: token } }
+        );
 
-        toast.success("Order successfully placed", { duration: 3000 })
-        window.location.href = '/order'
+        toast.success("Order successfully placed", { duration: 3000 });
+        window.location.href = "/order";
       }
-
-      
-
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
-  }
+  };
 
   const sendDataToOrder = async (data) => {
     setShow({ ...show, loading: true });
@@ -363,11 +370,10 @@ export default function CheckOut(props) {
   };
 
   const handlePlaceOrder = async () => {
-
     await calculateShippingCost();
 
     sendDataToOrder(data, shippingCost, useraddressid, getWHid);
-  }  
+  };
   const selectedAddress = async (value) => {
     console.log("x", value);
   };
@@ -379,10 +385,10 @@ export default function CheckOut(props) {
     getAddress();
     selectedAddress();
   }, []);
-  
+
   useEffect(() => {
     getUserCart();
-  }, [id])
+  }, [id]);
 
   useEffect(() => {
     getCourier();
@@ -391,85 +397,188 @@ export default function CheckOut(props) {
 
   return (
     <>
-    <Box w={'100%'} justifyContent={'space-between'} display={'flex'} flexDirection={'column'} alignItems={'space-between'} pt={'5'} pb={'10'} >
-      <div className=" mt-[15px] pl-[24px] ">
-        <div className="border-b-2">
-          <h1 className="font-ibmBold">CheckOut</h1>
-        </div>
-        <Box>
+      <Box
+        w={"100%"}
+        justifyContent={"space-between"}
+        display={"flex"}
+        flexDirection={"column"}
+        alignItems={"space-between"}
+        pt={"5"}
+        pb={"10"}
+      >
+        <div className=" mt-[15px] pl-[24px] ">
+          <div className="border-b-2">
+            <h1 className="font-ibmBold">CheckOut</h1>
+          </div>
           <Box>
-            {cart.map((item) => (
-              <Box
-                key={item.id}
-                display="flex"
-                alignItems="center"
-                mb="4"
-                mt="5"
-              >
-                <Image
-                  src={item.product.image_url}
-                  alt={item.product.name}
-                  boxSize="84px"
-                  objectFit="contain"
-                  mr="4"
-                  border="1px solid gray"
-                />
-                <Box>
-                  <Text className=" font-ibmMed">{item.product.name}</Text>
-                  <Text className=" font-ibmReg" align="left">
-                    Price:{" "}
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                    }).format(item.price)}{" "}
-                    * {item.quantity}
-                  </Text>
+            <Box>
+              {cart.map((item) => (
+                <Box
+                  key={item.id}
+                  display="flex"
+                  alignItems="center"
+                  mb="4"
+                  mt="5"
+                >
+                  <Image
+                    src={item.product.image_url}
+                    alt={item.product.name}
+                    boxSize="84px"
+                    objectFit="contain"
+                    mr="4"
+                    border="1px solid gray"
+                  />
+                  <Box>
+                    <Text className=" font-ibmMed">{item.product.name}</Text>
+                    <Text className=" font-ibmReg" align="left">
+                      Price:{" "}
+                      {new Intl.NumberFormat("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      }).format(item.price)}{" "}
+                      * {item.quantity}
+                    </Text>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              ))}
+            </Box>
           </Box>
-        </Box>
 
-        {mainAddress !== "" ? (
-          <>
-            <div className="flex items-center align-middle justify-between border-2 border-gray-300 rounded-lg p-4 mt-5">
-              <div>
-                <p className="text-sm font-bold font-ibmMed">
-                  {mainAddress?.recipient_name}
-                </p>
-                <p className="text-sm font-ibmReg">
-                  {mainAddress?.recipient_phone}
-                </p>
-                <p className="text-sm font-ibmReg">
-                  {mainAddress?.street_address}
-                </p>
-                <p className="text-sm font-ibmReg">
-                  {mainAddress?.subdistrict}, {splitText(mainAddress?.city)},{" "}
-                  {splitText(mainAddress?.province)}
-                </p>
-                <p className="text-sm font-ibmReg">
-                  {mainAddress?.postal_code}
-                </p>
+          {mainAddress !== "" ? (
+            <>
+              <div className="flex items-center align-middle justify-between border-2 border-gray-300 rounded-lg p-4 mt-5">
+                <div>
+                  <p className="text-sm font-bold font-ibmMed">
+                    {mainAddress?.recipient_name}
+                  </p>
+                  <p className="text-sm font-ibmReg">
+                    {mainAddress?.recipient_phone}
+                  </p>
+                  <p className="text-sm font-ibmReg">
+                    {mainAddress?.street_address}
+                  </p>
+                  <p className="text-sm font-ibmReg">
+                    {mainAddress?.subdistrict}, {splitText(mainAddress?.city)},{" "}
+                    {splitText(mainAddress?.province)}
+                  </p>
+                  <p className="text-sm font-ibmReg">
+                    {mainAddress?.postal_code}
+                  </p>
+                </div>
+
+                <Button
+                  w="120px"
+                  h="34px"
+                  border="1px solid #5D5FEF"
+                  color="#5D5FEF"
+                  borderRadius="3px"
+                  className="font-ibmFontRegular"
+                  onClick={modalSwitch.onOpen}
+                  onClose={modalSwitch.onClose}
+                >
+                  Switch
+                </Button>
               </div>
-
-              <Button
-                w="120px"
-                h="34px"
-                border="1px solid #5D5FEF"
-                color="#5D5FEF"
-                borderRadius="3px"
-                className="font-ibmFontRegular"
-                onClick={modalSwitch.onOpen}
+              <Modal
+                isOpen={modalSwitch.isOpen}
                 onClose={modalSwitch.onClose}
+                isCentered
+                w="300px"
+                motionPreset="slideInBottom"
+                className="z-50"
+                popup={true}
               >
-                Switch
-              </Button>
-            </div>
+                <ModalOverlay
+                  bg="blackAlpha.200"
+                  backdropFilter="blur(10px) hue-rotate(90deg)"
+                />
+                <ModalContent
+                  alignItems="center"
+                  overflowY="scroll"
+                  maxHeight="400px"
+                >
+                  <ModalCloseButton />
+                  {allAddress?.map((v, i) => (
+                    <div
+                      className="flex items-center align-middle justify-between p-10 flex-row"
+                      style={{ width: "100%" }}
+                      key={i}
+                    >
+                      <div>
+                        <p className="text-sm font-bold font-ibmMed">
+                          {v?.recipient_name}
+                        </p>
+                        <p className="text-sm font-bold font-ibmMed">
+                          {v?.recipient_phone}
+                        </p>
+                        <p className="text-sm font-bold font-ibmMed">
+                          {v?.street_address}
+                        </p>
+                        <p className="text-sm font-bold font-ibmMed">
+                          {v?.subdistrict}, {splitText(v?.city)},{" "}
+                          {splitText(v?.province)}
+                        </p>
+                        <p className="text-sm font-bold font-ibmMed">
+                          {mainAddress?.postal_code}
+                        </p>
+                      </div>
+                      <div className=" flex flex-col p-2 justify-between">
+                        <Button
+                          w="80px"
+                          h="34px"
+                          border="1px solid #5D5FEF"
+                          color="#5D5FEF"
+                          borderRadius="3px"
+                          className="font-ibmFontRegular"
+                          onClick={() => {
+                            defaultAddress(v?.id);
+                            modalSwitch.onClose();
+                          }}
+                        >
+                          Switch
+                        </Button>
+                        <Button
+                          w="80px"
+                          h="34px"
+                          border="1px solid #5D5FEF"
+                          color="#5D5FEF"
+                          borderRadius="3px"
+                          className="font-ibmFontRegular"
+                          onClick={() => {
+                            deleteAddress(v?.id);
+                            modalSwitch.onClose();
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </ModalContent>
+              </Modal>
+            </>
+          ) : (
+            <></>
+          )}
+
+          <div className="flex justify-center mt-[18px]">
+            <Button
+              w="325px"
+              h="34px"
+              border="1px solid #5D5FEF"
+              color="#5D5FEF"
+              borderRadius="3px"
+              className="font-ibmFontRegular"
+              onClick={modalAddress.onOpen}
+              onClose={modalAddress.onClose}
+            >
+              +add new address
+            </Button>
+
             <Modal
-              isOpen={modalSwitch.isOpen}
-              onClose={modalSwitch.onClose}
+              isOpen={modalAddress.isOpen}
+              onClose={modalAddress.onClose}
               isCentered
-              w="300px"
               motionPreset="slideInBottom"
               className="z-50"
               popup={true}
@@ -478,384 +587,287 @@ export default function CheckOut(props) {
                 bg="blackAlpha.200"
                 backdropFilter="blur(10px) hue-rotate(90deg)"
               />
-              <ModalContent
-                alignItems="center"
-                overflowY="scroll"
-                maxHeight="400px"
-              >
+              <ModalContent alignItems="center">
                 <ModalCloseButton />
-                {allAddress?.map((v, i) => (
-                  <div
-                    className="flex items-center align-middle justify-between p-10 flex-row"
-                    style={{ width: "100%" }}
-                    key={i}
-                  >
-                    <div>
-                      <p className="text-sm font-bold font-ibmMed">
-                        {v?.recipient_name}
-                      </p>
-                      <p className="text-sm font-bold font-ibmMed">
-                        {v?.recipient_phone}
-                      </p>
-                      <p className="text-sm font-bold font-ibmMed">
-                        {v?.street_address}
-                      </p>
-                      <p className="text-sm font-bold font-ibmMed">
-                        {v?.subdistrict}, {splitText(v?.city)},{" "}
-                        {splitText(v?.province)}
-                      </p>
-                      <p className="text-sm font-bold font-ibmMed">
-                        {mainAddress?.postal_code}
-                      </p>
-                    </div>
-                    <div className=" flex flex-col p-2 justify-between">
-                      <Button
-                        w="80px"
-                        h="34px"
-                        border="1px solid #5D5FEF"
-                        color="#5D5FEF"
-                        borderRadius="3px"
-                        className="font-ibmFontRegular"
-                        onClick={() => {
-                          defaultAddress(v?.id);
-                          modalSwitch.onClose();
-                        }}
-                      >
-                        Switch
-                      </Button>
-                      <Button
-                        w="80px"
-                        h="34px"
-                        border="1px solid #5D5FEF"
-                        color="#5D5FEF"
-                        borderRadius="3px"
-                        className="font-ibmFontRegular"
-                        onClick={() => {
-                          deleteAddress(v?.id);
-                          modalSwitch.onClose();
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                <>
+                  <form onSubmit={handleSubmit(onAddAddress)}>
+                    <Card maxWidth="300px" className="mt-[30px] ">
+                      <h1 className="font-ibmBold text-[20px] ">
+                        Address Detail
+                      </h1>
+                      <CardBody>
+                        <FormControl>
+                          <FormLabel size="sm">Recepient Name</FormLabel>
+                          <Input
+                            type="text"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            placeholder=""
+                            {...register("recipient_name")}
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel size="sm">Phone Number</FormLabel>
+                          <Input
+                            type="text"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            placeholder=""
+                            {...register("recipient_phone")}
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel size="sm">Province</FormLabel>
+                          <Select
+                            name="province"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            onChange={(e) => {
+                              rakirCity(e.target.value);
+                              setValue("province", e.target.value);
+                            }}
+                          >
+                            <option value="">Select Province</option>
+                            {province?.map((val, idx) => {
+                              return (
+                                <option
+                                  value={`${val.province_id}.${val.province}`}
+                                  key={idx}
+                                >
+                                  {val.province}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel size="sm">City</FormLabel>
+                          <Select
+                            name="city"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            {...register("city")}
+                            onChange={(e) => setValue("xCity", e.target.value)}
+                          >
+                            <option value="selected">Select City</option>
+                            {city.map((val, idx) => {
+                              return (
+                                <option
+                                  value={`${val.city_id}.${val.city_name}`}
+                                  key={idx}
+                                >
+                                  {val.city_name}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel size="sm">Subdistrict</FormLabel>
+                          <Input
+                            type="text"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            placeholder=""
+                            {...register("subdistrict")}
+                            required={true}
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel size="sm">Street Address</FormLabel>
+                          <Textarea
+                            type="text-area"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            placeholder=""
+                            {...register("street_address")}
+                            required={true}
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel size="sm">Postal Code</FormLabel>
+                          <Input
+                            type="text"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            placeholder=""
+                            {...register("postal_code")}
+                          />
+                        </FormControl>
+                        <div className="flex items-center gap-2 mt-[20px]">
+                          <Checkbox
+                            id="remember"
+                            onChange={() =>
+                              setRakir({
+                                ...rakir,
+                                main_address: rakir.main_address ? false : true,
+                              })
+                            }
+                          />
+                          <Label htmlFor="remember" className="font-ibmBold">
+                            Main Address
+                          </Label>
+                        </div>
+                        <div className="w-full flex justify-end">
+                          {show.loading ? (
+                            <button>
+                              <Spinner aria-label="Default status example" />
+                            </button>
+                          ) : (
+                            <Button
+                              backgroundColor="#5D5FEF"
+                              color="white"
+                              mt="5"
+                              type="submit"
+                              w="265px"
+                              h="34px"
+                              alignSelf="center"
+                              rounded="3xl"
+                            >
+                              Save Address
+                            </Button>
+                          )}
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </form>
+                </>
               </ModalContent>
             </Modal>
-          </>
-        ) : (
-          <></>
-        )}
-
-        <div className="flex justify-center mt-[18px]">
-          <Button
-            w="325px"
-            h="34px"
-            border="1px solid #5D5FEF"
-            color="#5D5FEF"
-            borderRadius="3px"
-            className="font-ibmFontRegular"
-            onClick={modalAddress.onOpen}
-            onClose={modalAddress.onClose}
-          >
-            +add new address
-          </Button>
-
-          <Modal
-            isOpen={modalAddress.isOpen}
-            onClose={modalAddress.onClose}
-            isCentered
-            motionPreset="slideInBottom"
-            className="z-50"
-            popup={true}
-          >
-            <ModalOverlay
-              bg="blackAlpha.200"
-              backdropFilter="blur(10px) hue-rotate(90deg)"
-            />
-            <ModalContent alignItems="center">
-              <ModalCloseButton />
-              <>
-                <form onSubmit={handleSubmit(onAddAddress)}>
-                  <Card maxWidth="300px" className="mt-[30px] ">
-                    <h1 className="font-ibmBold text-[20px] ">
-                      Address Detail
-                    </h1>
-                    <CardBody>
-                      <FormControl>
-                        <FormLabel size="sm">Recepient Name</FormLabel>
-                        <Input
-                          type="text"
-                          bg="white"
-                          borderColor="#d8dee4"
-                          size="sm"
-                          borderRadius="6px"
-                          placeholder=""
-                          {...register("recipient_name")}
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel size="sm">Phone Number</FormLabel>
-                        <Input
-                          type="text"
-                          bg="white"
-                          borderColor="#d8dee4"
-                          size="sm"
-                          borderRadius="6px"
-                          placeholder=""
-                          {...register("recipient_phone")}
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel size="sm">Province</FormLabel>
-                        <Select
-                          name="province"
-                          bg="white"
-                          borderColor="#d8dee4"
-                          size="sm"
-                          borderRadius="6px"
-                          onChange={(e) => {
-                            rakirCity(e.target.value);
-                            setValue("province", e.target.value);
-                          }}
-                        >
-                          <option value="">Select Province</option>
-                          {province?.map((val, idx) => {
-                            return (
-                              <option
-                                value={`${val.province_id}.${val.province}`}
-                                key={idx}
-                              >
-                                {val.province}
-                              </option>
-                            );
-                          })}
-                        </Select>
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel size="sm">City</FormLabel>
-                        <Select
-                          name="city"
-                          bg="white"
-                          borderColor="#d8dee4"
-                          size="sm"
-                          borderRadius="6px"
-                          {...register("city")}
-                          onChange={(e) => setValue("xCity", e.target.value)}
-                        >
-                          <option value="selected">Select City</option>
-                          {city.map((val, idx) => {
-                            return (
-                              <option
-                                value={`${val.city_id}.${val.city_name}`}
-                                key={idx}
-                              >
-                                {val.city_name}
-                              </option>
-                            );
-                          })}
-                        </Select>
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel size="sm">Subdistrict</FormLabel>
-                        <Input
-                          type="text"
-                          bg="white"
-                          borderColor="#d8dee4"
-                          size="sm"
-                          borderRadius="6px"
-                          placeholder=""
-                          {...register("subdistrict")}
-                          required={true}
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel size="sm">Street Address</FormLabel>
-                        <Textarea
-                          type="text-area"
-                          bg="white"
-                          borderColor="#d8dee4"
-                          size="sm"
-                          borderRadius="6px"
-                          placeholder=""
-                          {...register("street_address")}
-                          required={true}
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel size="sm">Postal Code</FormLabel>
-                        <Input
-                          type="text"
-                          bg="white"
-                          borderColor="#d8dee4"
-                          size="sm"
-                          borderRadius="6px"
-                          placeholder=""
-                          {...register("postal_code")}
-                        />
-                      </FormControl>
-                      <div className="flex items-center gap-2 mt-[20px]">
-                        <Checkbox
-                          id="remember"
-                          onChange={() =>
-                            setRakir({
-                              ...rakir,
-                              main_address: rakir.main_address ? false : true,
-                            })
-                          }
-                        />
-                        <Label htmlFor="remember" className="font-ibmBold">
-                          Main Address
-                        </Label>
-                      </div>
-                      <div className="w-full flex justify-end">
-                        {show.loading ? (
-                          <button>
-                            <Spinner aria-label="Default status example" />
-                          </button>
-                        ) : (
-                          <Button
-                            backgroundColor="#5D5FEF"
-                            color="white"
-                            mt="5"
-                            type="submit"
-                            w="265px"
-                            h="34px"
-                            alignSelf="center"
-                            rounded="3xl"
-                          >
-                            Save Address
-                          </Button>
-                        )}
-                      </div>
-                    </CardBody>
-                  </Card>
-                </form>
-              </>
-            </ModalContent>
-          </Modal>
+          </div>
         </div>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-row",
-          alignItems: "end",
-          justifyContent: "space-between",
-          paddingBottom: "14px",
-        }}
-      >
-        <label
-          htmlFor="shipping-method"
-          style={{ marginRight: "8px", textAlign: "left", fontSize: "14px" }}
-          className="font-ibmReg"
-        >
-          Shipping Method
-        </label>
-        <select
-          value={shippingMethod}
-          onChange={handleShippingMethodChange}
+        <div
           style={{
-            width: "200px",
-            height: "30px",
-            marginTop: "15px",
+            display: "flex",
+            justifyContent: "flex-row",
+            alignItems: "end",
+            justifyContent: "space-between",
+            paddingBottom: "14px",
           }}
         >
-          <option value=""></option>
-          <option
-            value="jne"
+          <label
+            htmlFor="shipping-method"
+            style={{ marginRight: "8px", textAlign: "left", fontSize: "14px" }}
             className="font-ibmReg"
-            style={{ fontSize: "14px" }}
           >
-            JNE
-          </option>
-          <option
-            value="pos"
+            Shipping Method
+          </label>
+          <select
+            value={shippingMethod}
+            onChange={handleShippingMethodChange}
+            style={{
+              width: "200px",
+              height: "30px",
+              marginTop: "15px",
+            }}
+          >
+            <option value=""></option>
+            <option
+              value="jne"
+              className="font-ibmReg"
+              style={{ fontSize: "14px" }}
+            >
+              JNE
+            </option>
+            <option
+              value="pos"
+              className="font-ibmReg"
+              style={{ fontSize: "14px" }}
+            >
+              POS
+            </option>
+            <option
+              value="tiki"
+              className="font-ibmReg"
+              style={{ fontSize: "14px" }}
+            >
+              TIKI
+            </option>
+          </select>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingBottom: "14px",
+          }}
+        >
+          <span
+            htmlFor="shipping-cost"
+            style={{ marginRight: "8px", textAlign: "left", fontSize: "14px" }}
             className="font-ibmReg"
-            style={{ fontSize: "14px" }}
           >
-            POS
-          </option>
-          <option
-            value="tiki"
-            className="font-ibmReg"
-            style={{ fontSize: "14px" }}
+            Shipping Cost
+          </span>
+          <span style={{ marginLeft: "auto" }}>
+            {new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+            }).format(shippingCost)}
+          </span>
+        </div>
+
+        <div className="border-b-2 mt-8"></div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingBottom: "14px",
+          }}
+        >
+          <span
+            htmlFor="shipping-cost"
+            style={{ marginRight: "8px", textAlign: "left", fontSize: "20px" }}
+            className="font-ibmBold"
           >
-            TIKI
-          </option>
-        </select>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingBottom: "14px",
-        }}
-      >
-        <span
-          htmlFor="shipping-cost"
-          style={{ marginRight: "8px", textAlign: "left", fontSize: "14px" }}
-          className="font-ibmReg"
+            Grand Total
+          </span>
+          <span style={{ marginLeft: "auto", fontSize: "20px" }}>
+            {new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+            }).format(getTotalPrice() + shippingCost)}
+          </span>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: "-2px",
+          }}
         >
-          Shipping Cost
-        </span>
-        <span style={{ marginLeft: "auto" }}>
-          {new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
-          }).format(shippingCost)}
-        </span>
-      </div>
-
-      <div className="border-b-2 mt-8"></div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingBottom: "14px",
-        }}
-      >
-        <span
-          htmlFor="shipping-cost"
-          style={{ marginRight: "8px", textAlign: "left", fontSize: "20px" }}
-          className="font-ibmBold"
-        >
-          Grand Total
-        </span>
-        <span style={{ marginLeft: "auto", fontSize: "20px" }}>
-          {new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
-          }).format(getTotalPrice() + shippingCost)}
-        </span>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: "-2px",
-        }}
-      >
-        <Button
-          rounded="3xl"
-          w="248px"
-          h="40px"
-          backgroundColor="#5D5FEF"
-          color="white"
-          mt="5"
-          type="button"
-          disabled={disable}
-
-          onClick={() => createOrder()}
-
-        >
-          <Text className=" font-ibmFontRegular">Create Order</Text>
-        </Button>
-      </div>
+          <Button
+            rounded="3xl"
+            w="248px"
+            h="40px"
+            backgroundColor="#5D5FEF"
+            color="white"
+            mt="5"
+            type="button"
+            disabled={disable}
+            onClick={() => createOrder()}
+          >
+            <Text className=" font-ibmFontRegular">Create Order</Text>
+          </Button>
+        </div>
       </Box>
     </>
   );
