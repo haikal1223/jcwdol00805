@@ -96,8 +96,8 @@ module.exports = {
       });
     }
   },
-  
-   getUserCartx: async (req, res) => {
+
+  getUserCartx: async (req, res) => {
     try {
       const { id } = req.uid;
 
@@ -154,7 +154,7 @@ module.exports = {
       });
     }
   },
-  
+
   getCheckoutCart: async (req, res) => {
     try {
       const { user_id } = req.query;
@@ -162,7 +162,7 @@ module.exports = {
       const findUserCart = await db.cart.findAll({
         where: {
           user_id,
-          is_checked: 1
+          is_checked: 1,
         },
         include: [
           {
@@ -186,9 +186,9 @@ module.exports = {
       const fetchId = await sequelize.query(
         `SELECT distinct id from carts 
         WHERE user_id = ${user_id} AND is_checked = 1`
-      ) 
-      
-      const cartId = fetchId[0].map(obj => obj.id)
+      );
+
+      const cartId = fetchId[0].map((obj) => obj.id);
 
       if (!findUserCart) {
         return res.status(404).send({
@@ -203,7 +203,7 @@ module.exports = {
         message: "Cart items fetched successfully",
         data: {
           findUserCart,
-          cartId
+          cartId,
         },
       });
     } catch (error) {
@@ -378,7 +378,7 @@ module.exports = {
     try {
       const { data } = await axios.get(
         "https://api.rajaongkir.com/starter/province",
-        { headers: { key: "0ab1e1cb6b9b40df49560b26aec4ec79" } }
+        { headers: { key: "98114927956fc9abdce23deeef6cfb17" } }
       );
       res.status(200).send({
         isError: false,
@@ -406,7 +406,7 @@ module.exports = {
       let response = await axios.get(
         `https://api.rajaongkir.com/starter/city?province=${province_id}`,
         {
-          headers: { key: "0ab1e1cb6b9b40df49560b26aec4ec79" },
+          headers: { key: "98114927956fc9abdce23deeef6cfb17" },
         }
       );
 
@@ -543,8 +543,9 @@ module.exports = {
         message: "An error occurred while processing your request",
         data: null,
       });
-    }},
- delCart: async (req, res) => {
+    }
+  },
+  delCart: async (req, res) => {
     try {
       let { id } = req.query;
       let deleteCart = await db.cart.destroy({
@@ -559,7 +560,7 @@ module.exports = {
       });
     } catch (error) {}
   },
-  
+
   updateNumberProduct: async (req, res) => {
     try {
       let { id } = req.query;
@@ -579,7 +580,7 @@ module.exports = {
       });
     } catch (error) {}
   },
-  
+
   getStockOrigin: async (req, res) => {
     const { id } = req.uid;
     try {
