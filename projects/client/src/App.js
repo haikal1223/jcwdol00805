@@ -99,7 +99,7 @@ function App() {
   };
 
   const AuthMainAdmin = ({ children }) => {
-    const adminRoleLogged = localStorage.getItem("role");
+    const adminRoleLogged = Cookies.get("role");
 
     if (adminRoleLogged != "admin") {
       return (

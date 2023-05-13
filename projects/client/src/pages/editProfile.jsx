@@ -226,7 +226,7 @@ export default function EditProfile() {
         isClosable: true,
         position: "top",
       });
-      setIsChangePassword(isChangePassword);
+      setIsChangePassword(!isChangePassword);
       setMessage("");
       Navigate(0)
     } catch (error) {
@@ -615,7 +615,7 @@ export default function EditProfile() {
                   <Input
                     rounded="lg"
                     variant="filled"
-                    placeholder="Old Password"
+                    placeholder="New Password"
                     type="password"
                     onChange={(e) => {
                       setNewPassword(e.target.value);
