@@ -103,7 +103,6 @@ export default function Navbar(props) {
                                         src={`${profilePicture}`}
                                         alt={"Profile Picture"}
                                         rounded="full"
-                                        id="imgpreview"
                                         ml={3}
                                         />
                                 </MenuButton>
