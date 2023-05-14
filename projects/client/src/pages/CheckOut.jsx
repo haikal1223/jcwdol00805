@@ -60,6 +60,7 @@ export default function CheckOut(props) {
     lat: 0,
     lng: 0
   })
+  const [disable, setdisable] = useState(false)
 
   const {
     register,
@@ -879,7 +880,8 @@ export default function CheckOut(props) {
             color="white"
             mt="5"
             type="button"
-            disabled={disable}
+            isDisabled={shippingMethod === "" || shippingCost === 0}
+            _disabled={{ bg: '#D9D9D9', color: '#9AA0B4', border: '0px', _hover: { bg: '#D9D9D9', color: '#9AA0B4', border: '0px' } }}
             onClick={() => createOrder()}
           >
             <Text className=" font-ibmFontRegular">Create Order</Text>
