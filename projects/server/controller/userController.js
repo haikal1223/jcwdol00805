@@ -91,6 +91,7 @@ module.exports = {
     }
   },
 
+
   /* getData: async (req, res) => {
     let { id } = req.query;
     const findUsers = await db.user.findAll({
@@ -358,7 +359,6 @@ module.exports = {
   uploadPhoto: async (req, res) => {
     try {
       let { id } = req.query;
-      const { file } = req.files;
 
       await db.user.update(
         {
