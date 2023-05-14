@@ -92,11 +92,11 @@ module.exports = {
   },
 
 
-  /* getData: async (req, res) => {
-    let { id } = req.query;
+  getData: async (req, res) => {
+    let { uid } = req.query;
     const findUsers = await db.user.findAll({
       where: {
-        id,
+        uid,
       },
     });
     if (findUsers)
@@ -105,7 +105,7 @@ module.exports = {
         message: "Data is found",
         data: findUsers,
       });
-  }, */
+  },
 
   inputPassword: async (req, res) => {
     try {
