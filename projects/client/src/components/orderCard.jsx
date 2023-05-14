@@ -194,7 +194,7 @@ export default function OrderCard(props) {
                   <></>
                 )}
               </>
-            ) : props.orderData.order_status_id <= 3 ? (
+            ) : props.orderData.order_status_id === 4 ? (
               <>
                 <Box display="flex" justifyContent="start">
                   <Button
@@ -210,15 +210,15 @@ export default function OrderCard(props) {
                     Order Detail
                   </Button>
                   <Button
-                    bg="#ff3838"
+                    bg="#5D5FEF"
                     boxShadow="0px 20px 30px rgba(211,209,216, 0.521)"
                     borderRadius="28.5px"
                     color="white"
-                    width="75px"
+                    width="150px"
                     height="43px"
-                    onClick={props.cancel}
+                    onClick={props.delivered}
                   >
-                    Cancel
+                    Order Delivered
                   </Button>
                 </Box>
               </>

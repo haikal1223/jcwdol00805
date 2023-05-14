@@ -84,6 +84,35 @@ module.exports = {
     }
   },
 
+  delivered: async (req, res) => {
+    try {
+      const { order_id } = req.query;
+
+      let deliveredOrder = await db.order.update(
+        {
+          order_status_id: 5,
+        },
+        {
+          where: {
+            id: order_id,
+          },
+        }
+      );
+
+      return res.status(200).send({
+        isError: false,
+        message: "Order delivered successfully",
+        data: null,
+      });
+    } catch (error) {
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
+    }
+  },
+
   getOrder: async (req, res) => {
     try {
       const { id } = req.uid;
