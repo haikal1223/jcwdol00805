@@ -87,10 +87,10 @@ module.exports = {
         });
       }
 
-      const { warehouseId, warehouseAdminId } = req.body;
+      const { warehouseId, adminId } = req.body;
 
       const warehouse = await db.warehouse.findByPk(warehouseId);
-      const warehouseAdmin = await db.user.findByPk(warehouseAdminId);
+      const warehouseAdmin = await db.user.findByPk(adminId);
       if (!warehouse || !warehouseAdmin) {
         return res.status(404).send({
           isError: true,
@@ -99,25 +99,34 @@ module.exports = {
         });
       }
 
+      const existingAssignment = await db.wh_admin.findOne({
+        where: { warehouse_id: warehouseId, user_id: adminId },
+      });
+
+      if (existingAssignment) {
+        return res.status(400).send({
+          isError: true,
+          message: "Admin is already assigned to the warehouse",
+          data: null,
+        });
+      }
+
       await db.wh_admin.create({
         warehouse_id: warehouseId,
-        user_id: warehouseAdminId,
+        user_id: adminId,
       });
 
       await db.user.update(
         { role: "warehouse_admin" },
-        { where: { id: warehouseAdminId } }
+        { where: { id: adminId } }
       );
 
       const isAssigned = await db.wh_admin.findOne({
-        where: { user_id: warehouseAdminId },
+        where: { user_id: adminId },
       });
 
       if (!isAssigned) {
-        await db.user.update(
-          { role: "user" },
-          { where: { id: warehouseAdminId } }
-        );
+        await db.user.update({ role: "user" }, { where: { id: adminId } });
       }
 
       res.status(200).send({
