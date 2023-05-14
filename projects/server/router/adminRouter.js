@@ -34,7 +34,9 @@ Router.delete(
 Router.get("/login", adminController.login);
 
 Router.get("/verify-token", adminController.verifyToken);
-Router.get("/fetch-warehouse", adminController.fetchWhId);
+
+Router.get("/warehouses", tokenVerify, adminController.fetchWarehouses);
+Router.get("/get-warehouse", adminController.fetchWhId);
 Router.get("/adminData", adminController.adminData);
 Router.get("/userData", adminController.userData);
 Router.post("/addAdmin", adminController.addAdmin);
@@ -56,7 +58,7 @@ Router.get(
   tokenVerify,
   adminController.productStockByWarehouse
 );
-Router.get("/warehouses", tokenVerify, adminController.fetchWarehouse);
+
 Router.get(
   "/sum-report",
   tokenVerify,
