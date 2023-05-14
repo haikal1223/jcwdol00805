@@ -144,7 +144,7 @@ module.exports = {
 
       let updateStatus = await db.order.update(
         {
-            order_status_id: 6,
+          order_status_id: 6,
         },
         {
           where: {
