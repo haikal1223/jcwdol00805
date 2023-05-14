@@ -11,7 +11,7 @@ const db = require("../sequelize/models/index");
 const { hashPassword, matchPassword } = require("../lib/hash");
 
 // Import jwt
-const { createToken } = require("../lib/jwt");
+const { createToken, validateToken } = require("../lib/jwt");
 
 // Import Filesystem
 const fs = require("fs").promises;
@@ -100,6 +100,7 @@ module.exports = {
   getUserCartx: async (req, res) => {
     try {
       const { id } = req.uid;
+      console.log("s");
 
       // Validate uid parameter
       // if (!uid) {
@@ -109,7 +110,6 @@ module.exports = {
       //     data: null,
       //   });
       // }
-      console.log("test", id);
 
       // const { id } = await db.user.findOne({
       //   where: {
@@ -149,7 +149,7 @@ module.exports = {
       // Send error response to the client
       return res.status(500).send({
         isError: true,
-        message: "Internal server error",
+        message: error.message,
         data: null,
       });
     }
@@ -450,7 +450,7 @@ module.exports = {
   sendDataToOrder: async (req, res) => {
     try {
       t = await sequelize.transaction();
-      const { uid } = req.uid;
+      const { id } = req.uid;
       const {
         paid_amount,
         user_address_id,
@@ -458,27 +458,20 @@ module.exports = {
         warehouse_id,
         order_status_id,
       } = req.body;
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
-
-      const { id: user_id } = await db.user.findOne({
-        where: {
-          uid,
-        },
-      });
+      // if (!uid) {
+      //   return res.status(400).send({
+      //     isError: true,
+      //     message: "Invalid user ID",
+      //     data: null,
+      //   });
+      // }
 
       const cartItems = await db.cart.findAll({
         where: {
-          user_id,
+          id,
           is_checked: 1,
         },
       });
-      console.log(cartItems);
 
       const order_status = await db.order_status.create({
         id: order_status_id,
@@ -498,11 +491,12 @@ module.exports = {
         },
         { transaction: t }
       );
+      console.log("xxxxxxx", order);
 
       const t2 = await sequelize.transaction();
       await db.cart.destroy({
         where: {
-          user_id,
+          id,
           is_checked: 1,
         },
         transaction: t2,
