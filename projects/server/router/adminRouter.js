@@ -35,7 +35,6 @@ Router.get("/login", adminController.login);
 
 Router.get("/verify-token", adminController.verifyToken);
 
-Router.get("/fetch-warehouse", adminController.fetchWarehouse);
 Router.get("/warehouses", tokenVerify, adminController.fetchWarehouses);
 Router.get("/get-warehouse", adminController.fetchWhId);
 Router.get("/adminData", adminController.adminData);

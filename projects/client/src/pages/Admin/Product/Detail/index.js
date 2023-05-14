@@ -36,7 +36,7 @@ import {
 } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import {toast, Toaster} from 'react-hot-toast'
+import { toast, Toaster } from "react-hot-toast";
 import Cookies from "js-cookie";
 
 const AdminProductDetail = () => {
@@ -49,21 +49,21 @@ const AdminProductDetail = () => {
   const [log, setLog] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [editStock, setEditStock] = useState({});
-  const [renderDelete, setRenderDelete] = useState(false)
+  const [renderDelete, setRenderDelete] = useState(false);
 
   const [page, setPage] = useState(1);
   const [maxPage, setMaxPage] = useState(0);
   const rowPerPage = 5;
 
-  const [whList, setWhList] = useState({})
+  const [whList, setWhList] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const cancelRef = React.useRef()
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
 
   const getUid = async () => {
     try {
-      let token = Cookies.get('adminToken');
+      let token = Cookies.get("adminToken");
       let response = await axios.get(
         `http://localhost:8000/admin/verify-token?token=${token}`
       );
@@ -77,7 +77,7 @@ const AdminProductDetail = () => {
     if (uid) {
       try {
         let response = await axios.get(
-          `http://localhost:8000/admin/fetch-warehouse?id=${uid}`
+          `http://localhost:8000/admin/get-warehouse?id=${uid}`
         );
         setWhAdmin(response.data.data[0][0].wh_id);
       } catch (error) {
@@ -145,28 +145,32 @@ const AdminProductDetail = () => {
     return null;
   };
 
-  const handleDeletestock = async(id, stock) => {
+  const handleDeletestock = async (id, stock) => {
     try {
-      await axios.delete(`http://localhost:8000/admin-product/delete-stock/${product_id}?wh=${id}&stock=${stock}&uid=${uid}`)
-      toast.success('stock deleted')
-      setRenderDelete(!renderDelete)
+      await axios.delete(
+        `http://localhost:8000/admin-product/delete-stock/${product_id}?wh=${id}&stock=${stock}&uid=${uid}`
+      );
+      toast.success("stock deleted");
+      setRenderDelete(!renderDelete);
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
-  }
+  };
 
   // Modal Add Stock
   const handleModalOpen = async () => {
     try {
-        let response = await axios.get(`http://localhost:8000/admin-product/fetch-warehouse/${product_id}?whid=${whAdmin}`)
-        setWhList(response.data.data[0])
+      let response = await axios.get(
+        `http://localhost:8000/admin-product/fetch-warehouse/${product_id}?whid=${whAdmin}`
+      );
+      setWhList(response.data.data[0]);
     } catch (error) {
-        console.log(error.message)
+      console.log(error.message);
     }
     setIsModalOpen(true);
   };
   const handleModalClose = () => {
-    setWhList({})
+    setWhList({});
     setIsModalOpen(false);
   };
 
@@ -202,7 +206,6 @@ const AdminProductDetail = () => {
   useEffect(() => {
     handleExistWh();
   }, [stockDetail, uid, whAdmin]);
-
 
   return (
     <div className="w-[100%] flex flex-1 justify-between">
@@ -250,7 +253,9 @@ const AdminProductDetail = () => {
                       return (
                         <Tr key={idx} className="bg-white">
                           <Td>{val.name}</Td>
-                          <Td className="w-[250px]">{val.city.split('.')[1]}</Td>
+                          <Td className="w-[250px]">
+                            {val.city.split(".")[1]}
+                          </Td>
                           <Td w={"130px"}>
                             {editMode[val.id] ? (
                               <Input
@@ -309,19 +314,36 @@ const AdminProductDetail = () => {
                                 >
                                   <AlertDialogOverlay>
                                     <AlertDialogContent>
-                                      <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                                      <AlertDialogHeader
+                                        fontSize="lg"
+                                        fontWeight="bold"
+                                      >
                                         Delete Stock
                                       </AlertDialogHeader>
 
                                       <AlertDialogBody>
-                                        Are you sure you want to delete stock from this warehouse?
+                                        Are you sure you want to delete stock
+                                        from this warehouse?
                                       </AlertDialogBody>
 
                                       <AlertDialogFooter>
-                                        <Button ref={cancelRef} onClick={onClose}>
+                                        <Button
+                                          ref={cancelRef}
+                                          onClick={onClose}
+                                        >
                                           Cancel
                                         </Button>
-                                        <Button colorScheme='red' onClick={() => {handleDeletestock(val.id, val.stock);onClose()}} ml={3}>
+                                        <Button
+                                          colorScheme="red"
+                                          onClick={() => {
+                                            handleDeletestock(
+                                              val.id,
+                                              val.stock
+                                            );
+                                            onClose();
+                                          }}
+                                          ml={3}
+                                        >
                                           Delete
                                         </Button>
                                       </AlertDialogFooter>
@@ -337,12 +359,22 @@ const AdminProductDetail = () => {
                   </Tbody>
                 </Table>
               </Box>
-              <Modal isOpen={isModalOpen} onClose={handleModalClose} scrollBehavior={'inside'} size={'lg'}>
-                  <ModalOverlay />
-                  <ModalContent>
-                      <ModalStock data={whList} uid={uid} id={product_id} close={handleModalClose}/>
-                  </ModalContent>
-              </Modal >
+              <Modal
+                isOpen={isModalOpen}
+                onClose={handleModalClose}
+                scrollBehavior={"inside"}
+                size={"lg"}
+              >
+                <ModalOverlay />
+                <ModalContent>
+                  <ModalStock
+                    data={whList}
+                    uid={uid}
+                    id={product_id}
+                    close={handleModalClose}
+                  />
+                </ModalContent>
+              </Modal>
               <br />
 
               <Text className="font-ibmMed text-lg">Log</Text>
@@ -432,7 +464,7 @@ const AdminProductDetail = () => {
           </Box>
         </div>
       </div>
-      <Toaster/>
+      <Toaster />
     </div>
   );
 };

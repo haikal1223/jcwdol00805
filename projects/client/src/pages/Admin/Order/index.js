@@ -86,7 +86,7 @@ const AdminOrder = () => {
     if (uid) {
       try {
         let response = await axios.get(
-          `http://localhost:8000/admin/fetch-warehouse?id=${uid}`
+          `http://localhost:8000/admin/get-warehouse?id=${uid}`
         );
         setWhid(response.data.data[0][0].wh_id);
       } catch (error) {

@@ -52,7 +52,7 @@ module.exports = {
       // run query
       let orders = await sequelize.query(
         `SELECT a.*, b.status , c.name as wh_name , d.email as user_email, count(e.product_id) as num_item
-                FROM db_test1.order a 
+                FROM db_warehouse.order a 
                 LEFT JOIN order_status b ON a.order_status_id=b.id
                 LEFT JOIN warehouse c ON a.warehouse_id = c.id
                 LEFT JOIN users d ON a.user_id = d.id
@@ -62,7 +62,7 @@ module.exports = {
 
       let countOrders = await sequelize.query(
         `SELECT count(DISTINCT a.id) as num_order
-                FROM db_test1.order a 
+                FROM db_warehouse.order a 
                 LEFT JOIN order_status b ON a.order_status_id=b.id
                 LEFT JOIN warehouse c ON a.warehouse_id = c.id
                 LEFT JOIN users d ON a.user_id = d.id
@@ -72,7 +72,7 @@ module.exports = {
 
       let wh_list = await sequelize.query(
         `SELECT DISTINCT c.name AS wh_name
-                FROM db_test1.order a 
+                FROM db_warehouse.order a 
                 LEFT JOIN order_status b ON a.order_status_id=b.id
                 LEFT JOIN warehouse c ON a.warehouse_id = c.id
                 LEFT JOIN users d ON a.user_id = d.id
@@ -106,7 +106,7 @@ module.exports = {
       // run query
       const order_detail = await sequelize.query(
         `SELECT a.*, b.status , c.name as wh_name , d.email as user_email
-                FROM db_test1.order a 
+                FROM db_warehouse.order a 
                 LEFT JOIN order_status b ON a.order_status_id=b.id
                 LEFT JOIN warehouse c ON a.warehouse_id = c.id
                 LEFT JOIN users d ON a.user_id = d.id
@@ -115,7 +115,7 @@ module.exports = {
 
       const product_detail = await sequelize.query(
         `SELECT a.*, b.name
-                FROM db_test1.order_detail a
+                FROM db_warehouse.order_detail a
                 LEFT JOIN product b
                 ON a.product_id = b.id
                 WHERE order_id=${id}`
