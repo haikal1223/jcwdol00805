@@ -1157,7 +1157,7 @@ module.exports = {
     }
   },
 
-  fetchWarehouse: async (req, res) => {
+  fetchWarehouses: async (req, res) => {
     try {
       const warehouses = await db.warehouse.findAll();
       return res.status(200).send({
