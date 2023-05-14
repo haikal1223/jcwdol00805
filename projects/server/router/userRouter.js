@@ -12,6 +12,7 @@ const { tokenVerify } = require("../middleware/verifyToken");
 
 Router.post("/register", userController.registerUser);
 Router.get("/activation", userController.getData);
+Router.get("/profile", userController.profile);
 Router.patch("/verification/:uid", userController.inputPassword);
 Router.post("/forgot-password", userController.forgotPassword);
 Router.patch("/reset-password/:uid", userController.resetPassword);
