@@ -210,17 +210,17 @@ function App() {
           <Route
             path="/admin/user"
             element={
-              <AuthAdmin>
+              <AuthMainAdmin>
                 <AdminUser />
-              </AuthAdmin>
+              </AuthMainAdmin>
             }
           />
           <Route
             path="/admin/category"
             element={
-              <AuthAdmin>
+              <AuthMainAdmin>
                 <ProductCategoryAdmin />
-              </AuthAdmin>
+              </AuthMainAdmin>
             }
           />
 
