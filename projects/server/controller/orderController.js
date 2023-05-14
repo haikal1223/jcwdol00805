@@ -277,4 +277,36 @@ module.exports = {
       });
     }
   },
+
+
+  uploadPayment: async (req, res) => {
+    try {
+      let { id } = req.query;
+
+      await db.order.update(
+        {
+          payment_proof: req.files.payments[0].path,
+          order_status_id: 2,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      res.status(201).send({
+        isError: false,
+        message: "Your payment proof is uploaded!",
+        data: null,
+      });
+    } catch (error) {
+      res.status(500).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
+
 };
