@@ -84,6 +84,35 @@ module.exports = {
     }
   },
 
+  delivered: async (req, res) => {
+    try {
+      const { order_id } = req.query;
+
+      let deliveredOrder = await db.order.update(
+        {
+          order_status_id: 5,
+        },
+        {
+          where: {
+            id: order_id,
+          },
+        }
+      );
+
+      return res.status(200).send({
+        isError: false,
+        message: "Order delivered successfully",
+        data: null,
+      });
+    } catch (error) {
+      return res.status(500).send({
+        isError: true,
+        message: "Internal server error",
+        data: null,
+      });
+    }
+  },
+
   getOrder: async (req, res) => {
     try {
       const { id } = req.uid;
@@ -187,20 +216,20 @@ module.exports = {
       console.log(id);
 
       // fetch checkout cart ischecked
-      // let carts = await db.sequelize.query(
-      //   `SELECT a.product_id, a.price, a.quantity, b.name
-      //   FROM db_warehouse.carts a
-      //   LEFT JOIN product b on a.product_id = b.id
-      //   WHERE a.is_checked = 1 AND a.user_id = ${uid}`
-      // );
-      const cartItems = await db.cart.findAll({
+      let carts = await db.sequelize.query(
+        `SELECT a.product_id, a.price, a.quantity, b.name
+        FROM db_warehouse.carts a
+        LEFT JOIN product b on a.product_id = b.id
+        WHERE a.is_checked = 1 AND a.user_id = ${uid}`
+      );
+      /* const cartItems = await db.cart.findAll({
         where: {
           user_id: id,
           is_checked: 1,
         },
-      });
+      }); */
 
-      let detail = cartItems[0];
+      let detail = carts[0];
 
       //validate product availability
       for (let i = 0; i < detail.length; i++) {
@@ -265,7 +294,7 @@ module.exports = {
         message: "Order successfully created",
         data: {
           order,
-          detail,
+          carts,
         },
       });
     } catch (error) {
