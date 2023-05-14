@@ -41,12 +41,14 @@ import { useForm } from "react-hook-form";
 export default function AdminWarehouse() {
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
   const [cityList, setCityList] = useState([]);
   const [provinceList, setProvinceList] = useState([]);
   const [allWarehouse, setAllWarehouse] = useState([]);
   const [filteredWarehouse, setFilteredWarehouse] = useState([]);
   const [page, setPage] = useState(1);
+  const [editWarehouseId, setEditWarehouseId] = useState(null);
+  const [deleteWarehouseId, setDeleteWarehouseId] = useState(null);
   const [maxPage, setMaxPage] = useState(0);
   const rowPerPage = 10;
   const [show, setShow] = useState({
@@ -59,6 +61,9 @@ export default function AdminWarehouse() {
     handleSubmit,
     formState: {},
   } = useForm();
+
+  const modalAddWH = useDisclosure();
+  const modalEditWH = useDisclosure();
 
   const getWarehouse = async (city) => {
     let cityName = city.slice(2, city.length);
@@ -103,7 +108,7 @@ export default function AdminWarehouse() {
         `http://localhost:8000/cart/rajaongkir-province`,
         {
           headers: {
-            key: "98114927956fc9abdce23deeef6cfb17",
+            key: "96dc80599e54e6d84bbd8f3b948da258",
           },
         }
       );
@@ -119,7 +124,7 @@ export default function AdminWarehouse() {
         `http://localhost:8000/cart/rajaongkir-city?province_id=${province_id}`,
         {
           headers: {
-            key: "98114927956fc9abdce23deeef6cfb17",
+            key: "96dc80599e54e6d84bbd8f3b948da258",
           },
         }
       );
@@ -132,6 +137,13 @@ export default function AdminWarehouse() {
   const renderWarehouse = () => {
     const startIndex = (page - 1) * rowPerPage;
     const endIndex = startIndex + rowPerPage;
+    const handleEditWarehouse = (warehouseId) => {
+      setEditWarehouseId(warehouseId);
+      modalEditWH.onOpen();
+    };
+    const handleDeleteWarehouse = (warehouseId) => {
+      setDeleteWarehouseId(warehouseId);
+    };
     const currentWarehouse = allWarehouse.slice(startIndex, endIndex);
     return currentWarehouse.map((warehouse, index) => {
       return (
@@ -144,6 +156,28 @@ export default function AdminWarehouse() {
           <Td>{warehouse.lng}</Td>
           <Td>{warehouse.createdAt}</Td>
           <Td>{warehouse.updatedAt}</Td>
+          <Td>
+            <Button
+              ml="20px"
+              alignSelf="center"
+              backgroundColor="#5D5FEF"
+              color="white"
+              className="font-ibmFont"
+              onClick={() => handleEditWarehouse(warehouse.id)}
+            >
+              Edit
+            </Button>
+            <Button
+              ml="20px"
+              alignSelf="center"
+              backgroundColor="#5D5FEF"
+              color="white"
+              className="font-ibmFont"
+              onClick={() => onDeleteWarehouse(warehouse.id)}
+            >
+              Delete
+            </Button>
+          </Td>
         </Tr>
       );
     });
@@ -172,36 +206,76 @@ export default function AdminWarehouse() {
         }
       );
       toast.success("Warehouse added successfully!");
-      onClose();
+      modalAddWH.onClose();
     } catch (error) {
       toast.error("Failed to add warehouse.");
       console.error(error);
     } finally {
       setShow({ ...show, loading: false });
       Navigate(0);
-      onClose();
+      modalAddWH.onClose();
     }
   };
 
-  const filterWarehouse = (searchTerm) => {
-    return allWarehouse.filter((warehouse) =>
-      warehouse.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const onEditWarehouse = async () => {
+    if (!editWarehouseId) return;
+    setShow({ ...show, loading: true });
+    const name = document.getElementById("name").value;
+    const city = document.getElementById("city").value;
+    const province = document.getElementById("province").value;
+    const { lat, lng } = await getWarehouse(city);
+    const payload = {
+      name,
+      city,
+      province,
+      lat,
+      lng,
+    };
+    let token = Cookies.get("adminToken");
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/warehouse/update-warehouse/${editWarehouseId}`,
+        payload,
+        {
+          headers: { token },
+        }
+      );
+      toast.success("Warehouse edited successfully!");
+      modalEditWH.onClose();
+    } catch (error) {
+      toast.error("Failed to edit warehouse.");
+      console.error(error);
+    } finally {
+      setShow({ ...show, loading: false });
+      Navigate(0);
+      modalEditWH.onClose();
+    }
   };
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
+  const onDeleteWarehouse = async (deleteWarehouseId) => {
+    setShow({ ...show, loading: true });
+
+    let token = Cookies.get("adminToken");
+    try {
+      const response = await axios.delete(
+        `http://localhost:8000/warehouse/delete-warehouse/${deleteWarehouseId}`,
+        {
+          headers: { token },
+        }
+      );
+      toast.success("Warehouse deleted successfully!");
+    } catch (error) {
+      toast.error("Failed to deleted warehouse.");
+      console.error(error);
+    } finally {
+      setShow({ ...show, loading: false });
+      Navigate(0);
+    }
   };
-  // search, sort & filter
 
   useEffect(() => {
     fetchWarehouse();
   }, [page, searchTerm, filteredWarehouse.length]);
-
-  useEffect(() => {
-    const filteredList = filterWarehouse(searchTerm);
-    setFilteredWarehouse(filteredList);
-  }, [filteredWarehouse]);
 
   useEffect(() => {
     rakirCity();
@@ -247,14 +321,14 @@ export default function AdminWarehouse() {
                 backgroundColor="#5D5FEF"
                 color="white"
                 className="font-ibmFont"
-                onClick={onOpen}
+                onClick={modalAddWH.onOpen}
               >
                 +Add Warehouse
               </Button>
             </div>
             <Modal
-              isOpen={isOpen}
-              onClose={onClose}
+              isOpen={modalAddWH.isOpen}
+              onClose={modalAddWH.onClose}
               isCentered
               motionPreset="slideInBottom"
               className="z-50"
@@ -270,7 +344,116 @@ export default function AdminWarehouse() {
                   <form onSubmit={handleSubmit(onAddWarehouse)}>
                     <Card maxWidth="300px" className="mt-[30px] ">
                       <h1 className="font-ibmBold text-[20px] ">
-                        Address Detail
+                        Warehouse Detail
+                      </h1>
+                      <CardBody>
+                        <FormControl>
+                          <FormLabel size="sm">Name</FormLabel>
+                          <Input
+                            type="text"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            placeholder="Name"
+                            id="name"
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel size="sm">Province</FormLabel>
+                          <Select
+                            name="province"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            onChange={(e) => {
+                              rakirCity(e.target.value[0]);
+                              setProvince(e.target.value);
+                            }}
+                            id="province"
+                          >
+                            <option value="">Select Province</option>
+                            {provinceList?.map((val, idx) => {
+                              return (
+                                <option
+                                  value={`${val.province_id}.${val.province}`}
+                                  key={idx}
+                                >
+                                  {val.province}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel size="sm">City</FormLabel>
+                          <Select
+                            name="city"
+                            bg="white"
+                            borderColor="#d8dee4"
+                            size="sm"
+                            borderRadius="6px"
+                            onChange={(e) => {
+                              setCity(e.target.value);
+                            }}
+                            id="city"
+                          >
+                            <option value="selected">Select City</option>
+                            {cityList.map((val, idx) => {
+                              return (
+                                <option
+                                  value={`${val.city_id}.${val.city_name}`}
+                                  key={idx}
+                                >
+                                  {val.type + " " + val.city_name}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+
+                        <div className="w-full flex justify-end">
+                          <Button
+                            backgroundColor="#5D5FEF"
+                            color="white"
+                            mt="5"
+                            type="submit"
+                            w="265px"
+                            h="34px"
+                            alignSelf="center"
+                            rounded="3xl"
+                          >
+                            Save Address
+                          </Button>
+                          {/* )} */}
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </form>
+                </>
+              </ModalContent>
+            </Modal>
+
+            <Modal
+              isOpen={modalEditWH.isOpen}
+              onClose={modalEditWH.onClose}
+              isCentered
+              motionPreset="slideInBottom"
+              className="z-50"
+              popup={true}
+            >
+              <ModalOverlay
+                bg="blackAlpha.200"
+                backdropFilter="blur(10px) hue-rotate(90deg)"
+              />
+              <ModalContent alignItems="center">
+                <ModalCloseButton />
+                <>
+                  <form onSubmit={handleSubmit(onEditWarehouse)}>
+                    <Card maxWidth="300px" className="mt-[30px] ">
+                      <h1 className="font-ibmBold text-[20px] ">
+                        Edit Warehouse
                       </h1>
                       <CardBody>
                         <FormControl>
