@@ -3,7 +3,7 @@ import {
     , Link
     , VStack
 } from "@chakra-ui/react"
-import logo from '../supports/image/logo.svg'
+import logo from '../supports/image/logo_project.svg'
 
 
 export default function Footer() {
@@ -16,12 +16,15 @@ export default function Footer() {
                             <VStack>
                                 <Link href='/'>
                                     <div>
-                                        <Image src={logo} />
+                                        <Image src={logo} h={'25px'} w={'25px'}/>
                                     </div>
                                 </Link>
                                 <Link _hover={{ textDecoration: 'none' }} href='/'>
-                                    <div className="font-ibmBold text-[16px] text-purple">
-                                        ikeanye
+                                    <div className="font-ibmBold text-[14px] text-purple">
+                                    Jakarta
+                                    </div>
+                                    <div className="font-ibmBold text-[14px] text-purple">
+                                    Threads
                                     </div>
                                 </Link>
                             </VStack>
