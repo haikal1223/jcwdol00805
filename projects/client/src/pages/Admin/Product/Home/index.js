@@ -160,7 +160,14 @@ const AdminUser = () => {
         <>
           <Tr>
             <Td>{val.id}</Td>
-            <Td whiteSpace={"normal"}>{val.name}</Td>
+            <Td whiteSpace={"normal"}>
+              <Link
+                    href={`/admin/product/${val.id}`}
+                    _hover={{ color:'#5D5FEF' }}
+                  >
+                {val.name}
+              </Link>
+            </Td>
             <Td>{val.price.toLocaleString("id-ID")}</Td>
             <Td>{val.product_category.category_name}</Td>
             <Td>

@@ -23,6 +23,7 @@ const ModalRequest = (props) => {
         uid: props.uid,
         qty: 0
     })
+    const [whItem, setWhItem] = useState([])
 
     const addHandler = (e) => {
         const name = e.target.name
@@ -33,6 +34,23 @@ const ModalRequest = (props) => {
             [name]: value
         })
     }
+
+    const fetchProductWh = async () => {
+        const { productId } = newRequest
+        try {
+            if(productId) {
+                let response = await axios.get(`http://localhost:8000/admin-mutation/fetch-wh-item/${productId}`)
+                setWhItem(response.data.data[0])
+            }
+            
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
+
+    useEffect(() => {
+        fetchProductWh()
+    }, [newRequest.productId])
 
     const addRequest = async() => {
         const { originWh, targetWh, qty, productId} = newRequest
@@ -81,7 +99,7 @@ const ModalRequest = (props) => {
             console.log(error.message)
         }
     }
-    console.log(newRequest)
+    
   return (
     <>
         <ModalCloseButton/>
@@ -101,13 +119,13 @@ const ModalRequest = (props) => {
                     <Select w={'200px'} name="originWh" placeholder='select warehouse' color={'gray'} onChange={addHandler}>
                         {
                             props.whid == 'all'?
-                            props.whList.filter(val => val.id !== newRequest.targetWh).map((val,idx) => {
+                            whItem.filter(val => val.id !== newRequest.targetWh).map((val,idx) => {
                                 return (
                                     <option key={idx} value={val.id}>{val.name}</option>
                                 )
                             })
                             :
-                            props.whList.filter(val => val.id !== parseInt(props.whid) && val.id !== newRequest.targetWh).map((val,idx) => {
+                            whItem.filter(val => val.id !== parseInt(props.whid) && val.id !== newRequest.targetWh).map((val,idx) => {
                                 return (
                                     <option key={idx} value={val.id}>{val.name}</option>
                                 )

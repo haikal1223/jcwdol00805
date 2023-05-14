@@ -116,6 +116,36 @@ module.exports = {
         }
     },
 
+    fetchProductWarehouse: async(req, res) =>{
+        try {
+            // fetch params
+            let { pid } = req.params
+
+            // run query
+            let wh = await sequelize.query(
+                `SELECT a.warehouse_id id, b.name
+                FROM db_warehouse.product_stock a
+                LEFT JOIN db_warehouse.warehouse b
+                ON a.warehouse_id = b.id
+                WHERE a.product_id = ${parseInt(pid)}`
+            )
+
+            // response
+            res.status(201).send({
+                isError: false,
+                message: `warehouse list for product ${pid} fetched`,
+                data: wh
+            })
+
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: error.message,
+                data: null
+            })
+        }
+    },
+
     fetchStatus: async(req, res) =>{
         try {
             // run query

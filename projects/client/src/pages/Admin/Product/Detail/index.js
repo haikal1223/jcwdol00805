@@ -250,7 +250,7 @@ const AdminProductDetail = () => {
                       return (
                         <Tr key={idx} className="bg-white">
                           <Td>{val.name}</Td>
-                          <Td className="w-[250px]">{val.city}</Td>
+                          <Td className="w-[250px]">{val.city.split('.')[1]}</Td>
                           <Td w={"130px"}>
                             {editMode[val.id] ? (
                               <Input
