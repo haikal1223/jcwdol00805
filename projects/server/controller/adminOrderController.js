@@ -213,4 +213,65 @@ module.exports = {
       });
     }
   },
+
+  confirmOrder: async (req, res) => {
+    try {
+      let { id } = req.params;
+
+      let updateStatus = await db.order.update(
+        {
+          order_status_id: 3,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      //response
+      res.status(201).send({
+        isError: false,
+        message: "confirm order success",
+        data: updateStatus,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
+
+  rejectOrder: async (req, res) => {
+    try {
+      let { id } = req.params;
+
+      let updateStatus = await db.order.update(
+        {
+          order_status_id: 1,
+          payment_proof: null,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      //response
+      res.status(201).send({
+        isError: false,
+        message: "reject order success",
+        data: updateStatus,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
 };

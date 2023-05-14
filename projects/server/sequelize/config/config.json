@@ -1,10 +1,12 @@
 {
   "development": {
     "username": "root",
-    "password": "ot3ra1han12",
+
+    "password": "ddd1234",
 
 
-    "database": "db_test1",
+    "database": "db_warehouse",
+
 
 
     "host": "127.0.0.1",
