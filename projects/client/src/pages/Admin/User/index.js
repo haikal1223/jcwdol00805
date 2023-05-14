@@ -39,7 +39,6 @@ import {
   TbChevronsLeft,
   TbChevronsRight,
 } from "react-icons/tb";
-import toast, { Toaster } from "react-hot-toast";
 import Cookies from "js-cookie";
 
 const AdminUser = () => {
@@ -301,8 +300,16 @@ const AdminUser = () => {
     let deleteAdminData = await axios.delete(
       `http://localhost:8000/admin/deleteAdminData?email=${selectedValue.email}`
     );
-
-    window.location.reload();
+    toast({
+      title: "Delete Admin Success",
+      description: deleteAdminData.data.message,
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
+    setTimeout(() => {
+      Navigate(0);
+    }, 1000);
   };
 
   const renderAdminData = () => {
@@ -544,7 +551,13 @@ const AdminUser = () => {
         warehouse_name: warehouseName?.current?.value,
         password: password.current.value,
       });
-      toast.success(addAdmin.data.message);
+      toast({
+        title: "Add Admin Success",
+        description: addAdmin.data.message,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
       email.current.value = "";
       firstName.current.value = "";
       lastName.current.value = "";
@@ -552,10 +565,17 @@ const AdminUser = () => {
       if (warehouseName?.current?.value) {
         warehouseName.current.value = "";
       }
-      window.location.reload();
+      setTimeout(() => {
+        Navigate(0);
+      }, 1000);
     } catch (error) {
-      console.log(error);
-      toast.error(error?.response?.data?.message);
+      toast({
+        title: "Error to Add Admin",
+        description: error?.response?.data?.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -589,12 +609,24 @@ const AdminUser = () => {
           warehouseName: editWarehouse,
         }
       );
-      console.log(editAdmin);
-      toast.success(editAdmin.data.message);
-      window.location.reload();
+      toast({
+        title: "Edit Admin Success",
+        description: editAdmin.data.message,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      setTimeout(() => {
+        Navigate(0);
+      }, 1000);
     } catch (error) {
-      console.log(error);
-      toast.error(error.response);
+      toast({
+        title: "Error to Edit Admin",
+        description: error?.response?.data?.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -1350,7 +1382,6 @@ const AdminUser = () => {
             </div>
           </div>
         </div>
-        <Toaster />
       </div>
     </>
   );

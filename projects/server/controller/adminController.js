@@ -606,7 +606,7 @@ module.exports = {
       if (!email || !first_name || !last_name || !role)
         return res.status(404).send({
           isError: true,
-          message: "Please Complete Registration Data",
+          message: "Please Complete the Data",
           data: null,
         });
 
