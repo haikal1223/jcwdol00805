@@ -630,4 +630,38 @@ module.exports = {
       });
     }
   },
+
+  fetchCloseWarehouse: async (req, res) => {
+    try {
+      // get data
+      let {lat, lng} = req.query
+
+      // fetch wh list
+      let nearestWh = await sequelize.query(
+        `WITH raw AS (
+          select a.*
+            , ST_Distance_Sphere(
+              point(${lng}, ${lat}),
+              point(a.lng, a.lat)
+            ) distance
+          FROM db_warehouse.warehouse a
+        ) select id,city from raw order by distance asc limit 1`
+      )
+
+      // response 
+      res.status(201).send({
+        isError: false,
+        message: 'wh id fetched',
+        data: nearestWh[0]
+      })
+
+
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  }
 };

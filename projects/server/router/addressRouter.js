@@ -13,6 +13,8 @@ Router.delete('/deleteAddress/:id', addressController.deleteAddress)
 Router.get('/getProvince', addressController.getProvince)
 Router.get('/getCity', addressController.getCity)
 
+Router.get('/open-cage', addressController.openCage)
+
 
 
 module.exports = Router

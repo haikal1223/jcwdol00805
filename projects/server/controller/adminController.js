@@ -177,7 +177,7 @@ module.exports = {
     }
   },
 
-  fetchWarehouse: async (req, res) => {
+  fetchWhId: async (req, res) => {
     try {
       // get value
       let { id } = req.query;
