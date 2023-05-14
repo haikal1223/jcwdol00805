@@ -25,7 +25,7 @@ export default function RegisterUser() {
       toast.success(data.message);
       email.current.value = "";
       setTimeout(() => {
-        Navigate("/login");
+        Navigate("/");
       }, 3000);
     } catch (error) {
       toast.error(error.response.data.message);

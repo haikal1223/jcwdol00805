@@ -1,30 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import {
-  Box,
-  VStack,
-  Heading,
-  Text,
-  FormControl,
-  FormLabel,
-  Input,
-  Button,
-  Image,
-  Icon,
-  InputGroup,
-  InputRightElement,
-  HStack,
-  Spinner,
-  Editable,
-  EditablePreview,
-  EditableInput,
-  EditableTextarea,
-  Select,
-  useToast,
-} from "@chakra-ui/react";
+import { Text, Link, Button } from "@chakra-ui/react";
 import { MinusIcon, AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import "../../App.css";
 import CartCard from "../../components/cartCard";
+import { toast, Toaster } from "react-hot-toast";
 
 export default function Cart() {
   const [id, setId] = useState("");
@@ -83,14 +63,19 @@ export default function Cart() {
             quantity: val.quantity + 1,
           }
         );
+      } else {
+        toast.error("Your cart has maximum stock of the product", {
+          duration: 3000,
+        });
       }
       getUserCart();
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   let minCart = async (val) => {
     try {
-
       if (val.quantity === 1) {
         let delCart = await axios.delete(
           `http://localhost:8000/cart/delCart?id=${val.id}`
@@ -104,7 +89,9 @@ export default function Cart() {
         );
       }
       getUserCart();
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
   const renderCart = () => {
     return userCart.map((val, idx) => {
@@ -114,7 +101,7 @@ export default function Cart() {
           productIdx={idx}
           deleteFunction={(e) => deleteCart(val)}
           addFunction={(e) => addCart(val)}
-          dminFunction={(e) => minCart(val)}
+          minFunction={(e) => minCart(val)}
         />
       );
     });
@@ -150,22 +137,24 @@ export default function Cart() {
           >
             Total Price:{" "}
             <Text fontSize={24} fontWeight={700}>
-              Rp{totalPrice.toLocaleString('id-ID')}
+              Rp{totalPrice.toLocaleString("id-ID")}
             </Text>
           </Text>
         </>
       ) : (
-        <Text
-          align={["left"]}
-          w="full"
-          py="30px"
-          px="30px"
-          className="font-ibmFont"
-          fontSize={18}
-          fontWeight={500}
-        >
-          Your cart is empty
-        </Text>
+        <>
+          <Text
+            align={["left"]}
+            w="full"
+            py="30px"
+            px="30px"
+            className="font-ibmFont"
+            fontSize={18}
+            fontWeight={500}
+          >
+            Your cart is empty
+          </Text>
+        </>
       )}
       <div className="flex flex-col items-center">
         <Button

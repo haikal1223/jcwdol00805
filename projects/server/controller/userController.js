@@ -91,6 +91,21 @@ module.exports = {
     }
   },
 
+  activate: async (req, res) => {
+    let { uid } = req.query;
+    const findUsers = await db.user.findAll({
+      where: {
+        id,
+      },
+    });
+    if (findUsers)
+      return res.status(200).send({
+        isError: false,
+        message: "Data is found",
+        data: findUsers,
+      });
+  },
+
   getData: async (req, res) => {
     let { id } = req.query;
     const findUsers = await db.user.findAll({
