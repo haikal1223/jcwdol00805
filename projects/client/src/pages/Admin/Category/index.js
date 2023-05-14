@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Sidebar from "../components/sidebar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -31,6 +32,7 @@ export default function ProductCategoryAdmin() {
 
   const handleSubmitAdd = async (event) => {
     try {
+      if (!category_name === "") return;
       setIsLoading(true);
       event.preventDefault();
       const token = Cookies.get("adminToken");
@@ -80,7 +82,11 @@ export default function ProductCategoryAdmin() {
   };
 
   const handleEditButton = (category_id) => {
+    const selectedCategory = productCategories.find(
+      (category) => category.id === category_id
+    );
     setEditCategoryId(category_id);
+    setCategory_name(selectedCategory.category_name);
   };
 
   const handleEditSubmit = async (event) => {
@@ -168,117 +174,144 @@ export default function ProductCategoryAdmin() {
 
   return (
     <>
-      <Box p={4}>
-        <Heading size="md" mb={4}>
-          Product Categories
-        </Heading>
-        <Box
-          borderWidth="1px"
-          borderRadius="lg"
-          overflow="hidden"
-          p="4"
-          mb="10"
-        >
-          <form onSubmit={handleSubmitAdd}>
-            <FormControl>
-              <FormLabel>Category Name</FormLabel>
-              <InputGroup>
-                <Input
-                  type="text"
-                  placeholder="Enter Category Name"
-                  value={category_name}
-                  onChange={(e) => setCategory_name(e.target.value)}
-                  width="840px"
-                />
-                <Button
-                  type="submit"
-                  colorScheme="blue"
-                  isLoading={isLoading}
-                  loadingText="Saving"
-                  width="100px"
-                  marginLeft="20px"
-                >
-                  Add
-                </Button>
-              </InputGroup>
-            </FormControl>
-          </form>
-        </Box>
-
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>ID</Th>
-              <Th>Category Name</Th>
-              <Th>Action</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {productCategories.map((category) => (
-              <Tr key={category.id}>
-                <Td>{category.id}</Td>
-                <Td>
-                  {editCategoryId === category.id ? (
-                    <FormControl>
-                      <Input
-                        type="text"
-                        value={category_name}
-                        onChange={(e) => setCategory_name(e.target.value)}
-                      />
-                    </FormControl>
-                  ) : (
-                    category.category_name
-                  )}
-                </Td>
-                <Td>
-                  {editCategoryId === category.id ? (
+      <div className="w-[100%] flex flex-1 justify-between">
+        <Sidebar />
+        <div className="bg-white w-[1240px] z-0 shadow-inner flex flex-col py-[40px] px-[50px]">
+          <div className="w-[1140px]  flex justify-center items-start overflow-auto "></div>
+          <Box p={4}>
+            <Heading size="md" mb={4}>
+              Product Categories
+            </Heading>
+            <Box
+              borderWidth="1px"
+              borderRadius="lg"
+              overflow="hidden"
+              p="4"
+              mb="10"
+            >
+              <form onSubmit={handleSubmitAdd}>
+                <FormControl>
+                  <FormLabel>Category Name</FormLabel>
+                  <InputGroup>
+                    <Input
+                      type="text"
+                      placeholder="Enter Category Name"
+                      value={category_name}
+                      onChange={(e) => setCategory_name(e.target.value)}
+                      width="840px"
+                    />
                     <Button
-                      colorScheme="green"
-                      mr="2"
-                      onClick={handleEditSubmit}
+                      type="submit"
+                      color="white"
+                      backgroundColor="#5D5FEF"
                       isLoading={isLoading}
                       loadingText="Saving"
+                      width="100px"
+                      marginLeft="20px"
                     >
-                      Save
+                      Add
                     </Button>
-                  ) : (
-                    <Button
-                      colorScheme="green"
-                      mr="2"
-                      onClick={() => handleEditButton(category.id)}
-                    >
-                      Edit
-                    </Button>
-                  )}
+                  </InputGroup>
+                </FormControl>
+              </form>
+            </Box>
 
-                  {deleteCategoryId === category.id ? (
-                    <HStack spacing={2}>
-                      <Button
-                        colorScheme="red"
-                        onClick={handleDeleteSubmit}
-                        isLoading={isLoading}
-                        loadingText="Deleting"
-                      >
-                        Confirm
-                      </Button>
-                      <Button onClick={() => setDeleteCategoryId(null)}>
-                        Cancel
-                      </Button>
-                    </HStack>
-                  ) : (
-                    <Button
-                      colorScheme="red"
-                      onClick={() => handleDeleteButton(category.id)}
-                    >
-                      Delete
-                    </Button>
-                  )}
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>ID</Th>
+                  <Th>Category Name</Th>
+                  <Th>Action</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {productCategories.map((category) => (
+                  <Tr key={category.id}>
+                    <Td>{category.id}</Td>
+                    <Td>
+                      {editCategoryId === category.id ? (
+                        <FormControl>
+                          <Input
+                            type="text"
+                            value={category_name}
+                            onChange={(e) => setCategory_name(e.target.value)}
+                          />
+                        </FormControl>
+                      ) : (
+                        category.category_name
+                      )}
+                    </Td>
+                    <Td>
+                      {editCategoryId === category.id ? (
+                        <Button
+                          ml="20px"
+                          alignSelf="center"
+                          backgroundColor="#5D5FEF"
+                          color="white"
+                          className="font-ibmFont"
+                          onClick={handleEditSubmit}
+                          isLoading={isLoading}
+                          loadingText="Saving"
+                        >
+                          Save
+                        </Button>
+                      ) : (
+                        <Button
+                          ml="20px"
+                          alignSelf="center"
+                          backgroundColor="#5D5FEF"
+                          color="white"
+                          className="font-ibmFont"
+                          onClick={() => handleEditButton(category.id)}
+                        >
+                          Edit
+                        </Button>
+                      )}
+
+                      {deleteCategoryId === category.id ? (
+                        <HStack spacing={2}>
+                          <Button
+                            mt="30px"
+                            ml="20px"
+                            alignSelf="center"
+                            backgroundColor="#5D5FEF"
+                            color="white"
+                            className="font-ibmFont"
+                            onClick={handleDeleteSubmit}
+                            isLoading={isLoading}
+                            loadingText="Deleting"
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            mt="30px"
+                            ml="20px"
+                            alignSelf="center"
+                            backgroundColor="red"
+                            color="white"
+                            className="font-ibmFont"
+                            onClick={() => setDeleteCategoryId(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </HStack>
+                      ) : (
+                        <Button
+                          ml="20px"
+                          colorScheme="red"
+                          onClick={() => handleDeleteButton(category.id)}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+        </div>
+      </div>
     </>
   );
 }

@@ -58,7 +58,6 @@ export default function CheckOut(props) {
   const [render, setRender] = useState(true);
   const [cord, setCord] = useState({
     lat: 0,
-
     lng: 0,
   });
 
@@ -879,8 +878,8 @@ export default function CheckOut(props) {
             mt="5"
             type="button"
             isDisabled={shippingMethod === "" || shippingCost === 0}
-
             _disabled={{ bg: '#D9D9D9', color: '#9AA0B4', border: '0px', _hover: { bg: '#D9D9D9', color: '#9AA0B4', border: '0px' } }}
+
             onClick={() => createOrder()}
           >
             <Text className=" font-ibmFontRegular">Create Order</Text>
