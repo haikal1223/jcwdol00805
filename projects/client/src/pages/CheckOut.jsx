@@ -55,11 +55,11 @@ export default function CheckOut(props) {
     addNewAddress: false,
     loading: false,
   });
-  const [render, setRender] = useState(true)
+  const [render, setRender] = useState(true);
   const [cord, setCord] = useState({
     lat: 0,
-    lng: 0
-  })
+    lng: 0,
+  });
 
   const {
     register,
@@ -109,7 +109,7 @@ export default function CheckOut(props) {
       console.log(error);
     } finally {
       setShow({ ...show, loading: false });
-      setRender(!render)
+      setRender(!render);
       modalAddress.onClose();
     }
   };
@@ -162,20 +162,24 @@ export default function CheckOut(props) {
         setMainAddress(main[0]);
       }
       setdestination(main[0].city.split(".")[0]);
-      setuseraddressid(main[0].id);  
+      setuseraddressid(main[0].id);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const fetchCord = async() => {
-    let openCage = await axios.get(`http://localhost:8000/address/open-cage?city=${mainAddress.city.split(".")[1]}&province=${mainAddress.province.split(".")[1]}`)
+  const fetchCord = async () => {
+    let openCage = await axios.get(
+      `http://localhost:8000/address/open-cage?city=${
+        mainAddress.city.split(".")[1]
+      }&province=${mainAddress.province.split(".")[1]}`
+    );
     setCord({
       ...cord,
       lat: openCage.data.data.lat,
-      lng: openCage.data.data.lng
-    })
-  }
+      lng: openCage.data.data.lng,
+    });
+  };
 
   const splitText = (text) => {
     if (text) {
@@ -203,7 +207,7 @@ export default function CheckOut(props) {
     } catch (error) {
       console.log(error);
     } finally {
-      setRender(!render)
+      setRender(!render);
     }
   };
 
@@ -220,7 +224,7 @@ export default function CheckOut(props) {
     } catch (error) {
       console.log(error);
     } finally {
-      setRender(!render)
+      setRender(!render);
     }
   };
 
@@ -259,7 +263,6 @@ export default function CheckOut(props) {
 
       /* setorigin(response.data.data.findUserCart[0].product.product_stocks[0].warehouse.city.split(".")[0]);
       setgetWHid(response.data.data.findUserCart[0].product.product_stocks[0].warehouse_id); */
-
     } catch (error) {
       console.log(error);
     }
@@ -269,37 +272,34 @@ export default function CheckOut(props) {
     return cart.reduce((acc, cur) => acc + cur.price * cur.quantity, 0);
   };
 
+  // const getCourier = async () => {
+  //   setdisable(true);
+  //   let token = localStorage.getItem("myToken");
 
-  const getCourier = async () => {
-    setdisable(true);
-    let token = localStorage.getItem("myToken");
-
-    try {
-      let cost = await axios.post(
-        "http://localhost:8000/courier/cost",
-        {
-          origin: origin,
-          destination: destination,
-          weight: weight,
-          courier: shippingMethod,
-        },
-        {
-          headers: {
-            token: token,
-            key: "98114927956fc9abdce23deeef6cfb17  ",
-          },
-        }
-      );
-      setCost(cost.data.data[0].costs);
-      setTimeout(() => {
-        setdisable(false);
-      }, 1000);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-
+  //   try {
+  //     let cost = await axios.post(
+  //       "http://localhost:8000/courier/cost",
+  //       {
+  //         origin: origin,
+  //         destination: destination,
+  //         weight: weight,
+  //         courier: shippingMethod,
+  //       },
+  //       {
+  //         headers: {
+  //           token: token,
+  //           key: "98114927956fc9abdce23deeef6cfb17  ",
+  //         },
+  //       }
+  //     );
+  //     setCost(cost.data.data[0].costs);
+  //     setTimeout(() => {
+  //       setdisable(false);
+  //     }, 1000);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const handleShippingMethodChange = (event) => {
     setShippingMethod(event.target.value);
@@ -322,12 +322,12 @@ export default function CheckOut(props) {
           },
         }
       );
-      console.log(response.data.data[0].costs)
-      if(response.data.data[0].costs.length !== 0) {
+      console.log(response.data.data[0].costs);
+      if (response.data.data[0].costs.length !== 0) {
         setShippingCost(response.data.data[0].costs[0].cost[0].value);
       } else {
-        toast.error('Courier not available in your area')
-        setShippingCost(0)
+        toast.error("Courier not available in your area");
+        setShippingCost(0);
       }
     } catch (error) {
       console.log(error);
@@ -337,13 +337,12 @@ export default function CheckOut(props) {
   const createOrder = async () => {
     try {
       // get value
-      
+
       // post order
       let token = localStorage.getItem("myToken");
       if (shippingMethod === "" || shippingCost === 0) {
-        toast.error('Please select shipping method first')
-      }  else {
-
+        toast.error("Please select shipping method first");
+      } else {
         await axios.post(
           `http://localhost:8000/order/create-order?paid_amt=${getTotalPrice()}&address=${useraddressid}&ship_cost=${shippingCost}&uid=${id}&whid=${getWHid}`,
           {
@@ -360,21 +359,21 @@ export default function CheckOut(props) {
     }
   };
 
-  const nearestWh = async() => {
+  const nearestWh = async () => {
     try {
-      if(cord.lat) {
-        let response = await axios.get(`http://localhost:8000/cart/nearest-wh?lat=${cord.lat}&lng=${cord.lng}`)
-        console.log(response)
-        setgetWHid(response.data.data[0].id)
-        setorigin(response.data.data[0].city.split(".")[0])
+      if (cord.lat) {
+        let response = await axios.get(
+          `http://localhost:8000/cart/nearest-wh?lat=${cord.lat}&lng=${cord.lng}`
+        );
+        console.log(response);
+        setgetWHid(response.data.data[0].id);
+        setorigin(response.data.data[0].city.split(".")[0]);
       }
-      
-      
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
-  }
-  console.log(cord)
+  };
+  console.log(cord);
 
   useEffect(() => {
     getId();
@@ -392,26 +391,25 @@ export default function CheckOut(props) {
   }, [shippingMethod]);
 
   useEffect(() => {
-    getAddress()
-  }, [render])
+    getAddress();
+  }, [render]);
 
   useEffect(() => {
-    calculateShippingCost()
-  }, [origin])
+    calculateShippingCost();
+  }, [origin]);
 
   useEffect(() => {
-    calculateShippingCost()
-  }, [useraddressid])
-  
-  useEffect(() => {
-    fetchCord()
-  }, [mainAddress])
+    calculateShippingCost();
+  }, [useraddressid]);
 
   useEffect(() => {
-    nearestWh()
-  }, [cord])
+    fetchCord();
+  }, [mainAddress]);
 
-  
+  useEffect(() => {
+    nearestWh();
+  }, [cord]);
+
   return (
     <>
       <Box
@@ -879,7 +877,7 @@ export default function CheckOut(props) {
             color="white"
             mt="5"
             type="button"
-            disabled={disable}
+            isDisabled={shippingMethod === "" || shippingCost === 0}
             onClick={() => createOrder()}
           >
             <Text className=" font-ibmFontRegular">Create Order</Text>
