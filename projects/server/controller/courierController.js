@@ -7,7 +7,7 @@ module.exports = {
     let { origin, destination, weight, courier } = req.body;
     let { id } = req.uid;
 
-    let key = "96dc80599e54e6d84bbd8f3b948da258";
+    let key = "98114927956fc9abdce23deeef6cfb17";
 
     try {
       if (destination === 0) {
@@ -50,7 +50,7 @@ module.exports = {
     let { origin, destination, weight } = req.body;
     const { id } = req.uid;
 
-    let key = "96dc80599e54e6d84bbd8f3b948da258";
+    let key = "98114927956fc9abdce23deeef6cfb17";
 
     try {
       if (destination === 0) {
@@ -93,7 +93,7 @@ module.exports = {
     let { origin, destination, weight } = req.body;
     const { id } = req.uid;
 
-    let key = "96dc80599e54e6d84bbd8f3b948da258";
+    let key = "98114927956fc9abdce23deeef6cfb17";
 
     try {
       if (destination === 0) {
@@ -137,7 +137,7 @@ module.exports = {
     let { origin, destination, weight, courier } = req.body;
     let { id } = req.uid;
 
-    let key = "96dc80599e54e6d84bbd8f3b948da258";
+    let key = "98114927956fc9abdce23deeef6cfb17";
 
     try {
       if (destination === 0) {

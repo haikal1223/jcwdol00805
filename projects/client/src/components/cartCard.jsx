@@ -17,9 +17,9 @@ export default function CartCard(props) {
   const fetchProduct = async () => {
     try {
       let response = await axios.get(
-        `http://localhost:8000/product/productData`
+        `http://localhost:8000/product/productDataId?product_id=${props.cartData.product_id}`
       );
-      setProducts(response.data.data[0]);
+      setProducts(response.data.data[0][0]);
     } catch (error) {}
   };
 
@@ -39,18 +39,22 @@ export default function CartCard(props) {
       >
         <HStack width="full">
           <Box width="100px" flex="none">
-            <Image
-              src={products[props.cartData.product_id - 1]?.image_url}
-              alt={products[props.cartData.product_id - 1]?.name}
-              borderRadius="15px"
-            />
+            <Link href={`/product/${products?.id}`}>
+              <Image
+                src={products?.image_url}
+                alt={products?.name}
+                borderRadius="15px"
+              />
+            </Link>
           </Box>
           <VStack align="stretch">
-            <Text fontSize={20} fontWeight={400} className="font-ibmFont">
-              {products[props.cartData.product_id - 1]?.name}
-            </Text>
+            <Link href={`/product/${products?.id}`}>
+              <Text fontSize={20} fontWeight={400} className="font-ibmFont">
+                {products?.name}
+              </Text>
+            </Link>
             <Text fontSize={16} fontWeight={700} className="font-ibmFont">
-              Rp{props.cartData.price.toLocaleString('id-ID')}
+              Rp{props.cartData.price.toLocaleString("id-ID")}
             </Text>
             <HStack>
               <Button onClick={props.deleteFunction}>

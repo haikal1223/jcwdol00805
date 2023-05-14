@@ -43,7 +43,7 @@ export default function Activation() {
     let getData = async () => {
         try {
             let response = await axios.get(
-                `http://localhost:8000/user/verification${location.search}`
+                `http://localhost:8000/user/activation${location.search}`
             );
             setFirstName(response.data.data[0].first_name);
             setEmail(response.data.data[0].email);

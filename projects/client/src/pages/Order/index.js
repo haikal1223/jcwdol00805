@@ -36,7 +36,6 @@ export default function CheckOut(props) {
           productIdx={idx}
           cancel={(e) => cancel(val.id)}
           orderDetail={(e) => orderDetail(val.id)}
-          uploadPayment={(e) => uploadPayment(val.id)}
         />
       );
     });
@@ -56,10 +55,6 @@ export default function CheckOut(props) {
     } catch (error) {
       console.log(error);
     }
-  };
-
-  let uploadPayment = async (id) => {
-    // code for upload payment
   };
 
   let orderDetail = async (id) => {

@@ -29,6 +29,7 @@ import AdminProduct from "./pages/Admin/Product/Home";
 import AdminProductDetail from "./pages/Admin/Product/Detail";
 import AdminMutation from "./pages/Admin/Mutation";
 import AdminDashboard from "./pages/Admin/Dashboard";
+import AdminWarehouse from "./pages/Admin/Warehouse";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -100,9 +101,8 @@ function App() {
     return children;
   };
 
-
   const AuthMainAdmin = ({ children }) => {
-    const adminRoleLogged = localStorage.getItem("role");
+    const adminRoleLogged = Cookies.get("role");
 
     if (adminRoleLogged != "admin") {
       return (
@@ -137,7 +137,7 @@ function App() {
   const Logout = () => {
     return (
       <>
-        {localStorage.removeItem('myToken')}
+        {localStorage.removeItem("myToken")}
         {setTimeout(() => {
           window.location.href = "/";
         }, 200)}
@@ -210,17 +210,17 @@ function App() {
           <Route
             path="/admin/user"
             element={
-              <AuthAdmin>
+              <AuthMainAdmin>
                 <AdminUser />
-              </AuthAdmin>
+              </AuthMainAdmin>
             }
           />
           <Route
             path="/admin/category"
             element={
-              <AuthAdmin>
+              <AuthMainAdmin>
                 <ProductCategoryAdmin />
-              </AuthAdmin>
+              </AuthMainAdmin>
             }
           />
 
@@ -262,6 +262,14 @@ function App() {
               <AuthAdmin>
                 <AdminDashboard />
               </AuthAdmin>
+            }
+          />
+          <Route
+            path="/admin/warehouse"
+            element={
+              <AuthMainAdmin>
+                <AdminWarehouse />
+              </AuthMainAdmin>
             }
           />
         </Routes>
