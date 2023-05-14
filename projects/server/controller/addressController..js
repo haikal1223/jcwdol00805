@@ -200,4 +200,37 @@ module.exports = {
       });
     }
   },
+
+  openCage: async (req, res) => {
+    try {
+      // get body
+      let key = process.env.OPENCAGE
+      /* let { city, province } = req.query */
+
+      // dummy
+      let city = "Tangerang Selatan" 
+      let province = "Banten"
+
+      let query = city.replace(" ", "%2C") + "+" + province.replace(" ", "%2C")
+
+      // run query
+      let response = await axios.get (
+        `https://api.opencagedata.com/geocode/v1/json?key=${key}&q=${query}`
+      )
+
+      // response
+      res.status(201).send({
+        isError: false,
+        message: 'spatial value fetched',
+        data: response.data.results[0].geometry
+      })
+      
+    } catch (error) {
+      res.status(400).send({
+        isError: true,
+        message: error.message,
+        data: null
+      })
+    }
+  }
 };

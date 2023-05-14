@@ -24,5 +24,6 @@ Router.delete("/delCart", cartController.delCart);
 Router.patch("/updateNumberCart", cartController.updateNumberProduct);
 // Router.get("/getStockOrigin", tokenVerify, cartController.getStockOrigin);
 Router.get("/checkout", /* tokenVerify, */ cartController.getCheckoutCart);
+Router.get("/nearest-wh", /* tokenVerify, */ cartController.fetchCloseWarehouse);
 
 module.exports = Router;

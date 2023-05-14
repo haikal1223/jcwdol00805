@@ -44,9 +44,7 @@ export default function CheckOut(props) {
   const [JNE, setJNE] = useState();
   const [POS, setPOS] = useState();
   const [TIKI, setTIKI] = useState();
-  const [disable, setdisable] = useState(false);
   const [weight, setweight] = useState(0);
-  const [address, setAddress] = useState("");
   const [province, setProvince] = useState([]);
   const [city, setCity] = useState([]);
   const [cart, setCart] = useState([]);
@@ -57,6 +55,11 @@ export default function CheckOut(props) {
     addNewAddress: false,
     loading: false,
   });
+  const [render, setRender] = useState(true)
+  const [cord, setCord] = useState({
+    lat: 0,
+    lng: 0
+  })
 
   const {
     register,
@@ -101,13 +104,12 @@ export default function CheckOut(props) {
           headers: { token: token },
         }
       );
-      setAddress(postAddress);
       toast.success("Address Added");
     } catch (error) {
       console.log(error);
     } finally {
       setShow({ ...show, loading: false });
-      Navigate(0);
+      setRender(!render)
       modalAddress.onClose();
     }
   };
@@ -160,11 +162,20 @@ export default function CheckOut(props) {
         setMainAddress(main[0]);
       }
       setdestination(main[0].city.split(".")[0]);
-      setuseraddressid(main[0].id);
+      setuseraddressid(main[0].id);  
     } catch (error) {
       console.log(error);
     }
   };
+
+  const fetchCord = async() => {
+    let openCage = await axios.get(`http://localhost:8000/address/open-cage?city=${mainAddress.city.split(".")[1]}&province=${mainAddress.province.split(".")[1]}`)
+    setCord({
+      ...cord,
+      lat: openCage.data.data.lat,
+      lng: openCage.data.data.lng
+    })
+  }
 
   const splitText = (text) => {
     if (text) {
@@ -192,7 +203,7 @@ export default function CheckOut(props) {
     } catch (error) {
       console.log(error);
     } finally {
-      Navigate(0);
+      setRender(!render)
     }
   };
 
@@ -209,7 +220,7 @@ export default function CheckOut(props) {
     } catch (error) {
       console.log(error);
     } finally {
-      Navigate(0);
+      setRender(!render)
     }
   };
 
@@ -245,15 +256,10 @@ export default function CheckOut(props) {
       setCartId(response.data.data.cartId);
 
       // need improvement later by checking nearest WH
-      setorigin(
-        response.data.data.findUserCart[0].product.product_stocks[0].warehouse.city.split(
-          "."
-        )[0]
-      );
-      setgetWHid(
-        response.data.data.findUserCart[0].product.product_stocks[0]
-          .warehouse_id
-      );
+
+      /* setorigin(response.data.data.findUserCart[0].product.product_stocks[0].warehouse.city.split(".")[0]);
+      setgetWHid(response.data.data.findUserCart[0].product.product_stocks[0].warehouse_id); */
+
     } catch (error) {
       console.log(error);
     }
@@ -262,6 +268,7 @@ export default function CheckOut(props) {
   const getTotalPrice = () => {
     return cart.reduce((acc, cur) => acc + cur.price * cur.quantity, 0);
   };
+
 
   const getCourier = async () => {
     setdisable(true);
@@ -292,6 +299,8 @@ export default function CheckOut(props) {
     }
   };
 
+
+
   const handleShippingMethodChange = (event) => {
     setShippingMethod(event.target.value);
   };
@@ -313,7 +322,13 @@ export default function CheckOut(props) {
           },
         }
       );
-      setShippingCost(response.data.data[0].costs[0].cost[0].value);
+      console.log(response.data.data[0].costs)
+      if(response.data.data[0].costs.length !== 0) {
+        setShippingCost(response.data.data[0].costs[0].cost[0].value);
+      } else {
+        toast.error('Courier not available in your area')
+        setShippingCost(0)
+      }
     } catch (error) {
       console.log(error);
     }
@@ -321,10 +336,14 @@ export default function CheckOut(props) {
 
   const createOrder = async () => {
     try {
+      // get value
+      
+      // post order
       let token = localStorage.getItem("myToken");
-      if (shippingMethod === "") {
-        toast.error("Please select shipping method first");
-      } else {
+      if (shippingMethod === "" || shippingCost === 0) {
+        toast.error('Please select shipping method first')
+      }  else {
+
         await axios.post(
           `http://localhost:8000/order/create-order?paid_amt=${getTotalPrice()}&address=${useraddressid}&ship_cost=${shippingCost}&uid=${id}&whid=${getWHid}`,
           {
@@ -341,49 +360,27 @@ export default function CheckOut(props) {
     }
   };
 
-  const sendDataToOrder = async (data) => {
-    setShow({ ...show, loading: true });
-    let token = localStorage.getItem("myToken");
+  const nearestWh = async() => {
     try {
-      if (window.confirm("Are you sure you want to proceed to order?")) {
-        let response = await axios.post(
-          `http://localhost:8000/cart/postToOrder`,
-          {
-            paid_amount: getTotalPrice(),
-            shipping_cost: shippingCost,
-            user_address_id: useraddressid,
-            payment_proof: "Pending",
-            warehouse_id: getWHid,
-            order_status_id: data,
-          },
-          { headers: { token: token } }
-        );
-        setData(response);
-        toast.success("Proceed to Order");
-        setTimeout(() => {
-          Navigate("/order");
-        }, 2000);
+      if(cord.lat) {
+        let response = await axios.get(`http://localhost:8000/cart/nearest-wh?lat=${cord.lat}&lng=${cord.lng}`)
+        console.log(response)
+        setgetWHid(response.data.data[0].id)
+        setorigin(response.data.data[0].city.split(".")[0])
       }
+      
+      
     } catch (error) {
-      console.log(error.message);
+      console.log(error.message)
     }
-  };
-
-  const handlePlaceOrder = async () => {
-    await calculateShippingCost();
-
-    sendDataToOrder(data, shippingCost, useraddressid, getWHid);
-  };
-  const selectedAddress = async (value) => {
-    console.log("x", value);
-  };
+  }
+  console.log(cord)
 
   useEffect(() => {
     getId();
     rakirCity();
     rakirProvince();
     getAddress();
-    selectedAddress();
   }, []);
 
   useEffect(() => {
@@ -391,10 +388,30 @@ export default function CheckOut(props) {
   }, [id]);
 
   useEffect(() => {
-    getCourier();
     calculateShippingCost();
   }, [shippingMethod]);
 
+  useEffect(() => {
+    getAddress()
+  }, [render])
+
+  useEffect(() => {
+    calculateShippingCost()
+  }, [origin])
+
+  useEffect(() => {
+    calculateShippingCost()
+  }, [useraddressid])
+  
+  useEffect(() => {
+    fetchCord()
+  }, [mainAddress])
+
+  useEffect(() => {
+    nearestWh()
+  }, [cord])
+
+  
   return (
     <>
       <Box
