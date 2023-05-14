@@ -14,7 +14,7 @@ import {
     , MenuList
     , Avatar
 } from "@chakra-ui/react"
-import logo from '../supports/image/logo.svg'
+import logo from '../supports/image/logo_project.svg'
 import { TbReceipt, TbShoppingBag } from 'react-icons/tb';
 import { IconContext } from "react-icons";
 import { toast, Toaster } from "react-hot-toast";
@@ -88,7 +88,7 @@ export default function Navbar(props) {
                     <HStack>
                         <Link href='/'>
                             <div>
-                                <Image src={logo} />
+                                <Image src={logo} h={'25px'} w={'25px'} />
                             </div>
                         </Link>
                         {props.login?
