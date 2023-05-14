@@ -17,7 +17,7 @@ const AboutUs = () => {
         About Us
       </Text>
       <Text mb={4} textAlign={"center"}>
-        At Ikeanye, we understand that being a modern parent is not an easy
+        At JakartaThreads, we understand that being a modern parent is not an easy
         task. We know that you want to provide your kids with the best of
         everything, including stylish and trendy clothing that makes them feel
         confident and comfortable. That's why we created a fashion destination
@@ -38,14 +38,14 @@ const AboutUs = () => {
         offer competitive prices without compromising on quality.
       </Text>
       <Text mb={4} textAlign={"center"}>
-        At Ikeanye, we're not just about selling clothes; we're about inspiring
+        At JakartaThreads, we're not just about selling clothes; we're about inspiring
         confidence in children and helping urban families express their unique
         sense of style. We take pride in offering top-quality products,
         exceptional customer service, and a personalized shopping experience
         that caters to your needs.
       </Text>
       <Text mb={4} textAlign={"center"}>
-        Thank you for choosing Ikeanye as your fashion destination. We are
+        Thank you for choosing JakartaThreads as your fashion destination. We are
         excited to be a part of your family's fashion journey and look forward
         to helping you find the perfect outfits for your little ones.
       </Text>
