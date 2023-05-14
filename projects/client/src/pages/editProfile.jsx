@@ -55,7 +55,6 @@ export default function EditProfile() {
   const [editMode, setEditMode] = useState(false);
   const [id, setId] = useState("");
 
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -145,7 +144,7 @@ export default function EditProfile() {
       let response = await axios.get(
         `http://localhost:8000/user/verification?id=${id}`
       );
-      console.log(response)
+      console.log(response);
       setFirstName(response.data.data[0].first_name);
       setLastName(response.data.data[0].last_name);
       setEmail(response.data.data[0].email);
@@ -191,6 +190,9 @@ export default function EditProfile() {
           position: "top",
         });
         setMessage("");
+        setTimeout(() => {
+          Navigate(0);
+        }, 1000);
       }
     } catch (error) {
       toast({
@@ -227,11 +229,11 @@ export default function EditProfile() {
         isClosable: true,
         position: "top",
       });
-      setIsChangePassword(isChangePassword);
+      setIsChangePassword(!isChangePassword);
       setMessage("");
-      Navigate(0)
+      Navigate(0);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast({
         title: error.response.data.message,
         status: "error",
@@ -276,9 +278,7 @@ export default function EditProfile() {
     getAddress();
     getImage();
     getData();
-
   }, [id]);
-
 
   const splitText = (text) => {
     if (text) {
@@ -618,7 +618,7 @@ export default function EditProfile() {
                   <Input
                     rounded="lg"
                     variant="filled"
-                    placeholder="Old Password"
+                    placeholder="New Password"
                     type="password"
                     onChange={(e) => {
                       setNewPassword(e.target.value);

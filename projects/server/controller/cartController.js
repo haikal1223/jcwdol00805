@@ -11,7 +11,7 @@ const db = require("../sequelize/models/index");
 const { hashPassword, matchPassword } = require("../lib/hash");
 
 // Import jwt
-const { createToken } = require("../lib/jwt");
+const { createToken, validateToken } = require("../lib/jwt");
 
 // Import Filesystem
 const fs = require("fs").promises;
@@ -96,10 +96,11 @@ module.exports = {
       });
     }
   },
-  
-   getUserCartx: async (req, res) => {
+
+  getUserCartx: async (req, res) => {
     try {
       const { id } = req.uid;
+      console.log("s");
 
       // Validate uid parameter
       // if (!uid) {
@@ -109,7 +110,6 @@ module.exports = {
       //     data: null,
       //   });
       // }
-      console.log("test", id);
 
       // const { id } = await db.user.findOne({
       //   where: {
@@ -149,12 +149,12 @@ module.exports = {
       // Send error response to the client
       return res.status(500).send({
         isError: true,
-        message: "Internal server error",
+        message: error.message,
         data: null,
       });
     }
   },
-  
+
   getCheckoutCart: async (req, res) => {
     try {
       const { user_id } = req.query;
@@ -162,7 +162,7 @@ module.exports = {
       const findUserCart = await db.cart.findAll({
         where: {
           user_id,
-          is_checked: 1
+          is_checked: 1,
         },
         include: [
           {
@@ -186,9 +186,9 @@ module.exports = {
       const fetchId = await sequelize.query(
         `SELECT distinct id from carts 
         WHERE user_id = ${user_id} AND is_checked = 1`
-      ) 
-      
-      const cartId = fetchId[0].map(obj => obj.id)
+      );
+
+      const cartId = fetchId[0].map((obj) => obj.id);
 
       if (!findUserCart) {
         return res.status(404).send({
@@ -203,7 +203,7 @@ module.exports = {
         message: "Cart items fetched successfully",
         data: {
           findUserCart,
-          cartId
+          cartId,
         },
       });
     } catch (error) {
@@ -378,7 +378,7 @@ module.exports = {
     try {
       const { data } = await axios.get(
         "https://api.rajaongkir.com/starter/province",
-        { headers: { key: "0ab1e1cb6b9b40df49560b26aec4ec79" } }
+        { headers: { key: "98114927956fc9abdce23deeef6cfb17" } }
       );
       res.status(200).send({
         isError: false,
@@ -406,7 +406,7 @@ module.exports = {
       let response = await axios.get(
         `https://api.rajaongkir.com/starter/city?province=${province_id}`,
         {
-          headers: { key: "0ab1e1cb6b9b40df49560b26aec4ec79" },
+          headers: { key: "98114927956fc9abdce23deeef6cfb17" },
         }
       );
 
@@ -450,7 +450,7 @@ module.exports = {
   sendDataToOrder: async (req, res) => {
     try {
       t = await sequelize.transaction();
-      const { uid } = req.uid;
+      const { id } = req.uid;
       const {
         paid_amount,
         user_address_id,
@@ -458,27 +458,20 @@ module.exports = {
         warehouse_id,
         order_status_id,
       } = req.body;
-      if (!uid) {
-        return res.status(400).send({
-          isError: true,
-          message: "Invalid user ID",
-          data: null,
-        });
-      }
-
-      const { id: user_id } = await db.user.findOne({
-        where: {
-          uid,
-        },
-      });
+      // if (!uid) {
+      //   return res.status(400).send({
+      //     isError: true,
+      //     message: "Invalid user ID",
+      //     data: null,
+      //   });
+      // }
 
       const cartItems = await db.cart.findAll({
         where: {
-          user_id,
+          id,
           is_checked: 1,
         },
       });
-      console.log(cartItems);
 
       const order_status = await db.order_status.create({
         id: order_status_id,
@@ -498,11 +491,12 @@ module.exports = {
         },
         { transaction: t }
       );
+      console.log("xxxxxxx", order);
 
       const t2 = await sequelize.transaction();
       await db.cart.destroy({
         where: {
-          user_id,
+          id,
           is_checked: 1,
         },
         transaction: t2,
@@ -543,8 +537,9 @@ module.exports = {
         message: "An error occurred while processing your request",
         data: null,
       });
-    }},
- delCart: async (req, res) => {
+    }
+  },
+  delCart: async (req, res) => {
     try {
       let { id } = req.query;
       let deleteCart = await db.cart.destroy({
@@ -559,7 +554,7 @@ module.exports = {
       });
     } catch (error) {}
   },
-  
+
   updateNumberProduct: async (req, res) => {
     try {
       let { id } = req.query;
@@ -579,7 +574,7 @@ module.exports = {
       });
     } catch (error) {}
   },
-  
+
   getStockOrigin: async (req, res) => {
     const { id } = req.uid;
     try {
@@ -629,4 +624,38 @@ module.exports = {
       });
     }
   },
+
+  fetchCloseWarehouse: async (req, res) => {
+    try {
+      // get data
+      let {lat, lng} = req.query
+
+      // fetch wh list
+      let nearestWh = await sequelize.query(
+        `WITH raw AS (
+          select a.*
+            , ST_Distance_Sphere(
+              point(${lng}, ${lat}),
+              point(a.lng, a.lat)
+            ) distance
+          FROM db_warehouse.warehouse a
+        ) select id,city from raw order by distance asc limit 1`
+      )
+
+      // response 
+      res.status(201).send({
+        isError: false,
+        message: 'wh id fetched',
+        data: nearestWh[0]
+      })
+
+
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  }
 };

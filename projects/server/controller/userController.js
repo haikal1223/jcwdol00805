@@ -91,7 +91,8 @@ module.exports = {
     }
   },
 
-  getData: async (req, res) => {
+
+  /* getData: async (req, res) => {
     let { id } = req.query;
     const findUsers = await db.user.findAll({
       where: {
@@ -104,7 +105,7 @@ module.exports = {
         message: "Data is found",
         data: findUsers,
       });
-  },
+  }, */
 
   inputPassword: async (req, res) => {
     try {
@@ -358,7 +359,6 @@ module.exports = {
   uploadPhoto: async (req, res) => {
     try {
       let { id } = req.query;
-      const { file } = req.files;
 
       await db.user.update(
         {

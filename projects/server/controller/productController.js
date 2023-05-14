@@ -117,6 +117,30 @@ module.exports = {
     }
   },
 
+  viewProductDataId: async (req, res) => {
+    try {
+      // get value
+      let { product_id } = req.query;
+
+      // run query
+      
+      let products = await sequelize.query(`SELECT * FROM product where id=${product_id}`);
+
+      // response
+      res.status(201).send({
+        isError: false,
+        message: "Product list returned",
+        data: products,
+      });
+    } catch (error) {
+      res.status(404).send({
+        isError: true,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
+
   viewDetailProduct: async (req, res) => {
     try {
       // get value

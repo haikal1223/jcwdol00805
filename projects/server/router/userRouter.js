@@ -11,7 +11,7 @@ const { multerUpload } = require("./../lib/multer");
 const { tokenVerify } = require("../middleware/verifyToken");
 
 Router.post("/register", userController.registerUser);
-Router.get("/verification", userController.getData);
+/* Router.get("/verification", userController.getData); */
 Router.patch("/verification/:uid", userController.inputPassword);
 Router.post("/forgot-password", userController.forgotPassword);
 Router.patch("/reset-password/:uid", userController.resetPassword);

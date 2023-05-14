@@ -31,6 +31,7 @@ export default function Login() {
             window.location.reload()
         } catch (error) {
             toast(error?.response?.data?.message)
+            console.log(error)
         }
     }
 
@@ -64,7 +65,7 @@ export default function Login() {
                     </FormControl>
                     <HStack w='full' justify='space-between'>
                         <Checkbox><Text className='font-ibmFont' fontSize='12px'>Remember me.</Text></Checkbox>
-                        <Button variant='link' colorScheme='blue'><Text className='font-ibmFont' fontSize='12px'>Forgot Password?</Text></Button>
+                        <Link href="/forgotpassword"><Button variant='link' colorScheme='blue'><Text className='font-ibmFont' fontSize='12px'>Forgot Password?</Text></Button></Link>
                     </HStack>
                     <Button rounded='lg' w={['30vh']} alignSelf='center' backgroundColor='#5D5FEF' color='white' className='font-ibmFont' onClick={login} >Login</Button>
                     <Text fontSize='xs' alignSelf='center'>Don't have an account? <Link variant='link' colorScheme='blue' href="/register" >Sign Up</Link></Text>
