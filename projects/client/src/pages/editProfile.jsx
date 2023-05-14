@@ -27,6 +27,7 @@ import {
   ModalCloseButton,
   Modal,
 } from "@chakra-ui/react";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
 import Address from "../components/address";
@@ -46,8 +47,15 @@ export default function EditProfile() {
 
   const [message, setMessage] = useState("");
   const [matchMessage, setMatchMessage] = useState("");
-  const [show, setShow] = useState(false);
-  const handleClick = () => setShow(!show);
+
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const handleClickShowOldPassword = () => setShowOldPassword(!showOldPassword);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const handleClickShowNewPassword = () => setShowNewPassword(!showNewPassword);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword(!showConfirmPassword);
+
   let inputImage = useRef();
   const [profilePicture, setProfilePicture] = useState([]);
   const handleClickChangePassword = () =>
@@ -142,7 +150,7 @@ export default function EditProfile() {
   let getData = async () => {
     try {
       let response = await axios.get(
-        `http://localhost:8000/user/verification?id=${id}`
+        `http://localhost:8000/user/profile?id=${id}`
       );
       console.log(response);
       setFirstName(response.data.data[0].first_name);
@@ -157,7 +165,9 @@ export default function EditProfile() {
       if (response.data.data[0].birth_place) {
         setBirthPlace(response.data.data[0].birth_place);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   let handleImage = (e) => {
@@ -231,7 +241,10 @@ export default function EditProfile() {
       });
       setIsChangePassword(!isChangePassword);
       setMessage("");
-      Navigate(0);
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      handleClickChangePassword();
     } catch (error) {
       console.log(error);
       toast({
@@ -599,15 +612,30 @@ export default function EditProfile() {
                   <FormLabel>
                     <Text className="font-ibmFont">Old Password</Text>
                   </FormLabel>
-                  <Input
-                    rounded="lg"
-                    variant="filled"
-                    placeholder="Old Password"
-                    type="password"
-                    onChange={(e) => {
-                      setOldPassword(e.target.value);
-                    }}
-                  />
+                  <InputGroup>
+                    <Input
+                      rounded="lg"
+                      variant="filled"
+                      placeholder="Old Password"
+                      type={showOldPassword ? "text" : "password"}
+                      onChange={(e) => {
+                        setOldPassword(e.target.value);
+                      }}
+                    />
+                    <InputRightElement width="4.5rem">
+                      <Button
+                        h="1.75rem"
+                        size="sm"
+                        onClick={handleClickShowOldPassword}
+                      >
+                        {showOldPassword ? (
+                          <Icon as={ViewIcon} />
+                        ) : (
+                          <Icon as={ViewOffIcon} />
+                        )}
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
                 </FormControl>
               </HStack>
               <HStack w="full">
@@ -615,17 +643,35 @@ export default function EditProfile() {
                   <FormLabel>
                     <Text className="font-ibmFont">New Password</Text>
                   </FormLabel>
-                  <Input
-                    rounded="lg"
-                    variant="filled"
-                    placeholder="New Password"
-                    type="password"
-                    onChange={(e) => {
-                      setNewPassword(e.target.value);
-                      validatePassword(e.target.value);
-                      validateMatchNewPassword(e.target.value, confirmPassword);
-                    }}
-                  />
+                  <InputGroup>
+                    <Input
+                      rounded="lg"
+                      variant="filled"
+                      placeholder="New Password"
+                      type={showNewPassword ? "text" : "password"}
+                      onChange={(e) => {
+                        setNewPassword(e.target.value);
+                        validatePassword(e.target.value);
+                        validateMatchNewPassword(
+                          e.target.value,
+                          confirmPassword
+                        );
+                      }}
+                    />
+                    <InputRightElement width="4.5rem">
+                      <Button
+                        h="1.75rem"
+                        size="sm"
+                        onClick={handleClickShowNewPassword}
+                      >
+                        {showNewPassword ? (
+                          <Icon as={ViewIcon} />
+                        ) : (
+                          <Icon as={ViewOffIcon} />
+                        )}
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
                 </FormControl>
               </HStack>
               <Text color="red">{message}</Text>
@@ -634,16 +680,31 @@ export default function EditProfile() {
                   <FormLabel>
                     <Text className="font-ibmFont">Confirm Password</Text>
                   </FormLabel>
-                  <Input
-                    rounded="lg"
-                    variant="filled"
-                    placeholder="Confirm Password"
-                    type="password"
-                    onChange={(e) => {
-                      setConfirmPassword(e.target.value);
-                      validateMatchNewPassword(e.target.value, newPassword);
-                    }}
-                  />
+                  <InputGroup>
+                    <Input
+                      rounded="lg"
+                      variant="filled"
+                      placeholder="Confirm Password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        validateMatchNewPassword(e.target.value, newPassword);
+                      }}
+                    />
+                    <InputRightElement width="4.5rem">
+                      <Button
+                        h="1.75rem"
+                        size="sm"
+                        onClick={handleClickShowConfirmPassword}
+                      >
+                        {showConfirmPassword ? (
+                          <Icon as={ViewIcon} />
+                        ) : (
+                          <Icon as={ViewOffIcon} />
+                        )}
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
                 </FormControl>
               </HStack>
               <VStack align={["flex-start", "left"]}>
