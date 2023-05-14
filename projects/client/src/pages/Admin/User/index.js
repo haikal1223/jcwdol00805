@@ -65,10 +65,13 @@ const AdminUser = () => {
   const [editAdminWarehouse, setEditAdminWarehouse] = useState(false);
   const [whList, setWhList] = useState([]);
   const [warehouseId, setWarehouseId] = useState("");
+  const [adminId, setAdminId] = useState("");
   const [warehouseAdminId, setWarehouseAdminId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
   const [whData, setWHData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [warehouses, setWarehouses] = useState([]);
   const Navigate = useNavigate();
 
   const [filter, setFilter] = useState({
@@ -145,6 +148,32 @@ const AdminUser = () => {
     }
   };
 
+  const fetchWarehouses = async () => {
+    setLoading(true);
+    try {
+      const token = Cookies.get("adminToken");
+      const response = await axios.get(
+        "http://localhost:8000/admin/warehouses",
+        {
+          headers: { token },
+        }
+      );
+      setWarehouses(response.data.data);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  };
+
+  const handleWarehouseChange = (event) => {
+    setWarehouseId(event.target.value);
+  };
+
+  const handleAdminChange = (event) => {
+    setAdminId(event.target.value);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsLoading(true);
@@ -155,7 +184,7 @@ const AdminUser = () => {
         "http://localhost:8000/admin/assign-wh-admin",
         {
           warehouseId,
-          warehouseAdminId,
+          adminId,
         },
         { headers: { token } }
       );
@@ -169,7 +198,7 @@ const AdminUser = () => {
       });
 
       setWarehouseId("");
-      setWarehouseAdminId("");
+      setAdminId("");
     } catch (error) {
       console.log(error);
       toast({
@@ -180,7 +209,7 @@ const AdminUser = () => {
         isClosable: true,
       });
     } finally {
-      Navigate(0);
+      setTimeout(() => Navigate(0), 2000);
     }
 
     setIsLoading(false);
@@ -229,6 +258,14 @@ const AdminUser = () => {
       console.log(error.message);
     }
   };
+
+  const filteredAdmins = userDatax.filter(
+    (admin) => admin.role === "warehouse_admin"
+  );
+
+  useEffect(() => {
+    fetchWarehouses();
+  }, []);
 
   useEffect(() => {
     getAdminData();
@@ -1178,17 +1215,19 @@ const AdminUser = () => {
                               fontSize={20}
                               fontWeight={500}
                             >
-                              Warehouse ID
+                              Warehouse
                             </FormLabel>
-                            <Input
-                              type="text"
-                              width="120px"
-                              height="30px"
-                              value={warehouseId}
-                              onChange={(event) =>
-                                setWarehouseId(event.target.value)
-                              }
-                            />
+                            <Select
+                              width="250px"
+                              placeholder="Select Warehouse"
+                              onChange={handleWarehouseChange}
+                            >
+                              {warehouses.map((warehouse) => (
+                                <option key={warehouse.id} value={warehouse.id}>
+                                  {warehouse.name}
+                                </option>
+                              ))}
+                            </Select>
                           </FormControl>
 
                           <FormControl isRequired>
@@ -1197,17 +1236,19 @@ const AdminUser = () => {
                               fontSize={20}
                               fontWeight={500}
                             >
-                              Warehouse Admin ID
+                              Warehouse Admin
                             </FormLabel>
-                            <Input
-                              type="text"
-                              width="120px"
-                              height="30px"
-                              value={warehouseAdminId}
-                              onChange={(event) =>
-                                setWarehouseAdminId(event.target.value)
-                              }
-                            />
+                            <Select
+                              width="250px"
+                              placeholder="Select Admin"
+                              onChange={handleAdminChange}
+                            >
+                              {filteredAdmins.map((admin) => (
+                                <option key={admin.id} value={admin.id}>
+                                  {admin.first_name}
+                                </option>
+                              ))}
+                            </Select>
                           </FormControl>
 
                           <Button
@@ -1222,34 +1263,6 @@ const AdminUser = () => {
                         </VStack>
                       </form>
                       <Box mt={8}>
-                        <Heading
-                          mb={4}
-                          className="font-ibmFont"
-                          fontSize={20}
-                          fontWeight={500}
-                        >
-                          Admin Data
-                        </Heading>
-                        <Table variant="simple">
-                          <Thead>
-                            <Tr>
-                              <Th>ID</Th>
-                              <Th>Username</Th>
-                              <Th>Email</Th>
-                              <Th>Role</Th>
-                            </Tr>
-                          </Thead>
-                          <Tbody>
-                            {userDatax.map((user) => (
-                              <Tr key={user.id}>
-                                <Td>{user.id}</Td>
-                                <Td>{user.first_name}</Td>
-                                <Td>{user.email}</Td>
-                                <Td>{user.role}</Td>
-                              </Tr>
-                            ))}
-                          </Tbody>
-                        </Table>
                         <Heading
                           mb={4}
                           className="font-ibmFont"
