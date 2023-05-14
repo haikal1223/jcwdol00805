@@ -32,6 +32,7 @@ import {
   Td,
   TableContainer,
   useToast,
+  Image,
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
 import { toast, Toaster } from "react-hot-toast";
@@ -62,12 +63,19 @@ const AdminOrder = () => {
   const [shippingCost, setShippingCost] = useState(0);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [paymentProof, setPaymentProof] = useState([]);
   const toast = useToast();
 
   const {
     isOpen: isOpenCancel,
     onOpen: onOpenCancel,
     onClose: onCloseCancel,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenConfirm,
+    onOpen: onOpenConfirm,
+    onClose: onCloseConfirm,
   } = useDisclosure();
 
   const getUid = async () => {
@@ -309,8 +317,10 @@ const AdminOrder = () => {
                 _disabled={{ color: "#D9D9D9" }}
                 color={"#4EE476"}
                 variant={"link"}
+                onClick={(e) => openConfirmModal(val)}
               >
                 confirm
+                {console.log(val)}
               </Button>
             ) : val.status === "Processed" ? (
               <Button
@@ -409,10 +419,71 @@ const AdminOrder = () => {
 
   const cancelOrder = async () => {
     try {
-      let response = await axios.get(
+      let response = await axios.patch(
         `http://localhost:8000/admin-order/cancel-order/${selectedId}`
       );
-      window.location.reload();
+      toast({
+        title: "Success",
+        description: "Cancel Order Success",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const openConfirmModal = async (val) => {
+    try {
+      onOpenConfirm();
+      setSelectedId(val.id);
+      let profilePictureSplit =
+          val.payment_proof.split(/\\/g)[2];
+        setPaymentProof(
+          `http://localhost:8000/payments/${profilePictureSplit}`
+        );
+    } catch (error) {}
+  };
+
+  const confirmOrder = async () => {
+    try {
+      let response = await axios.patch(
+        `http://localhost:8000/admin-order/confirm-order/${selectedId}`
+      );
+      toast({
+        title: "Success",
+        description: "Confirm Order Success",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const rejectOrder = async () => {
+    try {
+      let response = await axios.patch(
+        `http://localhost:8000/admin-order/reject-order/${selectedId}`
+      );
+      toast({
+        title: "Success",
+        description: "Reject Order Success",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.log(error.message);
     }
@@ -548,6 +619,64 @@ const AdminOrder = () => {
                 </Box>
               </ModalContent>
             </Modal>
+
+            <Modal isOpen={isOpenConfirm} onClose={onCloseConfirm}>
+              <ModalOverlay />
+              <ModalContent>
+                <Box w={["full", "md"]} p={[8, 20]} mt={[20, "1vh"]} mx="auto">
+                  <VStack spacing={4} align="flex-start" w="full">
+                    <HStack spacing={1} align={["flex-start", "left"]} w="full">
+                      <Heading>
+                        <Text className="font-ibmReg">
+                          Do you want to confirm the payment proof?
+                        </Text>
+                        <Text
+                          fontSize={"20pt"}
+                          my={"10px"}
+                          className="font-ibmReg"
+                        >
+                          Order #{selectedId}
+                        </Text>
+                        <Image
+                          w="300px"
+                          h="auto"
+                          objectFit="cover"
+                          src={`${paymentProof}`}
+                          alt={"Profile Picture"}
+                          id="imgpreview"
+                        />
+                      </Heading>
+                      <ModalCloseButton />
+                    </HStack>
+
+                    <Button
+                      rounded="lg"
+                      alignSelf="center"
+                      backgroundColor="#5D5FEF"
+                      color="white"
+                      className="font-ibmReg"
+                      onClick={confirmOrder}
+                      size="lg"
+                    >
+                      Yes, confirm it
+                    </Button>
+                    <Button
+                      rounded="lg"
+                      alignSelf="center"
+                      backgroundColor="white"
+                      color="#5D5FEF"
+                      className="font-ibmReg"
+                      variant="outline"
+                      onClick={rejectOrder}
+                      size="lg"
+                    >
+                      No, reject it
+                    </Button>
+                  </VStack>
+                </Box>
+              </ModalContent>
+            </Modal>
+
             <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
               <IconButton
                 isDisabled={page === 1}

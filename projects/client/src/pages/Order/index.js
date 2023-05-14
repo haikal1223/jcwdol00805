@@ -36,6 +36,7 @@ export default function CheckOut(props) {
           productIdx={idx}
           cancel={(e) => cancel(val.id)}
           orderDetail={(e) => orderDetail(val.id)}
+          delivered={(e) => delivered(val.id)}
         />
       );
     });
@@ -52,6 +53,20 @@ export default function CheckOut(props) {
           Navigate("/order");
         }, 2000);
       }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  let delivered = async (id) => {
+    try {
+      let response = await axios.patch(
+        `http://localhost:8000/order/delivered?order_id=${id}`
+      );
+      toast.success("Order Delivered");
+      setTimeout(() => {
+        Navigate("/order");
+      }, 2000);
     } catch (error) {
       console.log(error);
     }
