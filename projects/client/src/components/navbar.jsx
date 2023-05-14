@@ -68,7 +68,6 @@ export default function Navbar(props) {
             setProfilePicture(
               `http://localhost:8000/images/${profilePictureSplit}`
             );
-            console.log(res);
           })
           .catch((err) => {
             console.log(err);
@@ -103,7 +102,6 @@ export default function Navbar(props) {
                                         src={`${profilePicture}`}
                                         alt={"Profile Picture"}
                                         rounded="full"
-                                        id="imgpreview"
                                         ml={3}
                                         />
                                 </MenuButton>
