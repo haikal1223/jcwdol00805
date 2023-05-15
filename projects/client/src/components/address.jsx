@@ -73,7 +73,8 @@ export default function Address(props) {
                     recipient_phone: data.recipient_phone,
                     postal_code: data.postal_code,
                     uid,
-                },
+                }, { headers: { token: token } }
+
 
             );
 
@@ -81,7 +82,8 @@ export default function Address(props) {
             toast.success("Address Added");
         } catch (error) {
             console.log(error);
-        } finally {
+        }
+        finally {
             setShow({ ...show, loading: false });
             Navigate(0);
             modalAddress.onClose();
