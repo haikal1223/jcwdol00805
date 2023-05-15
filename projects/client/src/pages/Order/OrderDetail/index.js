@@ -122,7 +122,7 @@ export default function CheckOut(props) {
             fontSize={18}
             fontWeight={400}
           >
-            {`${order[0].order.user_address.street_address}, ${order[0].order.user_address.subdistrict}, ${order[0].order.user_address.city}, ${order[0].order.user_address.province}, ${order[0].order.user_address.postal_code}`}
+            {`${order[0].order.user_address.street_address}, ${order[0].order.user_address.subdistrict}, ${order[0].order.user_address.city.split('.')[1]}, ${order[0].order.user_address.province.split('.')[1]}, ${order[0].order.user_address.postal_code}`}
           </Text>
         </>
       ) : (

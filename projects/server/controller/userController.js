@@ -110,7 +110,7 @@ module.exports = {
     let { id } = req.query;
     const findUsers = await db.user.findAll({
       where: {
-        uid,
+        id,
       },
     });
     if (findUsers)
