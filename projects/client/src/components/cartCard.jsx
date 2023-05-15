@@ -26,6 +26,9 @@ export default function CartCard(props) {
   useEffect(() => {
     fetchProduct();
   }, []);
+  useEffect(() => {
+    fetchProduct();
+  }, [props.deleteFunction]);
 
   return (
     <>
