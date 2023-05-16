@@ -92,7 +92,7 @@ export default function AdminWarehouse() {
         }
       );
       setAllWarehouse(response.data.data);
-      setMaxPage(Math.ceil(filteredWarehouse.length / rowPerPage));
+      setMaxPage(Math.ceil(allWarehouse.length / rowPerPage));
       if (response.data.data.length === 0) {
         toast.error("WareHouse Not found");
       }
@@ -152,10 +152,6 @@ export default function AdminWarehouse() {
           <Td>{warehouse.name}</Td>
           <Td>{warehouse.city.split(".")[1]}</Td>
           <Td>{warehouse.province.split(".")[1]}</Td>
-          <Td>{warehouse.lat}</Td>
-          <Td>{warehouse.lng}</Td>
-          <Td>{warehouse.createdAt}</Td>
-          <Td>{warehouse.updatedAt}</Td>
           <Td>
             <Button
               ml="20px"
@@ -173,7 +169,12 @@ export default function AdminWarehouse() {
               backgroundColor="#5D5FEF"
               color="white"
               className="font-ibmFont"
-              onClick={() => onDeleteWarehouse(warehouse.id)}
+              onClick={() => {
+                const confirmed = window.confirm("Are you sure?");
+                if (confirmed) {
+                  onDeleteWarehouse(warehouse.id);
+                }
+              }}
             >
               Delete
             </Button>
@@ -207,12 +208,12 @@ export default function AdminWarehouse() {
       );
       toast.success("Warehouse added successfully!");
       modalAddWH.onClose();
+      fetchWarehouse();
     } catch (error) {
       toast.error("Failed to add warehouse.");
       console.error(error);
     } finally {
       setShow({ ...show, loading: false });
-      Navigate(0);
       modalAddWH.onClose();
     }
   };
@@ -242,12 +243,12 @@ export default function AdminWarehouse() {
       );
       toast.success("Warehouse edited successfully!");
       modalEditWH.onClose();
+      fetchWarehouse();
     } catch (error) {
       toast.error("Failed to edit warehouse.");
       console.error(error);
     } finally {
       setShow({ ...show, loading: false });
-      Navigate(0);
       modalEditWH.onClose();
     }
   };
@@ -264,18 +265,18 @@ export default function AdminWarehouse() {
         }
       );
       toast.success("Warehouse deleted successfully!");
+      fetchWarehouse();
     } catch (error) {
       toast.error("Failed to deleted warehouse.");
       console.error(error);
     } finally {
       setShow({ ...show, loading: false });
-      Navigate(0);
     }
   };
 
   useEffect(() => {
     fetchWarehouse();
-  }, [page, searchTerm, filteredWarehouse.length]);
+  }, [page, searchTerm, allWarehouse.length]);
 
   useEffect(() => {
     rakirCity();
@@ -306,308 +307,323 @@ export default function AdminWarehouse() {
   };
 
   return (
-    <div className="w-[100%] flex flex-1 justify-between">
-      <Sidebar />
-      <div className="bg-white w-[1240px] h-auto z-0 shadow-inner flex flex-col py-[40px] px-[50px]">
-        <div className="w-[1140px] min-h-screen flex justify-center items-start overflow-auto ">
-          {/*REPLACE BELOW FOR CONTENT*/}
-          <Box className="bg-white w-full h-[1100px] drop-shadow-md p-9">
-            <div className="flex flex-row justify-between align-center">
-              <Text className="font-ibmMed text-4xl">Warehouse</Text>
-              <Button
-                rounded="lg"
-                w={["35"]}
-                alignSelf="center"
-                backgroundColor="#5D5FEF"
-                color="white"
+    <div className="w-[100%]">
+      <div className="w-[100%] flex flex-1 justify-between">
+        <Sidebar />
+        <div className="bg-white w-[1240px] h-auto z-0 shadow-inner flex flex-col overflow-auto py-[40px] pl-[50px]">
+          <div className="w-[1140px] h-auto">
+            <div className="w-full h-full">
+              <Text
+                align={["left"]}
+                w="full"
                 className="font-ibmFont"
-                onClick={modalAddWH.onOpen}
+                fontSize={30}
+                fontWeight={500}
               >
-                +Add Warehouse
-              </Button>
+                <Text borderBottom="2px" borderColor="black">
+                  <span></span> <span className="text-purple">Warehouse</span>
+                  <span> Data</span>
+                </Text>
+              </Text>
+              {/*REPLACE BELOW FOR CONTENT*/}
+              <Box className="bg-white w-full h-[1100px] drop-shadow-md p-9">
+                <div className="flex flex-row justify-between align-center">
+                  <div></div>
+                  <Button
+                    rounded="lg"
+                    w={["35"]}
+                    alignSelf="center"
+                    backgroundColor="#5D5FEF"
+                    color="white"
+                    className="font-ibmFont"
+                    onClick={modalAddWH.onOpen}
+                  >
+                    +Add Warehouse
+                  </Button>
+                </div>
+                <Modal
+                  isOpen={modalAddWH.isOpen}
+                  onClose={modalAddWH.onClose}
+                  isCentered
+                  motionPreset="slideInBottom"
+                  className="z-50"
+                  popup={true}
+                >
+                  <ModalOverlay
+                    bg="blackAlpha.200"
+                    backdropFilter="blur(10px) hue-rotate(90deg)"
+                  />
+                  <ModalContent alignItems="center">
+                    <ModalCloseButton />
+                    <>
+                      <form onSubmit={handleSubmit(onAddWarehouse)}>
+                        <Card maxWidth="300px" className="mt-[30px] ">
+                          <h1 className="font-ibmBold text-[20px] ">
+                            Warehouse Detail
+                          </h1>
+                          <CardBody>
+                            <FormControl>
+                              <FormLabel size="sm">Name</FormLabel>
+                              <Input
+                                type="text"
+                                bg="white"
+                                borderColor="#d8dee4"
+                                size="sm"
+                                borderRadius="6px"
+                                placeholder="Name"
+                                id="name"
+                              />
+                            </FormControl>
+                            <FormControl>
+                              <FormLabel size="sm">Province</FormLabel>
+                              <Select
+                                name="province"
+                                bg="white"
+                                borderColor="#d8dee4"
+                                size="sm"
+                                borderRadius="6px"
+                                onChange={(e) => {
+                                  rakirCity(e.target.value[0]);
+                                  setProvince(e.target.value);
+                                }}
+                                id="province"
+                              >
+                                <option value="">Select Province</option>
+                                {provinceList?.map((val, idx) => {
+                                  return (
+                                    <option
+                                      value={`${val.province_id}.${val.province}`}
+                                      key={idx}
+                                    >
+                                      {val.province}
+                                    </option>
+                                  );
+                                })}
+                              </Select>
+                            </FormControl>
+                            <FormControl>
+                              <FormLabel size="sm">City</FormLabel>
+                              <Select
+                                name="city"
+                                bg="white"
+                                borderColor="#d8dee4"
+                                size="sm"
+                                borderRadius="6px"
+                                onChange={(e) => {
+                                  setCity(e.target.value);
+                                }}
+                                id="city"
+                              >
+                                <option value="selected">Select City</option>
+                                {cityList.map((val, idx) => {
+                                  return (
+                                    <option
+                                      value={`${val.city_id}.${val.city_name}`}
+                                      key={idx}
+                                    >
+                                      {val.type + " " + val.city_name}
+                                    </option>
+                                  );
+                                })}
+                              </Select>
+                            </FormControl>
+
+                            <div className="w-full flex justify-end">
+                              <Button
+                                backgroundColor="#5D5FEF"
+                                color="white"
+                                mt="5"
+                                type="submit"
+                                w="265px"
+                                h="34px"
+                                alignSelf="center"
+                                rounded="3xl"
+                              >
+                                Save Address
+                              </Button>
+                              {/* )} */}
+                            </div>
+                          </CardBody>
+                        </Card>
+                      </form>
+                    </>
+                  </ModalContent>
+                </Modal>
+
+                <Modal
+                  isOpen={modalEditWH.isOpen}
+                  onClose={modalEditWH.onClose}
+                  isCentered
+                  motionPreset="slideInBottom"
+                  className="z-50"
+                  popup={true}
+                >
+                  <ModalOverlay
+                    bg="blackAlpha.200"
+                    backdropFilter="blur(10px) hue-rotate(90deg)"
+                  />
+                  <ModalContent alignItems="center">
+                    <ModalCloseButton />
+                    <>
+                      <form onSubmit={handleSubmit(onEditWarehouse)}>
+                        <Card maxWidth="300px" className="mt-[30px] ">
+                          <h1 className="font-ibmBold text-[20px] ">
+                            Edit Warehouse
+                          </h1>
+                          <CardBody>
+                            <FormControl>
+                              <FormLabel size="sm">Name</FormLabel>
+                              <Input
+                                type="text"
+                                bg="white"
+                                borderColor="#d8dee4"
+                                size="sm"
+                                borderRadius="6px"
+                                placeholder="Name"
+                                id="name"
+                              />
+                            </FormControl>
+                            <FormControl>
+                              <FormLabel size="sm">Province</FormLabel>
+                              <Select
+                                name="province"
+                                bg="white"
+                                borderColor="#d8dee4"
+                                size="sm"
+                                borderRadius="6px"
+                                onChange={(e) => {
+                                  rakirCity(e.target.value[0]);
+                                  setProvince(e.target.value);
+                                }}
+                                id="province"
+                              >
+                                <option value="">Select Province</option>
+                                {provinceList?.map((val, idx) => {
+                                  return (
+                                    <option
+                                      value={`${val.province_id}.${val.province}`}
+                                      key={idx}
+                                    >
+                                      {val.province}
+                                    </option>
+                                  );
+                                })}
+                              </Select>
+                            </FormControl>
+                            <FormControl>
+                              <FormLabel size="sm">City</FormLabel>
+                              <Select
+                                name="city"
+                                bg="white"
+                                borderColor="#d8dee4"
+                                size="sm"
+                                borderRadius="6px"
+                                onChange={(e) => {
+                                  setCity(e.target.value);
+                                }}
+                                id="city"
+                              >
+                                <option value="selected">Select City</option>
+                                {cityList.map((val, idx) => {
+                                  return (
+                                    <option
+                                      value={`${val.city_id}.${val.city_name}`}
+                                      key={idx}
+                                    >
+                                      {val.type + " " + val.city_name}
+                                    </option>
+                                  );
+                                })}
+                              </Select>
+                            </FormControl>
+
+                            <div className="w-full flex justify-end">
+                              <Button
+                                backgroundColor="#5D5FEF"
+                                color="white"
+                                mt="5"
+                                type="submit"
+                                w="265px"
+                                h="34px"
+                                alignSelf="center"
+                                rounded="3xl"
+                              >
+                                Save Address
+                              </Button>
+                              {/* )} */}
+                            </div>
+                          </CardBody>
+                        </Card>
+                      </form>
+                    </>
+                  </ModalContent>
+                </Modal>
+
+                <hr className="my-4 border-[2px]" />
+                <HStack
+                  justifyContent={"space-between"}
+                  className="mb-4"
+                ></HStack>
+                <TableContainer>
+                  <Table variant="simple">
+                    <Thead>
+                      <Tr className="font-bold bg-[#f1f1f1]">
+                        <Th>ID</Th>
+                        <Th>Name</Th>
+                        <Th>City</Th>
+                        <Th>Province</Th>
+                        <Td className="flex justify-center w-[250px] z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
+                          Action
+                        </Td>
+                      </Tr>
+                    </Thead>
+                    <Tbody className="bg-white">{renderWarehouse()}</Tbody>
+                  </Table>
+                </TableContainer>
+
+                <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
+                  <IconButton
+                    isDisabled={page === 1}
+                    onClick={firstPageHandler}
+                    size={"sm"}
+                    bg="#5D5FEF"
+                    aria-label="previous page"
+                    icon={<TbChevronsLeft color="white" boxsize={"16px"} />}
+                  />
+                  <IconButton
+                    isDisabled={page === 1}
+                    onClick={prevPageHandler}
+                    size={"sm"}
+                    bg="#5D5FEF"
+                    aria-label="previous page"
+                    icon={<TbChevronLeft color="white" boxsize={"16px"} />}
+                  />
+                  <div className="font-ibmReg text-dgrey">
+                    Page {page} / {maxPage}
+                  </div>
+                  <IconButton
+                    isDisabled={page === maxPage}
+                    onClick={nextPageHandler}
+                    size={"sm"}
+                    bg="#5D5FEF"
+                    aria-label="next page"
+                    icon={<TbChevronRight color="white" boxsize={"16px"} />}
+                  />
+                  <IconButton
+                    isDisabled={page === maxPage}
+                    onClick={maxPageHandler}
+                    size={"sm"}
+                    bg="#5D5FEF"
+                    aria-label="next page"
+                    icon={<TbChevronsRight color="white" boxsize={"16px"} />}
+                  />
+                </div>
+              </Box>
             </div>
-            <Modal
-              isOpen={modalAddWH.isOpen}
-              onClose={modalAddWH.onClose}
-              isCentered
-              motionPreset="slideInBottom"
-              className="z-50"
-              popup={true}
-            >
-              <ModalOverlay
-                bg="blackAlpha.200"
-                backdropFilter="blur(10px) hue-rotate(90deg)"
-              />
-              <ModalContent alignItems="center">
-                <ModalCloseButton />
-                <>
-                  <form onSubmit={handleSubmit(onAddWarehouse)}>
-                    <Card maxWidth="300px" className="mt-[30px] ">
-                      <h1 className="font-ibmBold text-[20px] ">
-                        Warehouse Detail
-                      </h1>
-                      <CardBody>
-                        <FormControl>
-                          <FormLabel size="sm">Name</FormLabel>
-                          <Input
-                            type="text"
-                            bg="white"
-                            borderColor="#d8dee4"
-                            size="sm"
-                            borderRadius="6px"
-                            placeholder="Name"
-                            id="name"
-                          />
-                        </FormControl>
-                        <FormControl>
-                          <FormLabel size="sm">Province</FormLabel>
-                          <Select
-                            name="province"
-                            bg="white"
-                            borderColor="#d8dee4"
-                            size="sm"
-                            borderRadius="6px"
-                            onChange={(e) => {
-                              rakirCity(e.target.value[0]);
-                              setProvince(e.target.value);
-                            }}
-                            id="province"
-                          >
-                            <option value="">Select Province</option>
-                            {provinceList?.map((val, idx) => {
-                              return (
-                                <option
-                                  value={`${val.province_id}.${val.province}`}
-                                  key={idx}
-                                >
-                                  {val.province}
-                                </option>
-                              );
-                            })}
-                          </Select>
-                        </FormControl>
-                        <FormControl>
-                          <FormLabel size="sm">City</FormLabel>
-                          <Select
-                            name="city"
-                            bg="white"
-                            borderColor="#d8dee4"
-                            size="sm"
-                            borderRadius="6px"
-                            onChange={(e) => {
-                              setCity(e.target.value);
-                            }}
-                            id="city"
-                          >
-                            <option value="selected">Select City</option>
-                            {cityList.map((val, idx) => {
-                              return (
-                                <option
-                                  value={`${val.city_id}.${val.city_name}`}
-                                  key={idx}
-                                >
-                                  {val.type + " " + val.city_name}
-                                </option>
-                              );
-                            })}
-                          </Select>
-                        </FormControl>
-
-                        <div className="w-full flex justify-end">
-                          <Button
-                            backgroundColor="#5D5FEF"
-                            color="white"
-                            mt="5"
-                            type="submit"
-                            w="265px"
-                            h="34px"
-                            alignSelf="center"
-                            rounded="3xl"
-                          >
-                            Save Address
-                          </Button>
-                          {/* )} */}
-                        </div>
-                      </CardBody>
-                    </Card>
-                  </form>
-                </>
-              </ModalContent>
-            </Modal>
-
-            <Modal
-              isOpen={modalEditWH.isOpen}
-              onClose={modalEditWH.onClose}
-              isCentered
-              motionPreset="slideInBottom"
-              className="z-50"
-              popup={true}
-            >
-              <ModalOverlay
-                bg="blackAlpha.200"
-                backdropFilter="blur(10px) hue-rotate(90deg)"
-              />
-              <ModalContent alignItems="center">
-                <ModalCloseButton />
-                <>
-                  <form onSubmit={handleSubmit(onEditWarehouse)}>
-                    <Card maxWidth="300px" className="mt-[30px] ">
-                      <h1 className="font-ibmBold text-[20px] ">
-                        Edit Warehouse
-                      </h1>
-                      <CardBody>
-                        <FormControl>
-                          <FormLabel size="sm">Name</FormLabel>
-                          <Input
-                            type="text"
-                            bg="white"
-                            borderColor="#d8dee4"
-                            size="sm"
-                            borderRadius="6px"
-                            placeholder="Name"
-                            id="name"
-                          />
-                        </FormControl>
-                        <FormControl>
-                          <FormLabel size="sm">Province</FormLabel>
-                          <Select
-                            name="province"
-                            bg="white"
-                            borderColor="#d8dee4"
-                            size="sm"
-                            borderRadius="6px"
-                            onChange={(e) => {
-                              rakirCity(e.target.value[0]);
-                              setProvince(e.target.value);
-                            }}
-                            id="province"
-                          >
-                            <option value="">Select Province</option>
-                            {provinceList?.map((val, idx) => {
-                              return (
-                                <option
-                                  value={`${val.province_id}.${val.province}`}
-                                  key={idx}
-                                >
-                                  {val.province}
-                                </option>
-                              );
-                            })}
-                          </Select>
-                        </FormControl>
-                        <FormControl>
-                          <FormLabel size="sm">City</FormLabel>
-                          <Select
-                            name="city"
-                            bg="white"
-                            borderColor="#d8dee4"
-                            size="sm"
-                            borderRadius="6px"
-                            onChange={(e) => {
-                              setCity(e.target.value);
-                            }}
-                            id="city"
-                          >
-                            <option value="selected">Select City</option>
-                            {cityList.map((val, idx) => {
-                              return (
-                                <option
-                                  value={`${val.city_id}.${val.city_name}`}
-                                  key={idx}
-                                >
-                                  {val.type + " " + val.city_name}
-                                </option>
-                              );
-                            })}
-                          </Select>
-                        </FormControl>
-
-                        <div className="w-full flex justify-end">
-                          <Button
-                            backgroundColor="#5D5FEF"
-                            color="white"
-                            mt="5"
-                            type="submit"
-                            w="265px"
-                            h="34px"
-                            alignSelf="center"
-                            rounded="3xl"
-                          >
-                            Save Address
-                          </Button>
-                          {/* )} */}
-                        </div>
-                      </CardBody>
-                    </Card>
-                  </form>
-                </>
-              </ModalContent>
-            </Modal>
-
-            <hr className="my-4 border-[2px]" />
-            <HStack justifyContent={"space-between"} className="mb-4"></HStack>
-            <TableContainer>
-              <Table variant="simple">
-                <Thead>
-                  <Tr className="font-bold bg-[#f1f1f1]">
-                    <Th>ID</Th>
-                    <Th>Name</Th>
-                    <Th>City</Th>
-                    <Th>Province</Th>
-                    <Th>lat</Th>
-                    <Th>lng</Th>
-                    <Th>Created At</Th>
-                    <Th>update At</Th>
-                    <Td className="flex justify-center w-[250px] sticky right-0 z-50 bg-[#f1f1f1] shadow-[-10px_0px_30px_0px_#efefef]">
-                      action
-                    </Td>
-                  </Tr>
-                </Thead>
-                <Tbody className="bg-white">{renderWarehouse()}</Tbody>
-              </Table>
-            </TableContainer>
-
-            <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
-              <IconButton
-                isDisabled={page === 1}
-                onClick={firstPageHandler}
-                size={"sm"}
-                bg="#5D5FEF"
-                aria-label="previous page"
-                icon={<TbChevronsLeft color="white" boxsize={"16px"} />}
-              />
-              <IconButton
-                isDisabled={page === 1}
-                onClick={prevPageHandler}
-                size={"sm"}
-                bg="#5D5FEF"
-                aria-label="previous page"
-                icon={<TbChevronLeft color="white" boxsize={"16px"} />}
-              />
-              <div className="font-ibmReg text-dgrey">
-                Page {page} / {maxPage}
-              </div>
-              <IconButton
-                isDisabled={page === maxPage}
-                onClick={nextPageHandler}
-                size={"sm"}
-                bg="#5D5FEF"
-                aria-label="next page"
-                icon={<TbChevronRight color="white" boxsize={"16px"} />}
-              />
-              <IconButton
-                isDisabled={page === maxPage}
-                onClick={maxPageHandler}
-                size={"sm"}
-                bg="#5D5FEF"
-                aria-label="next page"
-                icon={<TbChevronsRight color="white" boxsize={"16px"} />}
-              />
-            </div>
-          </Box>
+          </div>
+          <Toaster />
         </div>
       </div>
-      <Toaster />
     </div>
   );
 }
