@@ -97,11 +97,14 @@ function UpdatePassword() {
 
   return (
     <Box
-      justifyContent={"center"}
+      w={[480]}
+      h={["full"]}
+      p={[0, 0]}
+      mx="auto"
       display={"flex"}
       flexDirection={"column"}
       alignItems={"center"}
-      gap={6}
+      justifyContent={"between"}
     >
       <Image src={HeaderPattern}></Image>
       <VStack as="header" spacing="6" mt="91">
