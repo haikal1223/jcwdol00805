@@ -100,13 +100,13 @@ module.exports = {
       }
 
       const existingAssignment = await db.wh_admin.findOne({
-        where: { warehouse_id: warehouseId, user_id: adminId },
+        where: { user_id: adminId },
       });
 
       if (existingAssignment) {
         return res.status(400).send({
           isError: true,
-          message: "Admin is already assigned to the warehouse",
+          message: "Admin is already assigned to a warehouse",
           data: null,
         });
       }
@@ -116,18 +116,7 @@ module.exports = {
         user_id: adminId,
       });
 
-      await db.user.update(
-        { role: "warehouse_admin" },
-        { where: { id: adminId } }
-      );
-
-      const isAssigned = await db.wh_admin.findOne({
-        where: { user_id: adminId },
-      });
-
-      if (!isAssigned) {
-        await db.user.update({ role: "user" }, { where: { id: adminId } });
-      }
+      await db.user.update({ role: "wh_admin" }, { where: { id: adminId } });
 
       res.status(200).send({
         isError: false,
@@ -1088,7 +1077,7 @@ module.exports = {
       const { warehouseId } = req.query;
 
       const user = await db.user.findOne({ where: { id } });
-      if (user.role === "warehouse_admin") {
+      if (user.role === "wh_admin") {
         const whAdmin = await db.wh_admin.findOne({
           where: { user_id: user.id, warehouse_id: warehouseId },
         });
@@ -1220,7 +1209,7 @@ module.exports = {
       const moment = require("moment");
 
       const user = await db.user.findOne({ where: { id } });
-      if (user.role === "warehouse_admin") {
+      if (user.role === "wh_admin") {
         const whAdmin = await db.wh_admin.findOne({
           where: { user_id: user.id, warehouse_id: warehouseId },
         });
@@ -1279,7 +1268,7 @@ module.exports = {
       LEFT JOIN
       product as p ON p.id = a.product_id
       WHERE a.warehouse_id=:warehouse_id
-      GROUP BY 1,2,3
+      GROUP BY 1,2,3,4,5
       `;
 
       const result = await sequelize.query(rawQuery, {
@@ -1310,7 +1299,7 @@ module.exports = {
       const moment = require("moment");
 
       const user = await db.user.findOne({ where: { id } });
-      if (user.role === "warehouse_admin") {
+      if (user.role === "wh_admin") {
         const whAdmin = await db.wh_admin.findOne({
           where: { user_id: user.id, warehouse_id },
         });

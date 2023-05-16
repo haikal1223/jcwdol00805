@@ -199,6 +199,7 @@ const AdminUser = () => {
 
       setWarehouseId("");
       setAdminId("");
+      showAllUserData();
     } catch (error) {
       console.log(error);
       toast({
@@ -209,7 +210,6 @@ const AdminUser = () => {
         isClosable: true,
       });
     } finally {
-      setTimeout(() => Navigate(0), 2000);
     }
 
     setIsLoading(false);
@@ -259,9 +259,7 @@ const AdminUser = () => {
     }
   };
 
-  const filteredAdmins = userDatax.filter(
-    (admin) => admin.role === "warehouse_admin"
-  );
+  const filteredAdmins = userDatax.filter((admin) => admin.role === "wh_admin");
 
   useEffect(() => {
     fetchWarehouses();
@@ -1199,18 +1197,23 @@ const AdminUser = () => {
                 ) : WHAssignMode ? (
                   <>
                     <Box mt={8}>
-                      <Heading
-                        mb={4}
+                      <Text
+                        align={["left"]}
+                        w="full"
                         className="font-ibmFont"
                         fontSize={30}
                         fontWeight={500}
                       >
-                        Assign Warehouse Admin
-                      </Heading>
+                        <Text borderBottom="2px" borderColor="black">
+                          <span></span> <span> Assign Warehouse </span>
+                          <span className="text-purple">Admin</span>
+                        </Text>
+                      </Text>
                       <form onSubmit={handleSubmit}>
                         <VStack spacing={4}>
                           <FormControl isRequired>
                             <FormLabel
+                              mt="20px"
                               className="font-ibmFont"
                               fontSize={20}
                               fontWeight={500}
@@ -1243,6 +1246,7 @@ const AdminUser = () => {
                               placeholder="Select Admin"
                               onChange={handleAdminChange}
                             >
+                              {console.log(filteredAdmins)}
                               {filteredAdmins.map((admin) => (
                                 <option key={admin.id} value={admin.id}>
                                   {admin.first_name}
@@ -1291,6 +1295,12 @@ const AdminUser = () => {
                                   colorScheme="red"
                                   size="sm"
                                   onClick={async () => {
+                                    const confirmed = window.confirm(
+                                      "Are you sure you want to delete this item?"
+                                    );
+                                    if (!confirmed) {
+                                      return;
+                                    }
                                     const token =
                                       localStorage.getItem("myToken");
                                     try {
@@ -1329,49 +1339,6 @@ const AdminUser = () => {
                       </Box>
                       <div className="w-[100%] mt-5 flex justify-center items-center gap-5">
                         {" "}
-                        <IconButton
-                          isDisabled={pageAdmin === 1}
-                          onClick={firstPageHandler}
-                          size={"sm"}
-                          bg="#5D5FEF"
-                          aria-label="previous page"
-                          icon={
-                            <TbChevronsLeft color="white" boxsize={"16px"} />
-                          }
-                        />
-                        <IconButton
-                          isDisabled={pageAdmin === 1}
-                          onClick={prevPageHandler}
-                          size={"sm"}
-                          bg="#5D5FEF"
-                          aria-label="previous page"
-                          icon={
-                            <TbChevronLeft color="white" boxsize={"16px"} />
-                          }
-                        />
-                        <div className="font-ibmReg text-dgrey">
-                          Page {pageAdmin} / {maxPageAdmin}
-                        </div>
-                        <IconButton
-                          isDisabled={pageAdmin === maxPageAdmin}
-                          onClick={nextPageHandler}
-                          size={"sm"}
-                          bg="#5D5FEF"
-                          aria-label="next page"
-                          icon={
-                            <TbChevronRight color="white" boxsize={"16px"} />
-                          }
-                        />
-                        <IconButton
-                          isDisabled={pageAdmin === maxPageAdmin}
-                          onClick={maxPageHandler}
-                          size={"sm"}
-                          bg="#5D5FEF"
-                          aria-label="next page"
-                          icon={
-                            <TbChevronsRight color="white" boxsize={"16px"} />
-                          }
-                        />
                       </div>
                     </Box>
                   </>
