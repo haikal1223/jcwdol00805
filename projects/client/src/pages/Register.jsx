@@ -172,7 +172,7 @@ export default function RegisterUser() {
               disabled={disable || isLoading}
               onClick={() => onRegister()}
             >
-              {isLoading ? ( // Render loading animation if isLoading is true
+              {isLoading ? (
                 <div className="flex justify-center items-center">
                   <div className="mr-2 animate-spin">
                     <svg

@@ -153,56 +153,12 @@ module.exports = {
         }
       );
 
-      let orderDetail = await db.order_detail.findAll({
-        where: {
-          order_id: id,
-        },
-      });
-
-      let order = await db.order.findOne({
-        where: {
-          id,
-        },
-      });
-
-      for (i = 0; i < orderDetail.length; i++) {
-        let getStock = await db.product_stock.findOne({
-          where: {
-            product_id: orderDetail[i].product_id,
-            warehouse_id: order.warehouse_id,
-          },
-        });
-        let oldStock = getStock.stock;
-        let newStock = oldStock + orderDetail[i].product_quantity;
-
-        let updateStock = await db.product_stock.update(
-          {
-            stock: newStock,
-          },
-          {
-            where: {
-              product_id: orderDetail[i].product_id,
-              warehouse_id: order.warehouse_id,
-            },
-          }
-        );
-
-        let updateStockLog = await db.stock_log.create({
-          old_stock: oldStock,
-          new_stock: newStock,
-          order_id: id,
-          product_id: orderDetail[i].product_id,
-        });
-      }
-
       //response
       res.status(201).send({
         isError: false,
         message: "cancel order success",
         data: {
           updateStatus,
-          orderDetail,
-          order,
         },
       });
     } catch (error) {

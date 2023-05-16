@@ -369,7 +369,7 @@ export default function EditProfile() {
           </VStack>
           <VStack align={["flex-start", "left"]} w="full">
             <Text
-              fontSize={18}
+              fontSize={24}
               fontWeight={700}
               mt="30px"
               className="font-ibmFont"
@@ -419,7 +419,7 @@ export default function EditProfile() {
           </HStack>
           <VStack align={["flex-start", "left"]} w="full">
             <Text
-              fontSize={18}
+              fontSize={24}
               fontWeight={700}
               mt="30px"
               className="font-ibmFont"
@@ -431,7 +431,7 @@ export default function EditProfile() {
             <VStack w="full">
               <FormControl>
                 <FormLabel>
-                  <Text className="font-ibmFont">First Name</Text>
+                  <Text className="font-ibmFont" fontWeight={700} fontSize={18}><em>First Name</em></Text>
                 </FormLabel>
                 {editMode ? (
                   <Input
@@ -451,7 +451,7 @@ export default function EditProfile() {
             <VStack w="full">
               <FormControl>
                 <FormLabel>
-                  <Text className="font-ibmFont">Last Name</Text>
+                  <Text className="font-ibmFont" fontWeight={700} fontSize={18}><em>Last Name</em></Text>
                 </FormLabel>
                 {editMode ? (
                   <Input
@@ -473,7 +473,7 @@ export default function EditProfile() {
             <VStack w="full">
               <FormControl>
                 <FormLabel>
-                  <Text className="font-ibmFont">Email</Text>
+                  <Text className="font-ibmFont" fontWeight={700} fontSize={18}><em>Email</em></Text>
                 </FormLabel>
                 {editMode ? (
                   <Input
@@ -493,7 +493,7 @@ export default function EditProfile() {
             <VStack w="full">
               <FormControl>
                 <FormLabel>
-                  <Text className="font-ibmFont">Gender</Text>
+                  <Text className="font-ibmFont" fontWeight={700} fontSize={18}><em>Gender</em></Text>
                 </FormLabel>
                 {editMode ? (
                   <Select
@@ -544,7 +544,7 @@ export default function EditProfile() {
             <VStack w="full">
               <FormControl>
                 <FormLabel>
-                  <Text className="font-ibmFont">Birth Place</Text>
+                  <Text className="font-ibmFont" fontWeight={700} fontSize={18}><em>Birth Place</em></Text>
                 </FormLabel>
                 {editMode ? (
                   <Input
@@ -564,7 +564,7 @@ export default function EditProfile() {
             <VStack w="full">
               <FormControl>
                 <FormLabel>
-                  <Text className="font-ibmFont">Birth Date</Text>
+                  <Text className="font-ibmFont" fontWeight={700} fontSize={18}><em>Birth Date</em></Text>
                 </FormLabel>
                 {editMode ? (
                   <Input
@@ -596,7 +596,7 @@ export default function EditProfile() {
           </Button>
           <VStack align={["flex-start", "left"]} w="full">
             <Text
-              fontSize={18}
+              fontSize={24}
               fontWeight={700}
               mt="30px"
               className="font-ibmFont"
@@ -744,7 +744,7 @@ export default function EditProfile() {
           <VStack align={["flex-start", "left"]} w="full">
             <Text
               mb={["50pt"]}
-              fontSize={18}
+              fontSize={24}
               fontWeight={700}
               mt="30px"
               className="font-ibmFont"
