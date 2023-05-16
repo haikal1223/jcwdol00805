@@ -1,3 +1,4 @@
+import Login from "../components/login";
 import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -17,6 +18,10 @@ import {
   HStack,
   Spinner,
   useToast,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import "../App.css";
@@ -39,6 +44,8 @@ export default function Activation() {
   let location = useLocation();
   const navigate = useNavigate();
   const toast = useToast();
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   let getData = async () => {
     try {
@@ -213,7 +220,7 @@ export default function Activation() {
                     backgroundColor="#5D5FEF"
                     color="white"
                     className="font-ibmFont"
-                    onClick={navigateLogin}
+                    onClick={onOpen}
                   >
                     Login
                   </Button>
@@ -244,7 +251,7 @@ export default function Activation() {
                     backgroundColor="#5D5FEF"
                     color="white"
                     className="font-ibmFont"
-                    onClick={navigateLogin}
+                    onClick={onOpen}
                   >
                     Login
                   </Button>
@@ -252,6 +259,13 @@ export default function Activation() {
               </>
             )}
           </Heading>
+          
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent>
+              <Login />
+            </ModalContent>
+          </Modal>
         </Box>
       )}
     </>

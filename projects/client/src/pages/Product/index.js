@@ -23,6 +23,7 @@ import { toast, Toaster } from "react-hot-toast";
 export default function Product(props) {
   const [userId, setUserId] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [updateQuantity, setUpdateQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [stock, setStock] = useState(0);
   const { id } = useParams();
@@ -60,6 +61,9 @@ export default function Product(props) {
     } catch (error) {}
   };
 
+  let updateQuantityNumber = () =>{
+    setUpdateQuantity(quantity)
+  }
   let getProductStock = async () => {
     try {
       setStock(0);
@@ -84,7 +88,7 @@ export default function Product(props) {
         if (quantity === 1) {
           console.log(userId);
           let addCart = await axios.post(`http://localhost:8000/cart/addCart`, {
-            quantity,
+            quantity: updateQuantity,
             price,
             user_id: userId,
             product_id: id,
@@ -94,7 +98,7 @@ export default function Product(props) {
             duration: 3000,
           });
         } else {
-          if (quantity > stock) {
+          if (updateQuantity > stock) {
             toast.error("Your cart has maximum stock of the product", {
               duration: 3000,
             });
@@ -102,7 +106,7 @@ export default function Product(props) {
             let updateCart = await axios.patch(
               `http://localhost:8000/cart/updateCart?user_id=${userId}&product_id=${id}`,
               {
-                quantity,
+                quantity: updateQuantity,
                 price,
               }
             );
@@ -112,6 +116,7 @@ export default function Product(props) {
           }
         }
         getCartFilterProduct();
+        setUpdateQuantity(quantity);
       }
     } catch (error) {
       console.log(error);
@@ -120,9 +125,9 @@ export default function Product(props) {
 
   const handleQuantityChange = (type) => {
     if (type === "increase") {
-      setQuantity(quantity + 1);
-    } else if (type === "decrease" && quantity > 1) {
-      setQuantity(quantity - 1);
+      setUpdateQuantity(updateQuantity + 1);
+    } else if (type === "decrease" && updateQuantity > 1) {
+      setUpdateQuantity(updateQuantity - 1);
     }
   };
   useEffect(() => {
@@ -133,9 +138,14 @@ export default function Product(props) {
     getProductDetail();
     getProductStock();
   }, []);
+  
   useEffect(() => {
     getCartFilterProduct();
   }, [userId]);
+
+  useEffect(() => {
+    updateQuantityNumber();
+  }, [quantity]);
 
   return (
     <div>
@@ -167,9 +177,9 @@ export default function Product(props) {
                   onClick={() => handleQuantityChange("decrease")}
                   size="sm"
                   variant="outline"
-                  isDisabled={quantity === 1}
+                  isDisabled={updateQuantity === 1}
                 />
-                {quantity > stock ? (
+                {updateQuantity > stock ? (
                   <Button
                     w="full"
                     bg={"#5D5FEF"}
@@ -180,9 +190,9 @@ export default function Product(props) {
                       border: "1px solid skyblue",
                     }}
                     onClick={handleAddOrder}
-                    isDisabled={quantity > stock}
+                    isDisabled={updateQuantity > stock}
                   >
-                    ADD TO CART ({quantity - 1})
+                    ADD TO CART ({updateQuantity - 1})
                   </Button>
                 ) : (
                   <Button
@@ -195,9 +205,9 @@ export default function Product(props) {
                       border: "1px solid skyblue",
                     }}
                     onClick={handleAddOrder}
-                    isDisabled={quantity > stock}
+                    isDisabled={updateQuantity > stock}
                   >
-                    ADD TO CART ({quantity})
+                    ADD TO CART ({updateQuantity})
                   </Button>
                 )}
                 <IconButton
@@ -206,6 +216,7 @@ export default function Product(props) {
                   onClick={() => handleQuantityChange("increase")}
                   size="sm"
                   variant="outline"
+                  isDisabled={updateQuantity == stock}
                 />
               </ButtonGroup>
             </Box>

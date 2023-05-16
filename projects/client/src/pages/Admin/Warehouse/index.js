@@ -117,7 +117,7 @@ export default function AdminWarehouse() {
       console.log(error);
     }
   };
-
+  console.log(provinceList)
   const rakirCity = async (province_id) => {
     try {
       let data = await axios.get(
@@ -383,7 +383,7 @@ export default function AdminWarehouse() {
                                 size="sm"
                                 borderRadius="6px"
                                 onChange={(e) => {
-                                  rakirCity(e.target.value[0]);
+                                  rakirCity(e.target.value.split('.')[0]);
                                   setProvince(e.target.value);
                                 }}
                                 id="province"
@@ -492,7 +492,7 @@ export default function AdminWarehouse() {
                                 size="sm"
                                 borderRadius="6px"
                                 onChange={(e) => {
-                                  rakirCity(e.target.value[0]);
+                                  rakirCity(e.target.value.split('.')[0]);
                                   setProvince(e.target.value);
                                 }}
                                 id="province"

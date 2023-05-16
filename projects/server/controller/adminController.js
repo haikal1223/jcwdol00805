@@ -490,7 +490,7 @@ module.exports = {
 
   addAdmin: async (req, res) => {
     try {
-      let { email, first_name, last_name, role, warehouse_name, password } =
+      let { email, first_name, last_name, role,  password } =
         req.body;
 
       if (!email || !first_name || !last_name || !role || !password)
@@ -500,14 +500,14 @@ module.exports = {
           data: null,
         });
 
-      if (role === "wh_admin") {
+      /* if (role === "wh_admin") {
         if (!warehouse_name)
           return res.status(404).send({
             isError: true,
             message: "Please Complete Registration Data",
             data: null,
           });
-      }
+      } */
 
       let findEmail = await db.user.findOne({
         where: {
@@ -539,7 +539,7 @@ module.exports = {
         },
       });
 
-      if (role === "wh_admin") {
+      /* if (role === "wh_admin") {
         let findWarehouse = await db.warehouse.findOne({
           where: {
             name: warehouse_name,
@@ -550,7 +550,7 @@ module.exports = {
           user_id: findEmail.dataValues.id,
           warehouse_id: findWarehouse.dataValues.id,
         });
-      }
+      } */
 
       res.status(201).send({
         isError: false,
@@ -590,7 +590,7 @@ module.exports = {
 
   editAdmin: async (req, res) => {
     try {
-      let { email, first_name, last_name, role, warehouseName } = req.body;
+      let { email, first_name, last_name, role } = req.body;
 
       if (!email || !first_name || !last_name || !role)
         return res.status(404).send({
@@ -618,7 +618,7 @@ module.exports = {
         },
       });
 
-      if (role === "wh_admin") {
+      /* if (role === "wh_admin") {
         let findWarehouse = await db.warehouse.findOne({
           where: {
             name: warehouseName,
@@ -662,7 +662,7 @@ module.exports = {
             },
           });
         }
-      }
+      } */
 
       res.status(201).send({
         isError: false,

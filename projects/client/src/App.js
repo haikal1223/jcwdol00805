@@ -171,7 +171,14 @@ function App() {
           <Route path="/" element={<Home login={isLoggedIn} />} />
           <Route path="/activation" element={<Activation />} />
           <Route path="/register" element={<RegisterUser />} />
-          <Route path="/edit-profile" element={<EditProfile />} />
+          <Route 
+            path="/edit-profile" 
+            element={
+              <RequireAuth>
+                <EditProfile />
+              </RequireAuth>
+            } 
+          />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/terms-condition" element={<TnC />} />
           <Route path="/product/:id" element={<Product login={isLoggedIn} />} />

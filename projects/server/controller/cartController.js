@@ -378,7 +378,7 @@ module.exports = {
     try {
       const { data } = await axios.get(
         "https://api.rajaongkir.com/starter/province",
-        { headers: { key: "96dc80599e54e6d84bbd8f3b948da258" } }
+        { headers: { key: "0ab1e1cb6b9b40df49560b26aec4ec79" } }
       );
       res.status(200).send({
         isError: false,
@@ -406,7 +406,7 @@ module.exports = {
       let response = await axios.get(
         `https://api.rajaongkir.com/starter/city?province=${province_id}`,
         {
-          headers: { key: "96dc80599e54e6d84bbd8f3b948da258" },
+          headers: { key: "0ab1e1cb6b9b40df49560b26aec4ec79" },
         }
       );
 

@@ -102,7 +102,7 @@ const AdminUser = () => {
   const firstName = useRef();
   const lastName = useRef();
   const role = useRef();
-  const warehouseName = useRef();
+  /* const warehouseName = useRef(); */
   const password = useRef();
 
   let changeDataMode = () => {
@@ -546,7 +546,7 @@ const AdminUser = () => {
         first_name: firstName.current.value,
         last_name: lastName.current.value,
         role: role.current.value,
-        warehouse_name: warehouseName?.current?.value,
+        
         password: password.current.value,
       });
       toast({
@@ -560,9 +560,7 @@ const AdminUser = () => {
       firstName.current.value = "";
       lastName.current.value = "";
       password.current.value = "";
-      if (warehouseName?.current?.value) {
-        warehouseName.current.value = "";
-      }
+      
       setTimeout(() => {
         Navigate(0);
       }, 1000);
@@ -604,7 +602,7 @@ const AdminUser = () => {
           first_name: editFirstName,
           last_name: editLastName,
           role: editRole,
-          warehouseName: editWarehouse,
+          
         }
       );
       toast({
@@ -801,7 +799,7 @@ const AdminUser = () => {
                                 </option>
                               </Select>
                             </FormControl>
-                            {adminWarehouse ? (
+                            {/* {adminWarehouse ? (
                               <FormControl>
                                 <FormLabel>
                                   <Text className="font-ibmMed">
@@ -824,7 +822,7 @@ const AdminUser = () => {
                               </FormControl>
                             ) : (
                               <></>
-                            )}
+                            )} */}
                             <FormControl>
                               <FormLabel>
                                 <Text className="font-ibmMed">Password</Text>
@@ -976,7 +974,7 @@ const AdminUser = () => {
                                 </option>
                               </Select>
                             </FormControl>
-                            {editAdminWarehouse ? (
+                            {/* {editAdminWarehouse ? (
                               <FormControl>
                                 <FormLabel>
                                   <Text className="font-ibmMed">
@@ -1003,7 +1001,7 @@ const AdminUser = () => {
                               </FormControl>
                             ) : (
                               <></>
-                            )}
+                            )} */}
                             <Button
                               rounded="lg"
                               alignSelf="center"
