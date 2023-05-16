@@ -1279,7 +1279,7 @@ module.exports = {
       LEFT JOIN
       product as p ON p.id = a.product_id
       WHERE a.warehouse_id=:warehouse_id
-      GROUP BY 1,2,3
+      GROUP BY 1,2,3,4,5
       `;
 
       const result = await sequelize.query(rawQuery, {

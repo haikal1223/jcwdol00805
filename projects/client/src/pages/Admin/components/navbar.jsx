@@ -24,6 +24,18 @@ export default function AdminNavbar(props) {
                         </div>
                     </Link>
                 </div>
+                {
+                    props.login && props.role === 'admin'?
+                            <div className="font-ibmBold text-[20px] ml-3 text-purple">
+                                ⭐ Admin ⭐
+                            </div>
+                    : props.login && props.role === 'wh_admin'?
+                            <div className="font-ibmBold text-[20px] ml-3 text-purple">
+                                Warehouse Admin
+                            </div>
+                    :
+                    <></>
+                }
                 <div>
                     {props.login?
                     <Link color='#FF3838' _hover={{ textDecoration: 'none', color:'#5D5FEF' }} onClick={props.func}>
