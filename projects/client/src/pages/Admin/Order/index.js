@@ -441,10 +441,10 @@ const AdminOrder = () => {
     try {
       onOpenConfirm();
       setSelectedId(val.id);
-      let profilePictureSplit =
+      let paymentProofSplit =
           val.payment_proof.split(/\\/g)[2];
         setPaymentProof(
-          `http://localhost:8000/payments/${profilePictureSplit}`
+          `http://localhost:8000/payments/${paymentProofSplit}`
         );
     } catch (error) {}
   };
@@ -642,7 +642,7 @@ const AdminOrder = () => {
                           h="auto"
                           objectFit="cover"
                           src={`${paymentProof}`}
-                          alt={"Profile Picture"}
+                          alt={"Payment Proof"}
                           id="imgpreview"
                         />
                       </Heading>
