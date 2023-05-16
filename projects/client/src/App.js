@@ -34,6 +34,7 @@ import AdminWarehouse from "./pages/Admin/Warehouse";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
+  const [adminRole, setAdminRole] = useState('')
   const navigate = useNavigate();
 
   const keepLoggedIn = () => {
@@ -52,10 +53,13 @@ function App() {
   const keepAdminLoggedIn = () => {
     try {
       const token = Cookies.get("adminToken");
+      const role = Cookies.get("role");
       if (token) {
         setAdminLoggedIn(true);
+        setAdminRole(role)
       } else {
         setAdminLoggedIn(false);
+        setAdminRole('')
       }
     } catch (error) {
       console.log(error.message);
@@ -159,7 +163,7 @@ function App() {
         }
       >
         {window.location.pathname.includes("/admin") ? (
-          <AdminNavbar login={adminLoggedIn} func={adminLogout} />
+          <AdminNavbar login={adminLoggedIn} func={adminLogout} role={adminRole} />
         ) : (
           <Navbar login={isLoggedIn} func={Logout} />
         )}

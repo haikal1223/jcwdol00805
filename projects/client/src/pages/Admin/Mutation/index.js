@@ -17,6 +17,7 @@ import {
   Box,
   Button,
   HStack,
+  Link,
   IconButton,
   Input,
   InputGroup,
@@ -187,7 +188,15 @@ const AdminMutation = () => {
           <Td>{val.id}</Td>
           <Td>{val.origin_wh_name}</Td>
           <Td>{val.target_wh_name}</Td>
-          <Td>{val.product_id}</Td>
+          <Td>
+            <Link
+              href={`/admin/product/${val.product_id}`}
+              _hover={{ color:'#5D5FEF' }}
+              isExternal
+            >
+              {val.product_id}
+            </Link>
+          </Td>
           <Td>{val.quantity}</Td>
           <Td>{val.order_id}</Td>
           <Td>{formattedCreateDate}</Td>

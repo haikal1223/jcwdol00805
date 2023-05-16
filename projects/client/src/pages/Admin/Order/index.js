@@ -514,7 +514,8 @@ const AdminOrder = () => {
                   </InputGroup>
                   <Select
                     name="filterWarehouse"
-                    placeholder="All warehouse"
+                    placeholder={whid === 'all'? "All warehouse" : whOptions}
+                    isDisabled ={whid !== 'all'}
                     color={"gray"}
                     onChange={searchInputHandler}
                   >
