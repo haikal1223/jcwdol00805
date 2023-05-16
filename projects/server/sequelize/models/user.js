@@ -61,7 +61,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.INTEGER,
       },
-      is_Updated: { allowNull: true, type: DataTypes.INTEGER },
+      is_Updated: { allowNull: true, type: DataTypes.INTEGER, defaultValue: 0 },
       password: DataTypes.STRING,
       role: DataTypes.STRING,
       gender: DataTypes.INTEGER,
