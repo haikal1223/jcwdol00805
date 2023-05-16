@@ -6,7 +6,7 @@ const axios = require("axios");
 module.exports = {
   addAddress: async (req, res) => {
     const t = await sequelize.transaction();
-    // const { uid } = req.query;
+    const { id } = req.uid;
     const {
       recipient_name,
       recipient_phone,
@@ -20,7 +20,8 @@ module.exports = {
     } = req.body;
 
     try {
-      const { id } = await db.user.findOne({ where: { id } });
+      // const { id } = await db.user.findOne({ where: { id } });
+      console.log("x", id)
       if (main_address) {
         await db.user_address.update(
           { main_address: false },
@@ -95,7 +96,7 @@ module.exports = {
         message: "",
         data: address,
       });
-    } catch (error) {}
+    } catch (error) { }
   },
 
   defaultAddress: async (req, res) => {
@@ -132,7 +133,7 @@ module.exports = {
     try {
       const { data } = await axios.get(
         "https://api.rajaongkir.com/starter/province",
-        { headers: { key: "c0cfdbc638201b0930f5a50e41a8f211" } }
+        { headers: { key: "1c7c205702353d15cd449b7b8e07d22a" } }
       );
       res.status(200).send({
         isError: false,
@@ -160,7 +161,7 @@ module.exports = {
       let response = await axios.get(
         `https://api.rajaongkir.com/starter/city?province=${province_id}`,
         {
-          headers: { key: "c0cfdbc638201b0930f5a50e41a8f211" },
+          headers: { key: "1c7c205702353d15cd449b7b8e07d22a" },
         }
       );
 
@@ -208,13 +209,13 @@ module.exports = {
       /* let { city, province } = req.query */
 
       // dummy
-      let city = "Tangerang Selatan" 
+      let city = "Tangerang Selatan"
       let province = "Banten"
 
       let query = city.replace(" ", "%2C") + "+" + province.replace(" ", "%2C")
 
       // run query
-      let response = await axios.get (
+      let response = await axios.get(
         `https://api.opencagedata.com/geocode/v1/json?key=${key}&q=${query}`
       )
 
@@ -224,7 +225,7 @@ module.exports = {
         message: 'spatial value fetched',
         data: response.data.results[0].geometry
       })
-      
+
     } catch (error) {
       res.status(400).send({
         isError: true,

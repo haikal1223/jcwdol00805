@@ -43,16 +43,7 @@ const AddressCard = (props) => {
 
                         <ButtonGroup spacing='2' justifyContent='flex-end' ml='auto'>
                             <Stack>
-                                {/* {!props.addressData.main_address ? <Button color={'#FCFCFD'} bg={"#5D5FEF"}>Set Main</Button> : <></>}
 
-                                <Button
-                                    variant='outline'
-                                    color={'#5D5FEF'}
-                                    bg={"#FCFCFD"}
-                                    onClick={() => props.handleEdit(props.addressData)}
-                                >
-                                    Edit
-                                </Button> */}
                                 <Button variant='ghost' color={'#FCFCFD'} bg={"#FF3838"} onClick={props.handleDelete}>
                                     delete
                                 </Button>
